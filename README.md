@@ -1,31 +1,14 @@
-# OneSake PvP OPTCG Simulator
+# OneSake
 
-Browser-only real-time PvP OPTCG game.
+Browser-only OPTCG PvP Simulator (server-authoritative, choice-driven)  
+Tech: ASP.NET Core (C#) + PostgreSQL + React/TypeScript
 
-## Quick Start
-
+## Dev
 ### Backend
-```bash
-cd backend
-dotnet run --project OneSake.Server
-```
-Runs on http://localhost:5179
+cd backend\\OneSake.Server
+dotnet run
 
 ### Frontend
-```bash
-cd frontend/web
+cd frontend\\web
 npm install
 npm run dev
-```
-Runs on http://localhost:5173
-
-### Test
-1. Open two browser tabs to http://localhost:5173
-2. Enter same room code (e.g., "testroom") and join.
-3. Chat messages and join events should appear in both tabs.
-
-## Architecture
-See [docs/architecture.md](docs/architecture.md)
-
-## API
-See [docs/api-contract.md](docs/api-contract.md)

@@ -1,0 +1,6 @@
+# CODEOWNERS for OneSake
+# TODO: Replace @TEAM_FRONTEND with the real GitHub username.
+
+/backend/** @13-Tino-13
+/frontend/** @TEAM_FRONTEND
+/docs/** @13-Tino-13
