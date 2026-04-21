@@ -1,4 +1,6 @@
+using System.Text.Json.Serialization;
 using OneSake.Server.Hubs;
+using OneSake.Server.Match;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSignalR();
+builder.Services
+    .AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+builder.Services.AddSingleton<MatchRoomManager>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
