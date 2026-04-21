@@ -1,54 +1,39 @@
 # Contributing to OneSake
 
-Vielen Dank für deinen Beitrag zu OneSake.
+Thanks for contributing.
 
-## Branch Naming
+## Branch Model
 
-Bitte arbeite **nicht direkt auf `main`**. Verwende stattdessen:
+- `main` = stable, demo-ready
+- `dev` = integration branch
+- Do not work directly on `main` or `dev`
+
+Create topic branches from `dev`:
 
 - `feature/<name>-<topic>`
 - `fix/<topic>`
 - `docs/<topic>`
 
-Beispiele:
+## Pull Request Target
 
-- `feature/tino-matchmaking`
-- `fix/login-timeout`
-- `docs/team-workflow`
+- Default target branch for pull requests is `dev`.
+- Only release or milestone pull requests go from `dev` to `main`.
 
-## Pull-Request Regeln
+## Pull Request Rules
 
-- Erstelle kleine, fokussierte PRs.
-- Jeder PR benötigt mindestens **1 Review** vor dem Merge.
-- Füge im PR zwingend einen Abschnitt **"How to test"** hinzu.
-- Verlinke zugehörige Issues (falls vorhanden).
+- Keep PRs small and focused.
+- Include a "How to test" section in each PR.
+- Link related issues when available.
 
-## Commit-Konvention
+## Commit Convention
 
-Nutze prägnante Commit-Messages mit Prefix:
+Use clear commit prefixes:
 
-- `feat:` neue Funktionalität
-- `fix:` Bugfix
-- `docs:` Dokumentationsänderungen
-- `chore:` Wartung/Tooling/CI
+- `feat:`
+- `fix:`
+- `docs:`
+- `chore:`
 
-Beispiel: `feat: add room reconnect handling`
+## ADR Process
 
-## Konflikt-Minimierung
-
-- Vor Arbeitsbeginn: `git pull` auf aktuellem Stand.
-- Halte deinen Feature-Branch aktuell.
-- Rebase ist optional, aber empfohlen für lineare Historie.
-
-## Release-Strategie
-
-- `main` ist immer der stabile Stand.
-- Releases werden aus `main` erzeugt.
-
-## ADR-Prozess
-
-Neue Architekturentscheidungen werden als ADR dokumentiert unter:
-
-- `docs/adr/XXXX-*.md`
-
-Vergib fortlaufende Nummern (`0001`, `0002`, ...), beschreibe Kontext, Entscheidung und Konsequenzen.
+Architectural decisions are documented in `docs/adr/XXXX-*.md`.
