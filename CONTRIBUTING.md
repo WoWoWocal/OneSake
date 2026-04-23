@@ -8,11 +8,6 @@ Thanks for contributing.
 - `dev` = integration branch
 - Do not work directly on `main` or `dev`
 
-Create topic branches from `dev`:
-
-- `feature/<name>-<topic>`
-- `fix/<topic>`
-- `docs/<topic>`
 
 ## Pull Request Target
 
