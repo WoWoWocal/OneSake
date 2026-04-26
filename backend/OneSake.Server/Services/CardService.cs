@@ -44,7 +44,7 @@ public class CardService
         if (_setCache.ContainsKey(set_id)) return _setCache[set_id];
 
         // API Endpoint
-        var url = $"https://www.optcgapi.com/api/sets/{set_id}/";
+        var url = $"https://optcgapi.com/api/sets/{set_id}/";
 
         try
         {
