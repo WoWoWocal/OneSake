@@ -15,8 +15,46 @@ npm run dev
 
 ## Workflow (dev + main)
 1. `git checkout dev && git pull`
-2. Create a feature branch from `dev` (`feature/...`, `fix/...`, `docs/...`)
-3. Commit and push your branch
-4. Open a pull request to `dev`
-5. Test `dev` regularly and keep CI green
-6. When `dev` is stable, open a pull request from `dev` to `main`
+2. Commit and push your branch
+3. Open a pull request to `dev`
+4. Test `dev` regularly and keep CI green
+5. When `dev` is stable, open a pull request from `dev` to `main`
+
+### Spickzettel
+
+# Backend starten
+
+cd backend\OneSake.Server
+dotnet restore
+dotnet run
+
+# Frontend starten
+
+cd frontend\web
+npm install
+npm run dev
+
+# Frontend prüfen
+
+cd frontend\web
+npm run lint
+npm run build
+
+# Backend prüfen
+
+cd backend
+dotnet build OneSake.sln -c Release
+dotnet test OneSake.Tests\OneSake.Tests.csproj -c Release
+
+## Täglicher Git-Workflow auf dev
+
+git checkout dev
+
+git pull origin dev
+
+## Änderungen committen und auf Dev-Branch pushen
+
+git status `to view if youre on the correct branch`
+ 
+git push origin dev
+
