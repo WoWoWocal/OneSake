@@ -898,6 +898,39 @@ label {
   font-size: 1.05rem;
 }
 
+.probability-calculator {
+  align-content: start;
+}
+
+.probability-form {
+  display: grid;
+  gap: 10px;
+}
+
+.probability-result {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #b9d8cf;
+  border-radius: 8px;
+  padding: 12px;
+  background: #eefaf6;
+}
+
+.probability-result span {
+  color: #536776;
+  font-weight: 700;
+}
+
+.probability-result strong {
+  color: #125143;
+  font-size: 1.8rem;
+}
+
+.probability-result p {
+  margin: 0;
+  color: #344f5d;
+}
+
 .validation-list li {
   border-radius: 8px;
   padding: 10px;
@@ -990,6 +1023,10 @@ label {
   }
 
   .mulligan-hand {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .probability-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
