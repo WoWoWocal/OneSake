@@ -15,7 +15,7 @@ import { DeckValidation } from './DeckValidation';
 import { emptyDeck, loadStoredDeck, saveStoredDeck } from './utils/deckStorage';
 import { validateDeck } from './utils/deckValidation';
 
-const availableSets = ['OP01', 'OP02', 'OP03', 'ST01'];
+const availableSets = ['OP-01', 'OP-02', 'OP-03', 'ST-01'];
 
 const emptyFilters: CardFilters = {
   searchText: '',
