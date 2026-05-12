@@ -176,8 +176,11 @@ export function MatchPage() {
       <main className="content-grid">
         <MatchStatePanel
           activePlayerDisplay={activePlayerDisplay}
+          currentPrompt={currentPrompt}
           gameState={gameState}
           joinedRoomCode={joinedRoomCode}
+          onSubmitChoice={(option) => void submitChoice(option)}
+          pending={pending}
         />
         <LogPanel logEvents={logEvents} />
         <ChatPanel

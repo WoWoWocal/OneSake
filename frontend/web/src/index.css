@@ -253,6 +253,370 @@ label {
   margin-top: 10px;
 }
 
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.panel-title-row h2 {
+  margin: 0;
+}
+
+.panel-title-row span {
+  min-width: 32px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  text-align: center;
+  font-weight: 800;
+  background: #eef3f4;
+}
+
+.list-entry.is-empty {
+  color: #637581;
+  font-weight: 700;
+}
+
+.match-page {
+  color: #d9e9ee;
+}
+
+.match-page .panel {
+  border-color: rgba(115, 171, 178, 0.26);
+  background: #102131;
+  box-shadow: 0 18px 42px rgba(3, 11, 20, 0.16);
+}
+
+.match-page .header-panel {
+  border-color: rgba(240, 191, 56, 0.35);
+  background:
+    linear-gradient(135deg, rgba(240, 191, 56, 0.14), transparent 36%),
+    #0b1a2a;
+}
+
+.match-page .header-panel h1,
+.match-page .logs-panel h2,
+.match-page .chat-panel h2 {
+  color: #ffffff;
+}
+
+.match-page .header-panel p,
+.match-page label,
+.match-page .list-entry small {
+  color: #9db5bd;
+}
+
+.match-page input {
+  border-color: rgba(148, 187, 194, 0.34);
+  color: #eef8f9;
+  background: #071522;
+}
+
+.match-page input::placeholder {
+  color: #6e8993;
+}
+
+.match-page .lobby-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.match-page .scroll-list {
+  max-height: 190px;
+  border-color: rgba(148, 187, 194, 0.22);
+  background: #071522;
+}
+
+.match-page .list-entry {
+  border-color: rgba(148, 187, 194, 0.16);
+  color: #d9e9ee;
+}
+
+.match-page .panel-title-row span {
+  color: #0f2230;
+  background: #f0bf38;
+}
+
+.match-board-shell {
+  display: grid;
+  gap: 12px;
+}
+
+.match-scorebar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.match-scorebar div {
+  min-height: 64px;
+  border: 1px solid rgba(148, 187, 194, 0.22);
+  border-radius: 12px;
+  padding: 10px;
+  background: #0b1a2a;
+}
+
+.match-scorebar span,
+.board-player-status span,
+.hand-zone span,
+.life-zone span,
+.don-zone span,
+.drop-zone span,
+.board-stack span,
+.match-action-bar span {
+  display: block;
+  color: #8ea9b3;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.match-scorebar strong,
+.board-player-status strong,
+.hand-zone strong,
+.life-zone strong,
+.don-zone strong,
+.drop-zone strong,
+.board-stack strong,
+.match-action-bar strong {
+  display: block;
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.phase-pill {
+  border-color: rgba(240, 191, 56, 0.45) !important;
+  background: linear-gradient(135deg, rgba(240, 191, 56, 0.2), #0b1a2a) !important;
+}
+
+.match-board-layout {
+  display: grid;
+  gap: 12px;
+}
+
+.match-board {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(115, 171, 178, 0.28);
+  border-radius: 16px;
+  padding: 10px;
+  background:
+    radial-gradient(circle at top, rgba(31, 128, 124, 0.2), transparent 34%),
+    linear-gradient(180deg, #081626, #0d2230);
+}
+
+.board-player-area {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(148, 187, 194, 0.2);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(5, 16, 28, 0.68);
+}
+
+.board-player-area.is-opponent {
+  background: rgba(9, 24, 38, 0.76);
+}
+
+.board-player-status {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.board-player-status small,
+.match-action-bar small {
+  display: block;
+  color: #8ea9b3;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.connection-pill {
+  min-height: 30px;
+  border: 1px solid rgba(148, 187, 194, 0.24);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #b7cbd1;
+  font-size: 0.78rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.connection-pill.is-online {
+  border-color: rgba(31, 196, 159, 0.42);
+  color: #b9f3df;
+  background: rgba(31, 196, 159, 0.12);
+}
+
+.board-zone-grid,
+.side-zones,
+.resource-zones {
+  display: grid;
+  gap: 8px;
+}
+
+.leader-stage-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.drop-zone,
+.don-zone,
+.life-zone,
+.board-stack {
+  min-height: 76px;
+  border: 1px dashed rgba(148, 187, 194, 0.38);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.leader-zone {
+  border-color: rgba(240, 191, 56, 0.52);
+}
+
+.stage-zone,
+.don-zone {
+  border-color: rgba(31, 128, 124, 0.52);
+}
+
+.don-zone {
+  min-height: 58px;
+}
+
+.character-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(96px, 1fr));
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.character-slot {
+  display: grid;
+  place-items: center;
+  min-height: 108px;
+  color: #9db5bd;
+  font-weight: 800;
+  text-align: center;
+}
+
+.resource-zones {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.board-stack {
+  display: grid;
+  align-content: center;
+  text-align: center;
+}
+
+.board-stack--trash {
+  border-color: rgba(182, 101, 97, 0.44);
+}
+
+.life-zone {
+  display: grid;
+  gap: 8px;
+}
+
+.life-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.life-row span {
+  width: 22px;
+  height: 30px;
+  border: 1px solid rgba(148, 187, 194, 0.34);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.life-row span.is-filled {
+  border-color: rgba(240, 191, 56, 0.72);
+  background: linear-gradient(160deg, #f0bf38, #9a681b);
+}
+
+.hand-zone {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid rgba(148, 187, 194, 0.16);
+  padding-top: 8px;
+}
+
+.hand-card-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.board-card {
+  flex: 0 0 58px;
+  min-height: 82px;
+  border: 1px solid rgba(240, 191, 56, 0.4);
+  border-radius: 8px;
+  padding: 7px;
+  color: #f4e7bd;
+  background: linear-gradient(160deg, #142a3c, #071522);
+}
+
+.board-card span,
+.board-card strong {
+  display: block;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.board-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f0bf38;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.board-divider::before,
+.board-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: rgba(240, 191, 56, 0.28);
+}
+
+.match-action-bar {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(240, 191, 56, 0.26);
+  border-radius: 14px;
+  padding: 10px;
+  background: #0b1a2a;
+}
+
+.match-action-bar button {
+  min-height: 48px;
+  border: 1px solid rgba(240, 191, 56, 0.42);
+  border-radius: 10px;
+  color: #102131;
+  font-weight: 900;
+  background: #f0bf38;
+}
+
+.match-action-bar button:disabled {
+  color: #8ea9b3;
+  border-color: rgba(148, 187, 194, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+
 .bottom-nav {
   position: fixed;
   right: 0;
@@ -1047,6 +1411,27 @@ label {
     grid-template-columns: 1fr auto;
   }
 
+  .match-page .lobby-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    align-items: end;
+  }
+
+  .match-page .lobby-panel .button-row {
+    align-self: end;
+  }
+
+  .match-scorebar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .match-action-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .match-action-bar > div {
+    grid-column: 1 / -1;
+  }
+
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1079,6 +1464,33 @@ label {
   .content-grid {
     grid-template-columns: 1.15fr 1fr 1fr;
     align-items: start;
+  }
+
+  .match-page .content-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .match-board-shell {
+    grid-row: span 2;
+  }
+
+  .match-board-layout {
+    grid-template-columns: minmax(0, 1fr) 168px;
+    align-items: start;
+  }
+
+  .match-action-bar {
+    position: sticky;
+    top: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  .match-action-bar > div {
+    grid-column: auto;
+  }
+
+  .match-page .scroll-list {
+    max-height: 300px;
   }
 
   .scroll-list {
@@ -1122,6 +1534,19 @@ label {
 }
 
 @media (min-width: 1100px) {
+  .board-zone-grid {
+    grid-template-columns: 180px minmax(0, 1fr) 170px;
+    align-items: stretch;
+  }
+
+  .resource-zones {
+    grid-template-columns: 1fr;
+  }
+
+  .character-row {
+    overflow-x: visible;
+  }
+
   .card-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

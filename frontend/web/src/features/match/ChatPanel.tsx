@@ -23,8 +23,12 @@ export function ChatPanel({
 }: ChatPanelProps) {
   return (
     <section className="panel chat-panel">
-      <h2>Chat</h2>
+      <div className="panel-title-row">
+        <h2>Chat</h2>
+        <span>{chatMessages.length}</span>
+      </div>
       <div className="scroll-list">
+        {chatMessages.length === 0 && <div className="list-entry is-empty">No messages yet.</div>}
         {chatMessages.map((message) => (
           <div key={`${message.senderId}-${message.tsUnixMs}`} className="list-entry">
             <div>
