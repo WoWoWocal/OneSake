@@ -1,14 +1,38 @@
 import { Modal } from '../../components/ui/Modal';
+import { Button } from '../../components/ui/Button';
 import type { CardDto } from '../../types/cards';
 
 interface CardInspectModalProps {
   card: CardDto | null;
+  onAddCard: (card: CardDto) => void;
   onClose: () => void;
 }
 
-export function CardInspectModal({ card, onClose }: CardInspectModalProps) {
+export function CardInspectModal({ card, onAddCard, onClose }: CardInspectModalProps) {
+  const actionLabel = card?.card_type.toLowerCase() === 'leader' ? 'Set leader' : 'Add card';
+
+  const handleAction = (): void => {
+    if (!card) {
+      return;
+    }
+
+    onAddCard(card);
+    onClose();
+  };
+
   return (
-    <Modal onClose={onClose} open={Boolean(card)} title={card?.card_name ?? 'Card'}>
+    <Modal
+      footer={
+        card && (
+          <Button fullWidth onClick={handleAction} variant="secondary">
+            {actionLabel}
+          </Button>
+        )
+      }
+      onClose={onClose}
+      open={Boolean(card)}
+      title={card?.card_name ?? 'Card'}
+    >
       {card && (
         <div className="card-inspect">
           <div className="card-inspect__image">

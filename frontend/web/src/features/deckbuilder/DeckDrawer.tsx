@@ -4,9 +4,15 @@ interface DeckDrawerProps {
   deck: Deck;
   onIncreaseCard: (cardId: string) => void;
   onDecreaseCard: (cardId: string) => void;
+  onRemoveCard: (cardId: string) => void;
 }
 
-export function DeckDrawer({ deck, onDecreaseCard, onIncreaseCard }: DeckDrawerProps) {
+export function DeckDrawer({
+  deck,
+  onDecreaseCard,
+  onIncreaseCard,
+  onRemoveCard,
+}: DeckDrawerProps) {
   return (
     <section className="panel deck-panel">
       <h2>Deck list</h2>
@@ -35,6 +41,14 @@ export function DeckDrawer({ deck, onDecreaseCard, onIncreaseCard }: DeckDrawerP
                   type="button"
                 >
                   +
+                </button>
+                <button
+                  aria-label={`Remove ${deckCard.name} from deck`}
+                  className="deck-list__remove"
+                  onClick={() => onRemoveCard(deckCard.cardId)}
+                  type="button"
+                >
+                  Remove
                 </button>
               </div>
             </li>

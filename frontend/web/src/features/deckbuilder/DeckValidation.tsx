@@ -1,26 +1,19 @@
-import type { Deck } from '../../types/decks';
+import type { DeckValidationResult } from './utils/deckValidation';
 
 interface DeckValidationProps {
-  deck: Deck;
+  validation: DeckValidationResult;
 }
 
-export function DeckValidation({ deck }: DeckValidationProps) {
-  const totalCards = deck.cards.reduce((sum, card) => sum + card.quantity, 0);
-  const copyErrors = deck.cards.filter((card) => card.quantity > 4);
-  const validationErrors = [
-    !deck.leaderCardId ? 'Leader is missing.' : '',
-    totalCards !== 50 ? `Deck has ${totalCards}/50 cards.` : '',
-    ...copyErrors.map((card) => `${card.name} has ${card.quantity}/4 copies.`),
-  ].filter(Boolean);
-
+export function DeckValidation({ validation }: DeckValidationProps) {
   return (
     <section className="panel deck-panel">
       <h2>Validation</h2>
+      <div className="validation-progress">Main Deck: {validation.totalCards}/50</div>
       <ul className="validation-list">
-        {validationErrors.length === 0 ? (
+        {validation.isValid ? (
           <li className="is-valid">Deck is valid.</li>
         ) : (
-          validationErrors.map((validationError) => (
+          validation.errors.map((validationError) => (
             <li key={validationError} className="is-pending">
               {validationError}
             </li>

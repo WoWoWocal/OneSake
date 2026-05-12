@@ -1,5 +1,5 @@
-import type { CardDto } from '../../types/cards';
 import { Button } from '../../components/ui/Button';
+import type { CardDto } from '../../types/cards';
 
 interface CardTileProps {
   card: CardDto;
@@ -24,7 +24,7 @@ export function CardTile({ card, onAdd, onSelect }: CardTileProps) {
           <span className="card-tile__id">{card.card_set_id}</span>
           <h2>{card.card_name}</h2>
           <p>
-            {card.card_color || '-'} · {card.card_type || '-'}
+            {card.card_color || '-'} / {card.card_type || '-'}
           </p>
         </div>
       </button>
