@@ -11,6 +11,10 @@ export function buildFlatDeck(deck: Deck): MulliganDeckCard[] {
     Array.from({ length: Math.max(0, card.quantity) }, () => ({
       cardId: card.cardId,
       name: card.name,
+      color: card.color,
+      type: card.type,
+      cost: card.cost,
+      counter: card.counter,
     })),
   );
 }
@@ -43,6 +47,10 @@ function groupHandCards(cards: MulliganDeckCard[]): MulliganHandCard[] {
       cardId: card.cardId,
       name: card.name,
       quantity: 1,
+      color: card.color,
+      type: card.type,
+      cost: card.cost,
+      counter: card.counter,
     });
   });
 
@@ -56,6 +64,25 @@ export function calculateHandMetrics(hand: MulliganHandCard[]): MulliganHandMetr
     cardCount,
     uniqueCardIds: hand.length,
     cardsWithQuantity: hand,
+    counter2000Count: hand.reduce(
+      (sum, card) => sum + (card.counter === 2000 ? card.quantity : 0),
+      0,
+    ),
+    eventCount: hand.reduce(
+      (sum, card) =>
+        sum + (card.type?.toLowerCase().includes('event') ? card.quantity : 0),
+      0,
+    ),
+    lowCostCount: hand.reduce(
+      (sum, card) =>
+        sum + (typeof card.cost === 'number' && card.cost <= 3 ? card.quantity : 0),
+      0,
+    ),
+    characterCount: hand.reduce(
+      (sum, card) =>
+        sum + (card.type?.toLowerCase().includes('character') ? card.quantity : 0),
+      0,
+    ),
   };
 }
 
@@ -69,6 +96,10 @@ export function drawOpeningHand(deck: Deck, handSize = 5): MulliganDrawResult {
         cardCount: 0,
         uniqueCardIds: 0,
         cardsWithQuantity: [],
+        counter2000Count: 0,
+        eventCount: 0,
+        lowCostCount: 0,
+        characterCount: 0,
       },
       error: `Deck needs at least ${handSize} cards to draw an opening hand.`,
     };

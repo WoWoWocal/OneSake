@@ -17,21 +17,17 @@ export function buildProbabilityDeck(deck: Deck): ProbabilityDeckCard[] {
 }
 
 function normalizeInput(input: ProbabilitySimulationInput): ProbabilitySimulationInput {
+  const targetCardIds = [...new Set(input.targetCardIds.map((cardId) => cardId.trim()))].filter(
+    Boolean,
+  );
+
   return {
-    targetCardId: input.targetCardId.trim(),
+    targetCardIds,
     minimumHits: Math.max(1, Math.floor(input.minimumHits || 1)),
     handSize: Math.max(1, Math.floor(input.handSize || 5)),
     simulations: Math.min(maxSimulations, Math.max(1, Math.floor(input.simulations || 10000))),
+    presetName: input.presetName,
   };
-}
-
-function parseTargetCardIds(targetCardId: string): Set<string> {
-  return new Set(
-    targetCardId
-      .split(',')
-      .map((cardId) => cardId.trim())
-      .filter(Boolean),
-  );
 }
 
 function drawHand(cards: ProbabilityDeckCard[], handSize: number): ProbabilityDeckCard[] {
@@ -54,7 +50,7 @@ export function runProbabilitySimulation(
 ): ProbabilityResult {
   const normalizedInput = normalizeInput(input);
   const flatDeck = buildProbabilityDeck(deck);
-  const targetCardIds = parseTargetCardIds(normalizedInput.targetCardId);
+  const targetCardIds = new Set(normalizedInput.targetCardIds);
   let hits = 0;
 
   for (let index = 0; index < normalizedInput.simulations; index += 1) {
@@ -70,9 +66,10 @@ export function runProbabilitySimulation(
     probabilityPercent: (hits / normalizedInput.simulations) * 100,
     hits,
     simulations: normalizedInput.simulations,
-    targetCardId: normalizedInput.targetCardId,
+    targetCardIds: normalizedInput.targetCardIds,
     minimumHits: normalizedInput.minimumHits,
     handSize: normalizedInput.handSize,
+    presetName: normalizedInput.presetName,
   };
 }
 

@@ -3,18 +3,26 @@ export interface ProbabilityDeckCard {
   name: string;
 }
 
+export interface ProbabilityPreset {
+  name: string;
+  handSize: number;
+  minimumHits: number;
+}
+
 export interface ProbabilitySimulationInput {
-  targetCardId: string;
+  targetCardIds: string[];
   minimumHits: number;
   handSize: number;
   simulations: number;
+  presetName?: string;
 }
 
 export interface ProbabilityResult {
   probabilityPercent: number;
   hits: number;
   simulations: number;
-  targetCardId: string;
+  targetCardIds: string[];
   minimumHits: number;
   handSize: number;
+  presetName?: string;
 }

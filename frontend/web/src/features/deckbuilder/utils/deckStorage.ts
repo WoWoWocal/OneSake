@@ -30,7 +30,15 @@ export function createNewDeck(name = 'New Deck'): Deck {
 
 export const emptyDeck: Deck = createNewDeck();
 
-function isDeckCard(value: Partial<DeckCard>): value is DeckCard {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isDeckCard(value: unknown): value is DeckCard {
+  if (!isRecord(value)) {
+    return false;
+  }
+
   return (
     typeof value.cardId === 'string' &&
     typeof value.name === 'string' &&
@@ -39,19 +47,56 @@ function isDeckCard(value: Partial<DeckCard>): value is DeckCard {
   );
 }
 
-export function sanitizeDeck(deck: Partial<Deck>): Deck {
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function optionalNumber(value: unknown): number | null | undefined {
+  if (value === null) {
+    return null;
+  }
+
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function sanitizeDeckCard(card: Partial<DeckCard>): DeckCard | null {
+  if (!isDeckCard(card)) {
+    return null;
+  }
+
+  return {
+    cardId: card.cardId,
+    name: card.name,
+    quantity: card.quantity,
+    color: optionalString(card.color),
+    type: optionalString(card.type),
+    cost: optionalNumber(card.cost),
+    power: optionalNumber(card.power),
+    counter: optionalNumber(card.counter),
+    attribute: optionalString(card.attribute),
+    subTypes: optionalString(card.subTypes),
+    rarity: optionalString(card.rarity),
+  };
+}
+
+export function sanitizeDeck(deck: Partial<Deck> | null | undefined): Deck {
+  const safeDeck = isRecord(deck) ? deck : {};
   const now = nowIso();
-  const cards = Array.isArray(deck.cards)
-    ? deck.cards.filter((card): card is DeckCard => isDeckCard(card))
+  const cards = Array.isArray(safeDeck.cards)
+    ? safeDeck.cards.filter((card): card is DeckCard => isDeckCard(card))
     : [];
 
   return {
-    id: typeof deck.id === 'string' && deck.id.trim() ? deck.id : createDeckId(),
-    name: typeof deck.name === 'string' && deck.name.trim() ? deck.name : 'New Deck',
-    leaderCardId: typeof deck.leaderCardId === 'string' ? deck.leaderCardId : '',
-    createdAt: typeof deck.createdAt === 'string' && deck.createdAt ? deck.createdAt : now,
-    updatedAt: typeof deck.updatedAt === 'string' && deck.updatedAt ? deck.updatedAt : now,
-    cards,
+    id: typeof safeDeck.id === 'string' && safeDeck.id.trim() ? safeDeck.id : createDeckId(),
+    name: typeof safeDeck.name === 'string' && safeDeck.name.trim() ? safeDeck.name : 'New Deck',
+    leaderCardId: typeof safeDeck.leaderCardId === 'string' ? safeDeck.leaderCardId : '',
+    createdAt:
+      typeof safeDeck.createdAt === 'string' && safeDeck.createdAt ? safeDeck.createdAt : now,
+    updatedAt:
+      typeof safeDeck.updatedAt === 'string' && safeDeck.updatedAt ? safeDeck.updatedAt : now,
+    cards: cards
+      .map((card) => sanitizeDeckCard(card))
+      .filter((card): card is DeckCard => Boolean(card)),
   };
 }
 

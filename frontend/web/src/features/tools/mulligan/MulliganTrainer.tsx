@@ -23,6 +23,10 @@ function createEmptyDrawResult(): MulliganDrawResult {
       cardCount: 0,
       uniqueCardIds: 0,
       cardsWithQuantity: [],
+      counter2000Count: 0,
+      eventCount: 0,
+      lowCostCount: 0,
+      characterCount: 0,
     },
     error: '',
   };
@@ -116,6 +120,16 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
                 <strong>{card.name}</strong>
                 <span>{card.cardId}</span>
                 <span>x{card.quantity}</span>
+                <div className="tag-list">
+                  {card.color && <span className="tag-chip">{card.color}</span>}
+                  {card.type && <span className="tag-chip">{card.type}</span>}
+                  {typeof card.cost === 'number' && (
+                    <span className="tag-chip">Cost {card.cost}</span>
+                  )}
+                  {typeof card.counter === 'number' && card.counter > 0 && (
+                    <span className="tag-chip">Counter {card.counter}</span>
+                  )}
+                </div>
               </article>
             ))}
           </div>
@@ -124,6 +138,10 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
             <span>Cards: {drawResult.metrics.cardCount}</span>
             <span>Unique IDs: {drawResult.metrics.uniqueCardIds}</span>
             <span>Grouped cards: {drawResult.metrics.cardsWithQuantity.length}</span>
+            <span>2k counters: {drawResult.metrics.counter2000Count}</span>
+            <span>Events: {drawResult.metrics.eventCount}</span>
+            <span>Low cost: {drawResult.metrics.lowCostCount}</span>
+            <span>Characters: {drawResult.metrics.characterCount}</span>
           </div>
 
           <div className="mulligan-actions">
