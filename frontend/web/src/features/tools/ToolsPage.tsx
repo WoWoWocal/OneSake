@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
 import { getTotalCards } from '../deckbuilder/utils/deckValidation';
+import { MulliganTrainer } from './mulligan/MulliganTrainer';
 import { SavedDeckSelect } from './SavedDeckSelect';
 
 export function ToolsPage() {
@@ -38,10 +39,7 @@ export function ToolsPage() {
       )}
 
       <div className="tools-grid">
-        <section className="panel tools-panel">
-          <h2>Mulligan Trainer</h2>
-          <p>This will use the selected saved deck for opening-hand practice.</p>
-        </section>
+        <MulliganTrainer deck={selectedDeck} />
 
         <section className="panel tools-panel">
           <h2>Probability Calculator</h2>
