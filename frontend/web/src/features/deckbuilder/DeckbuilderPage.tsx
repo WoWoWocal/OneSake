@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { getCardsBySetId } from '../../api/cardsApi';
 import { Drawer } from '../../components/ui/Drawer';
 import type { CardDto } from '../../types/cards';
-import type { Deck } from '../../types/decks';
+import type { Deck, DeckCard } from '../../types/decks';
 import { CardGrid } from './CardGrid';
 import { CardInspectModal } from './CardInspectModal';
 import { CardSearch } from './CardSearch';
@@ -12,6 +12,7 @@ import { DeckSummary } from './DeckSummary';
 import { DeckValidation } from './DeckValidation';
 
 const availableSets = ['OP01', 'OP02', 'OP03', 'ST01'];
+const deckStorageKey = 'onesake.deckbuilder.currentDeck';
 
 const emptyDeck: Deck = {
   id: 'new-deck',
@@ -20,15 +21,63 @@ const emptyDeck: Deck = {
   cards: [],
 };
 
+function isDeckCard(value: Partial<DeckCard>): value is DeckCard {
+  return (
+    typeof value.cardId === 'string' &&
+    typeof value.name === 'string' &&
+    typeof value.quantity === 'number' &&
+    Number.isFinite(value.quantity) &&
+    value.quantity > 0
+  );
+}
+
+function sanitizeDeck(deck: Partial<Deck>): Deck {
+  const cards = Array.isArray(deck.cards)
+    ? deck.cards.filter((card): card is DeckCard => isDeckCard(card))
+    : [];
+
+  return {
+    id: typeof deck.id === 'string' && deck.id.trim() ? deck.id : emptyDeck.id,
+    name: typeof deck.name === 'string' && deck.name.trim() ? deck.name : emptyDeck.name,
+    leaderCardId: typeof deck.leaderCardId === 'string' ? deck.leaderCardId : '',
+    cards,
+  };
+}
+
+function loadStoredDeck(): Deck {
+  try {
+    const storedDeck = window.localStorage.getItem(deckStorageKey);
+    if (!storedDeck) {
+      return emptyDeck;
+    }
+
+    return sanitizeDeck(JSON.parse(storedDeck) as Partial<Deck>);
+  } catch {
+    return emptyDeck;
+  }
+}
+
+function saveStoredDeck(deck: Deck): void {
+  try {
+    window.localStorage.setItem(deckStorageKey, JSON.stringify(deck));
+  } catch {
+    // Draft persistence is optional; deck editing should keep working without storage.
+  }
+}
+
 export function DeckbuilderPage() {
   const [selectedSetId, setSelectedSetId] = useState(availableSets[0]);
   const [searchText, setSearchText] = useState('');
   const [cards, setCards] = useState<CardDto[]>([]);
-  const [deck, setDeck] = useState<Deck>(emptyDeck);
+  const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [selectedCard, setSelectedCard] = useState<CardDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deckOpen, setDeckOpen] = useState(false);
+
+  useEffect(() => {
+    saveStoredDeck(deck);
+  }, [deck]);
 
   useEffect(() => {
     let ignoreResult = false;
