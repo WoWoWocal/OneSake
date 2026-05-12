@@ -820,6 +820,84 @@ label {
   color: #536776;
 }
 
+.mulligan-trainer {
+  align-content: start;
+}
+
+.mulligan-header {
+  display: grid;
+  gap: 10px;
+}
+
+.mulligan-header h2 {
+  margin: 0;
+}
+
+.mulligan-header p {
+  margin-top: 2px;
+}
+
+.mulligan-hand {
+  display: grid;
+  gap: 8px;
+}
+
+.mulligan-card {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #dce6e9;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8fafb;
+}
+
+.mulligan-card strong,
+.mulligan-card span {
+  overflow-wrap: anywhere;
+}
+
+.mulligan-card span {
+  color: #637581;
+  font-size: 0.86rem;
+}
+
+.mulligan-metrics,
+.mulligan-actions,
+.mulligan-stats {
+  display: grid;
+  gap: 8px;
+}
+
+.mulligan-metrics {
+  color: #536776;
+  font-weight: 700;
+}
+
+.mulligan-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.mulligan-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mulligan-stats div {
+  display: grid;
+  gap: 2px;
+  border-radius: 8px;
+  padding: 10px;
+  background: #eef3f4;
+}
+
+.mulligan-stats span {
+  color: #637581;
+  font-size: 0.82rem;
+}
+
+.mulligan-stats strong {
+  font-size: 1.05rem;
+}
+
 .validation-list li {
   border-radius: 8px;
   padding: 10px;
@@ -903,6 +981,15 @@ label {
   }
 
   .tools-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mulligan-header {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+
+  .mulligan-hand {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
