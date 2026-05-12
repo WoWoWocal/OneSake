@@ -10,9 +10,19 @@ import { CardInspectModal } from './CardInspectModal';
 import { CardSearch } from './CardSearch';
 import { DeckDrawer } from './DeckDrawer';
 import { DeckExport } from './DeckExport';
+import { DeckLibrary } from './DeckLibrary';
 import { DeckSummary } from './DeckSummary';
 import { DeckValidation } from './DeckValidation';
-import { emptyDeck, loadStoredDeck, saveStoredDeck } from './utils/deckStorage';
+import {
+  createNewDeck,
+  deleteStoredDeck,
+  duplicateStoredDeck,
+  loadStoredDeck,
+  loadStoredDecks,
+  saveStoredDeck,
+  touchDeck,
+  upsertStoredDeck,
+} from './utils/deckStorage';
 import { validateDeck } from './utils/deckValidation';
 
 const availableSets = ['OP-01', 'OP-02', 'OP-03', 'ST-01'];
@@ -36,6 +46,7 @@ export function DeckbuilderPage() {
   const [filters, setFilters] = useState<CardFilters>(emptyFilters);
   const [cards, setCards] = useState<CardDto[]>([]);
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
+  const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
   const [selectedCard, setSelectedCard] = useState<CardDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -44,6 +55,9 @@ export function DeckbuilderPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const validation = useMemo(() => validateDeck(deck), [deck]);
+  const isDeckSaved = savedDecks.some(
+    (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
+  );
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
   const filterOptions = useMemo(
     () => ({
@@ -105,9 +119,13 @@ export function DeckbuilderPage() {
     setDeckNotice(message);
   };
 
+  const updateDeck = (update: (currentDeck: Deck) => Deck): void => {
+    setDeck((currentDeck) => touchDeck(update(currentDeck)));
+  };
+
   const addCardToDeck = (card: CardDto): void => {
     if (card.card_type.toLowerCase() === 'leader') {
-      setDeck((currentDeck) => ({
+      updateDeck((currentDeck) => ({
         ...currentDeck,
         leaderCardId: card.card_set_id,
       }));
@@ -115,7 +133,7 @@ export function DeckbuilderPage() {
       return;
     }
 
-    setDeck((currentDeck) => {
+    updateDeck((currentDeck) => {
       const existingCard = currentDeck.cards.find((deckCard) => deckCard.cardId === card.card_set_id);
 
       if (existingCard) {
@@ -151,7 +169,7 @@ export function DeckbuilderPage() {
   };
 
   const increaseDeckCard = (cardId: string): void => {
-    setDeck((currentDeck) => {
+    updateDeck((currentDeck) => {
       const card = currentDeck.cards.find((deckCard) => deckCard.cardId === cardId);
       if (!card) {
         return currentDeck;
@@ -172,7 +190,7 @@ export function DeckbuilderPage() {
   };
 
   const decreaseDeckCard = (cardId: string): void => {
-    setDeck((currentDeck) => ({
+    updateDeck((currentDeck) => ({
       ...currentDeck,
       cards: currentDeck.cards
         .map((deckCard) =>
@@ -183,29 +201,31 @@ export function DeckbuilderPage() {
   };
 
   const removeDeckCard = (cardId: string): void => {
-    setDeck((currentDeck) => ({
+    updateDeck((currentDeck) => ({
       ...currentDeck,
       cards: currentDeck.cards.filter((deckCard) => deckCard.cardId !== cardId),
     }));
   };
 
   const renameDeck = (name: string): void => {
-    setDeck((currentDeck) => ({
+    updateDeck((currentDeck) => ({
       ...currentDeck,
       name,
     }));
   };
 
   const clearDeck = (): void => {
-    setDeck({
-      ...emptyDeck,
+    setDeck(touchDeck({
+      ...createNewDeck(),
+      id: deck.id,
+      createdAt: deck.createdAt,
       name: deck.name,
-    });
+    }));
     showDeckNotice('Deck cleared.');
   };
 
   const removeLeader = (): void => {
-    setDeck((currentDeck) => ({
+    updateDeck((currentDeck) => ({
       ...currentDeck,
       leaderCardId: '',
     }));
@@ -213,6 +233,49 @@ export function DeckbuilderPage() {
 
   const resetFilters = (): void => {
     setFilters(emptyFilters);
+  };
+
+  const createDeck = (): void => {
+    const newDeck = createNewDeck();
+    setDeck(newDeck);
+    showDeckNotice('New deck started.');
+  };
+
+  const saveDeck = (): void => {
+    const nextDecks = upsertStoredDeck(deck);
+    const savedDeck = nextDecks.find((storedDeck) => storedDeck.id === deck.id) ?? deck;
+    setSavedDecks(nextDecks);
+    setDeck(savedDeck);
+    showDeckNotice(`${savedDeck.name} saved.`);
+  };
+
+  const loadDeck = (deckToLoad: Deck): void => {
+    setDeck(deckToLoad);
+    showDeckNotice(`${deckToLoad.name} loaded.`);
+  };
+
+  const duplicateDeck = (deckId: string): void => {
+    const nextDecks = duplicateStoredDeck(deckId);
+    setSavedDecks(nextDecks);
+    if (nextDecks[0]) {
+      setDeck(nextDecks[0]);
+      showDeckNotice(`${nextDecks[0].name} created.`);
+    }
+  };
+
+  const deleteDeck = (deckId: string): void => {
+    const nextDecks = deleteStoredDeck(deckId);
+    setSavedDecks(nextDecks);
+
+    if (deck.id === deckId) {
+      const newDeck = createNewDeck();
+      setDeck(newDeck);
+      saveStoredDeck(newDeck);
+      showDeckNotice('Deleted deck. New deck started.');
+      return;
+    }
+
+    showDeckNotice('Deck deleted.');
   };
 
   return (
@@ -265,8 +328,18 @@ export function DeckbuilderPage() {
         </main>
 
         <aside className="deck-sidebar">
+          <DeckLibrary
+            activeDeckId={deck.id}
+            decks={savedDecks}
+            onCreateDeck={createDeck}
+            onDeleteDeck={deleteDeck}
+            onDuplicateDeck={duplicateDeck}
+            onLoadDeck={loadDeck}
+            onSaveDeck={saveDeck}
+          />
           <DeckSummary
             deck={deck}
+            isSaved={isDeckSaved}
             onClearDeck={clearDeck}
             onDeckNameChange={renameDeck}
             onRemoveLeader={removeLeader}
@@ -283,8 +356,18 @@ export function DeckbuilderPage() {
       </div>
 
       <Drawer onClose={() => setDeckOpen(false)} open={deckOpen} title="Deck">
+        <DeckLibrary
+          activeDeckId={deck.id}
+          decks={savedDecks}
+          onCreateDeck={createDeck}
+          onDeleteDeck={deleteDeck}
+          onDuplicateDeck={duplicateDeck}
+          onLoadDeck={loadDeck}
+          onSaveDeck={saveDeck}
+        />
         <DeckSummary
           deck={deck}
+          isSaved={isDeckSaved}
           onClearDeck={clearDeck}
           onDeckNameChange={renameDeck}
           onRemoveLeader={removeLeader}
