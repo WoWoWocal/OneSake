@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { DeckbuilderPage } from '../../features/deckbuilder/DeckbuilderPage';
 import { MatchPage } from '../../features/match/MatchPage';
+import { ToolsPage } from '../../features/tools/ToolsPage';
 import { BottomNav, type AppSection } from './BottomNav';
 
 function PlaceholderPage({ title }: { title: string }) {
@@ -21,7 +22,7 @@ export function AppShell() {
       <main className="app-main">
         {activeSection === 'match' && <MatchPage />}
         {activeSection === 'deckbuilder' && <DeckbuilderPage />}
-        {activeSection === 'tools' && <PlaceholderPage title="Tools" />}
+        {activeSection === 'tools' && <ToolsPage />}
         {activeSection === 'profile' && <PlaceholderPage title="Profile" />}
       </main>
       <BottomNav activeSection={activeSection} onChange={setActiveSection} />

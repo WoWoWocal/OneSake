@@ -3,6 +3,7 @@ import { getTotalCards } from './utils/deckValidation';
 
 interface DeckSummaryProps {
   deck: Deck;
+  isSaved: boolean;
   onClearDeck: () => void;
   onDeckNameChange: (name: string) => void;
   onRemoveLeader: () => void;
@@ -10,12 +11,17 @@ interface DeckSummaryProps {
 
 export function DeckSummary({
   deck,
+  isSaved,
   onClearDeck,
   onDeckNameChange,
   onRemoveLeader,
 }: DeckSummaryProps) {
   const totalCards = getTotalCards(deck.cards);
   const uniqueCards = deck.cards.length;
+  const updatedAt = new Date(deck.updatedAt);
+  const updatedAtLabel = Number.isNaN(updatedAt.getTime())
+    ? '-'
+    : updatedAt.toLocaleString();
 
   return (
     <section className="panel deck-panel">
@@ -35,6 +41,10 @@ export function DeckSummary({
         <strong>{totalCards}/50</strong>
         <span>Unique</span>
         <strong>{uniqueCards}</strong>
+        <span>Status</span>
+        <strong>{isSaved ? 'Saved' : 'Unsaved changes'}</strong>
+        <span>Updated</span>
+        <strong>{updatedAtLabel}</strong>
       </div>
       <div className="deck-actions">
         <button disabled={!deck.leaderCardId} onClick={onRemoveLeader} type="button">
