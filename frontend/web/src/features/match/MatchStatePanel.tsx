@@ -1,4 +1,7 @@
+import type { Deck } from '../../types/decks';
 import type { ChoicePromptDto, GameStateDto, PlayerStateDto } from '../../types/realtime';
+import type { DeckValidationResult } from '../deckbuilder/utils/deckValidation';
+import { getTotalCards } from '../deckbuilder/utils/deckValidation';
 import { formatPhase } from './matchFormatters';
 
 interface MatchStatePanelProps {
@@ -8,6 +11,8 @@ interface MatchStatePanelProps {
   currentPrompt: ChoicePromptDto | null;
   pending: boolean;
   canSubmitChoice: boolean;
+  selectedDeck: Deck | null;
+  selectedDeckValidation: DeckValidationResult | null;
   onSubmitChoice: (option: string) => void;
 }
 
@@ -165,6 +170,8 @@ export function MatchStatePanel({
   joinedRoomCode,
   onSubmitChoice,
   pending,
+  selectedDeck,
+  selectedDeckValidation,
 }: MatchStatePanelProps) {
   const phaseLabel = gameState ? formatPhase(gameState.phase) : 'Lobby';
   const players = gameState?.players ?? [];
@@ -189,6 +196,21 @@ export function MatchStatePanel({
         <div>
           <span>Active Player</span>
           <strong>{activePlayerDisplay}</strong>
+        </div>
+      </div>
+
+      <div className="selected-match-deck">
+        <div>
+          <span>Selected Deck</span>
+          <strong>{selectedDeck?.name ?? 'No deck selected'}</strong>
+          <small>{selectedDeck?.leaderCardId || 'No leader'}</small>
+        </div>
+        <div>
+          <span>Main Deck</span>
+          <strong>{selectedDeck ? `${getTotalCards(selectedDeck.cards)}/50` : '-'}</strong>
+          <small className={selectedDeckValidation?.isValid ? 'is-valid' : 'is-invalid'}>
+            {selectedDeckValidation?.isValid ? 'Valid' : 'Invalid'}
+          </small>
         </div>
       </div>
 

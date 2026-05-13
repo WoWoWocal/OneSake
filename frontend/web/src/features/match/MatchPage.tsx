@@ -8,11 +8,14 @@ import {
   GameStateDto,
   LogEventDto,
 } from '../../types/realtime';
+import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
+import { validateDeck } from '../deckbuilder/utils/deckValidation';
 import { ChatPanel } from './ChatPanel';
 import { ChoiceSheet } from './ChoiceSheet';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 import { LobbyPanel } from './LobbyPanel';
 import { LogPanel } from './LogPanel';
+import { MatchDeckSelect } from './MatchDeckSelect';
 import { MatchStatePanel } from './MatchStatePanel';
 
 export function MatchPage() {
@@ -31,6 +34,8 @@ export function MatchPage() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+  const [savedDecks] = useState(() => loadStoredDecks());
+  const [selectedDeckId, setSelectedDeckId] = useState('');
 
   useEffect(() => {
     const client = signalRClient.current;
@@ -55,12 +60,40 @@ export function MatchPage() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!selectedDeckId && savedDecks[0]) {
+      setSelectedDeckId(savedDecks[0].id);
+    }
+  }, [savedDecks, selectedDeckId]);
+
   const isConnected = connectionStatus === 'connected';
+  const selectedDeck = useMemo(
+    () => savedDecks.find((deck) => deck.id === selectedDeckId) ?? null,
+    [savedDecks, selectedDeckId],
+  );
+  const selectedDeckValidation = useMemo(
+    () => (selectedDeck ? validateDeck(selectedDeck) : null),
+    [selectedDeck],
+  );
+  const hasSavedDecks = savedDecks.length > 0;
+  const hasValidSelectedDeck = Boolean(selectedDeckValidation?.isValid);
   const canJoin =
     roomCodeInput.trim().length > 0 &&
     displayNameInput.trim().length > 0 &&
     connectionStatus !== 'connecting';
-  const canStart = joinedRoomCode.length > 0 && connectionStatus === 'connected';
+  const canStart =
+    joinedRoomCode.length > 0 && connectionStatus === 'connected' && hasValidSelectedDeck;
+  const deckNotice = useMemo(() => {
+    if (!hasSavedDecks) {
+      return 'Create and save a deck in the Deckbuilder first.';
+    }
+
+    if (!selectedDeck || !selectedDeckValidation?.isValid) {
+      return 'Selected deck is not valid yet.';
+    }
+
+    return '';
+  }, [hasSavedDecks, selectedDeck, selectedDeckValidation]);
   const connectionNotice = useMemo(() => {
     if (connectionStatus === 'reconnecting') {
       return 'Connection lost. Reconnecting to the match server...';
@@ -203,6 +236,7 @@ export function MatchPage() {
       <LobbyPanel
         canJoin={canJoin}
         canStart={canStart}
+        deckNotice={deckNotice}
         displayNameInput={displayNameInput}
         onDisplayNameChange={setDisplayNameInput}
         onJoinRoom={() => void joinRoom()}
@@ -210,6 +244,12 @@ export function MatchPage() {
         onStartMatch={() => void startMatch()}
         pending={pending}
         roomCodeInput={roomCodeInput}
+      />
+
+      <MatchDeckSelect
+        decks={savedDecks}
+        onSelectDeck={setSelectedDeckId}
+        selectedDeckId={selectedDeckId}
       />
 
       <main className="content-grid">
@@ -221,6 +261,8 @@ export function MatchPage() {
           joinedRoomCode={joinedRoomCode}
           onSubmitChoice={(option) => void submitChoice(option)}
           pending={pending}
+          selectedDeck={selectedDeck}
+          selectedDeckValidation={selectedDeckValidation}
         />
         <LogPanel logEvents={logEvents} />
         <ChatPanel

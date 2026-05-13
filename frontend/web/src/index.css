@@ -386,6 +386,66 @@ label {
   gap: 8px;
 }
 
+.match-lobby-notice,
+.match-deck-select__empty {
+  margin: 0;
+  border: 1px solid rgba(240, 191, 56, 0.36);
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: #ffe7a1;
+  font-weight: 800;
+  background: rgba(240, 191, 56, 0.12);
+}
+
+.match-deck-select {
+  display: grid;
+  gap: 10px;
+}
+
+.match-deck-list {
+  display: grid;
+  gap: 8px;
+}
+
+.match-deck-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  border: 1px solid rgba(148, 187, 194, 0.22);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: left;
+  color: #d9e9ee;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.match-deck-option.is-selected {
+  border-color: rgba(240, 191, 56, 0.64);
+  box-shadow: 0 0 0 2px rgba(240, 191, 56, 0.14);
+}
+
+.match-deck-option.is-invalid {
+  border-color: rgba(234, 111, 99, 0.42);
+}
+
+.match-deck-option span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.match-deck-option strong,
+.match-deck-option small {
+  overflow-wrap: anywhere;
+}
+
+.match-deck-option small {
+  color: #9db5bd;
+  font-weight: 700;
+}
+
 .match-page .scroll-list {
   max-height: 190px;
   border-color: rgba(148, 187, 194, 0.22);
@@ -452,6 +512,45 @@ label {
 .phase-pill {
   border-color: rgba(240, 191, 56, 0.45) !important;
   background: linear-gradient(135deg, rgba(240, 191, 56, 0.2), #0b1a2a) !important;
+}
+
+.selected-match-deck {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(148, 187, 194, 0.22);
+  border-radius: 12px;
+  padding: 10px;
+  background: #0b1a2a;
+}
+
+.selected-match-deck div {
+  display: grid;
+  gap: 2px;
+}
+
+.selected-match-deck span {
+  color: #8ea9b3;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.selected-match-deck strong {
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.selected-match-deck small {
+  color: #9db5bd;
+  font-weight: 800;
+}
+
+.selected-match-deck .is-valid {
+  color: #b9f3df;
+}
+
+.selected-match-deck .is-invalid {
+  color: #ffd1cc;
 }
 
 .match-board-layout {
@@ -1516,6 +1615,11 @@ label {
 
   .match-action-bar > div {
     grid-column: 1 / -1;
+  }
+
+  .selected-match-deck {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
   }
 
   .card-grid {
