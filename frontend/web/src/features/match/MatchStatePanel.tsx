@@ -7,6 +7,7 @@ interface MatchStatePanelProps {
   activePlayerDisplay: string;
   currentPrompt: ChoicePromptDto | null;
   pending: boolean;
+  canSubmitChoice: boolean;
   onSubmitChoice: (option: string) => void;
 }
 
@@ -158,6 +159,7 @@ function MatchPlayerArea({
 
 export function MatchStatePanel({
   activePlayerDisplay,
+  canSubmitChoice,
   currentPrompt,
   gameState,
   joinedRoomCode,
@@ -210,7 +212,7 @@ export function MatchStatePanel({
             return (
               <button
                 key={actionLabel}
-                disabled={!option || pending}
+                disabled={!option || pending || !canSubmitChoice}
                 onClick={() => option && onSubmitChoice(option)}
                 type="button"
               >

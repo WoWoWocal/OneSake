@@ -9,11 +9,13 @@ interface ChatPanelProps {
   chatInput: string;
   joinedRoomCode: string;
   pending: boolean;
+  canSendChat: boolean;
   onChatInputChange: (value: string) => void;
   onSendChat: (event: FormEvent) => void;
 }
 
 export function ChatPanel({
+  canSendChat,
   chatInput,
   chatMessages,
   joinedRoomCode,
@@ -45,7 +47,7 @@ export function ChatPanel({
           placeholder="Write chat message"
           value={chatInput}
         />
-        <Button disabled={!joinedRoomCode || pending} type="submit">
+        <Button disabled={!joinedRoomCode || pending || !canSendChat} type="submit">
           Send
         </Button>
       </form>

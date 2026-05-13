@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
-import { SignalRClient } from '../../api/signalrClient';
+import { SignalRClient, type ConnectionStatus } from '../../api/signalrClient';
 import {
   ChatMessageDto,
   ChoicePromptDto,
@@ -10,6 +10,7 @@ import {
 } from '../../types/realtime';
 import { ChatPanel } from './ChatPanel';
 import { ChoiceSheet } from './ChoiceSheet';
+import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 import { LobbyPanel } from './LobbyPanel';
 import { LogPanel } from './LogPanel';
 import { MatchStatePanel } from './MatchStatePanel';
@@ -29,6 +30,7 @@ export function MatchPage() {
   const [chatInput, setChatInput] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
 
   useEffect(() => {
     const client = signalRClient.current;
@@ -47,10 +49,37 @@ export function MatchPage() {
     client.onLogEvent((event) => {
       setLogEvents((previous) => [...previous, event]);
     });
+
+    client.onConnectionStatus((status) => {
+      setConnectionStatus(status);
+    });
   }, []);
 
-  const canJoin = roomCodeInput.trim().length > 0 && displayNameInput.trim().length > 0;
-  const canStart = joinedRoomCode.length > 0;
+  const isConnected = connectionStatus === 'connected';
+  const canJoin =
+    roomCodeInput.trim().length > 0 &&
+    displayNameInput.trim().length > 0 &&
+    connectionStatus !== 'connecting';
+  const canStart = joinedRoomCode.length > 0 && connectionStatus === 'connected';
+  const connectionNotice = useMemo(() => {
+    if (connectionStatus === 'reconnecting') {
+      return 'Connection lost. Reconnecting to the match server...';
+    }
+
+    if (connectionStatus === 'disconnected') {
+      return 'Not connected yet. Join a room to connect to the match server.';
+    }
+
+    if (connectionStatus === 'error') {
+      return 'Connection error. Check the backend server and try again.';
+    }
+
+    if (connectionStatus === 'connecting') {
+      return 'Connecting to the match server...';
+    }
+
+    return '';
+  }, [connectionStatus]);
 
   const activePlayerDisplay = useMemo(() => {
     if (!gameState) {
@@ -108,7 +137,7 @@ export function MatchPage() {
   };
 
   const submitChoice = async (option: string): Promise<void> => {
-    if (!currentPrompt || !joinedRoomCode) {
+    if (!currentPrompt || !joinedRoomCode || !isConnected) {
       return;
     }
 
@@ -136,7 +165,7 @@ export function MatchPage() {
     event.preventDefault();
 
     const normalizedText = chatInput.trim();
-    if (!joinedRoomCode || !normalizedText) {
+    if (!joinedRoomCode || !normalizedText || !isConnected) {
       return;
     }
 
@@ -156,8 +185,18 @@ export function MatchPage() {
   return (
     <section className="match-page">
       <header className="panel header-panel">
-        <h1>OneSake Match</h1>
-        <p>Join, start, choices, log and chat in one mobile-ready view.</p>
+        <div className="match-header-row">
+          <div>
+            <h1>OneSake Match</h1>
+            <p>Join, start, choices, log and chat in one mobile-ready view.</p>
+          </div>
+          <ConnectionStatusBadge status={connectionStatus} />
+        </div>
+        {connectionNotice && (
+          <p className={`connection-notice connection-notice--${connectionStatus}`}>
+            {connectionNotice}
+          </p>
+        )}
         {error && <p className="error-banner">{error}</p>}
       </header>
 
@@ -176,6 +215,7 @@ export function MatchPage() {
       <main className="content-grid">
         <MatchStatePanel
           activePlayerDisplay={activePlayerDisplay}
+          canSubmitChoice={isConnected}
           currentPrompt={currentPrompt}
           gameState={gameState}
           joinedRoomCode={joinedRoomCode}
@@ -184,6 +224,7 @@ export function MatchPage() {
         />
         <LogPanel logEvents={logEvents} />
         <ChatPanel
+          canSendChat={isConnected}
           chatInput={chatInput}
           chatMessages={chatMessages}
           joinedRoomCode={joinedRoomCode}
@@ -194,6 +235,7 @@ export function MatchPage() {
       </main>
 
       <ChoiceSheet
+        canSubmitChoice={isConnected}
         currentPrompt={currentPrompt}
         onSubmitChoice={(option) => void submitChoice(option)}
         pending={pending}

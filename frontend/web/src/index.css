@@ -296,6 +296,11 @@ label {
     #0b1a2a;
 }
 
+.match-header-row {
+  display: grid;
+  gap: 10px;
+}
+
 .match-page .header-panel h1,
 .match-page .logs-panel h2,
 .match-page .chat-panel h2 {
@@ -316,6 +321,64 @@ label {
 
 .match-page input::placeholder {
   color: #6e8993;
+}
+
+.connection-status {
+  min-height: 34px;
+  width: fit-content;
+  border: 1px solid rgba(148, 187, 194, 0.3);
+  border-radius: 999px;
+  padding: 7px 12px;
+  color: #d9e9ee;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.connection-status--connected {
+  border-color: rgba(31, 196, 159, 0.5);
+  color: #b9f3df;
+  background: rgba(31, 196, 159, 0.14);
+}
+
+.connection-status--connecting,
+.connection-status--reconnecting {
+  border-color: rgba(240, 191, 56, 0.62);
+  color: #ffe7a1;
+  background: rgba(240, 191, 56, 0.14);
+}
+
+.connection-status--disconnected,
+.connection-status--error {
+  border-color: rgba(234, 111, 99, 0.52);
+  color: #ffd1cc;
+  background: rgba(234, 111, 99, 0.13);
+}
+
+.connection-notice {
+  border: 1px solid rgba(148, 187, 194, 0.22);
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: #b8cdd3 !important;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.connection-notice--connected {
+  display: none;
+}
+
+.connection-notice--connecting,
+.connection-notice--reconnecting {
+  border-color: rgba(240, 191, 56, 0.36);
+  color: #ffe7a1 !important;
+}
+
+.connection-notice--disconnected,
+.connection-notice--error {
+  border-color: rgba(234, 111, 99, 0.34);
+  color: #ffd1cc !important;
 }
 
 .match-page .lobby-panel {
@@ -1432,6 +1495,15 @@ label {
 
   .match-page .lobby-panel .button-row {
     align-self: end;
+  }
+
+  .match-header-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .connection-status {
+    justify-self: end;
   }
 
   .match-scorebar {
