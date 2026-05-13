@@ -1117,6 +1117,7 @@ label {
 
 .card-grid {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -1127,8 +1128,10 @@ label {
 
 .card-tile {
   display: grid;
-  gap: 10px;
+  align-content: start;
+  gap: 8px;
   width: 100%;
+  padding: 8px;
   color: inherit;
   text-align: left;
 }
@@ -1139,11 +1142,8 @@ label {
 }
 
 .card-tile__inspect {
-  display: grid;
-  grid-template-columns: 78px 1fr;
-  gap: 10px;
+  display: block;
   width: 100%;
-  min-height: 108px;
   border: 0;
   padding: 0;
   color: inherit;
@@ -1152,70 +1152,37 @@ label {
   cursor: pointer;
 }
 
+.card-tile-image,
 .card-tile__image {
   display: grid;
-  min-height: 108px;
+  width: 100%;
+  aspect-ratio: 5 / 7;
   place-items: center;
   border-radius: 8px;
-  padding: 8px;
   color: #ffffff;
   background: #314b57;
   text-align: center;
   font-weight: 700;
+  overflow: hidden;
 }
 
+.card-tile-image img,
 .card-tile__image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
-}
-
-.card-tile__body {
-  min-width: 0;
-  align-self: start;
-}
-
-.card-tile__id {
-  color: #637581;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.card-tile h2 {
-  margin: 2px 0 6px;
-  font-size: 0.98rem;
-}
-
-.card-tile p {
-  margin: 0;
-  color: #536776;
-  overflow-wrap: anywhere;
-}
-
-.card-tile__meta {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  margin: 0;
-}
-
-.card-tile__meta div {
-  border-radius: 8px;
-  padding: 7px;
   background: #eef3f4;
 }
 
-.card-tile__meta dt {
-  color: #637581;
-  font-size: 0.78rem;
+.card-tile-actions {
+  display: grid;
+  gap: 6px;
 }
 
-.card-tile__meta dd {
-  margin: 0;
-  font-weight: 700;
-  overflow-wrap: anywhere;
+.card-action-button {
+  min-height: 44px;
+  padding-inline: 8px;
 }
 
 .card-inspect {
@@ -1863,7 +1830,10 @@ label {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .card-tile__meta {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 360px) {
+  .card-grid {
+    grid-template-columns: 1fr;
   }
 }
