@@ -7,7 +7,7 @@ export interface DeckValidationResult {
   warnings: string[];
 }
 
-const knownColors = ['Red', 'Green', 'Blue', 'Purple', 'Black', 'Yellow'];
+export const playableColors = ['Red', 'Green', 'Blue', 'Purple', 'Black', 'Yellow'];
 
 export function isLeaderCardType(cardType: string | undefined): boolean {
   return Boolean(cardType?.toLowerCase().includes('leader'));
@@ -19,7 +19,7 @@ export function getCardColors(color: string | undefined): string[] {
   }
 
   const normalizedColor = color.toLowerCase();
-  const matchedKnownColors = knownColors.filter((knownColor) =>
+  const matchedKnownColors = playableColors.filter((knownColor) =>
     normalizedColor.includes(knownColor.toLowerCase()),
   );
 
@@ -46,6 +46,19 @@ export function cardMatchesLeaderColors(cardColor: string | undefined, leaderCol
   return cardColors.some((cardColorValue) =>
     leaderColors.some(
       (leaderColor) => cardColorValue.toLowerCase() === leaderColor.toLowerCase(),
+    ),
+  );
+}
+
+export function cardMatchesSelectedColors(cardColor: string | undefined, selectedColors: string[]): boolean {
+  if (selectedColors.length === 0) {
+    return true;
+  }
+
+  const cardColors = getCardColors(cardColor);
+  return cardColors.some((cardColorValue) =>
+    selectedColors.some(
+      (selectedColor) => cardColorValue.toLowerCase() === selectedColor.toLowerCase(),
     ),
   );
 }

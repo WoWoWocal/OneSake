@@ -1024,6 +1024,86 @@ label {
   width: 100%;
 }
 
+.color-palette-filter {
+  display: grid;
+  gap: 10px;
+}
+
+.color-palette-filter__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.color-palette-filter__header div {
+  display: grid;
+  gap: 2px;
+}
+
+.color-palette-filter__header span {
+  color: #637581;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.color-palette-filter__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-filter-button {
+  min-height: 44px;
+  border: 1px solid #cbd9dc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #344f5d;
+  background: #ffffff;
+  font-weight: 800;
+}
+
+.color-filter-button span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 7px;
+  border: 1px solid rgba(22, 34, 45, 0.2);
+  border-radius: 999px;
+  vertical-align: -1px;
+}
+
+.color-filter-button--red span {
+  background: #d73a31;
+}
+
+.color-filter-button--green span {
+  background: #24965b;
+}
+
+.color-filter-button--blue span {
+  background: #2878c8;
+}
+
+.color-filter-button--purple span {
+  background: #7c4dcc;
+}
+
+.color-filter-button--black span {
+  background: #222831;
+}
+
+.color-filter-button--yellow span {
+  background: #f3c74f;
+}
+
+.color-filter-button--active {
+  border-color: #176f65;
+  color: #125143;
+  background: #e6f7f2;
+  box-shadow: inset 0 0 0 1px #176f65;
+}
+
 .status-panel {
   color: #536776;
   font-weight: 700;

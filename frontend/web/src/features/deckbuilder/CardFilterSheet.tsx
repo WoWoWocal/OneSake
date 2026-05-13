@@ -1,16 +1,16 @@
 import { BottomSheet } from '../../components/ui/BottomSheet';
 import { Button } from '../../components/ui/Button';
+import { ColorPaletteFilter } from './ColorPaletteFilter';
 
 export interface CardFilters {
   searchText: string;
-  color: string;
+  selectedColors: string[];
   cardType: string;
   cost: string;
   counter: string;
 }
 
 interface CardFilterOptions {
-  colors: string[];
   cardTypes: string[];
   costs: string[];
   counters: string[];
@@ -70,17 +70,10 @@ export function CardFilterSheet({
           />
         </label>
 
-        <label className="field" htmlFor="cardColor">
-          Color
-          <select
-            id="cardColor"
-            onChange={(event) => onChange({ ...filters, color: event.target.value })}
-            value={filters.color}
-          >
-            <option value="">Any color</option>
-            {renderOptions(options.colors)}
-          </select>
-        </label>
+        <ColorPaletteFilter
+          onChange={(selectedColors) => onChange({ ...filters, selectedColors })}
+          selectedColors={filters.selectedColors}
+        />
 
         <label className="field" htmlFor="cardType">
           Type

@@ -8,6 +8,7 @@ import { CardFilterSheet, type CardFilters } from './CardFilterSheet';
 import { CardGrid } from './CardGrid';
 import { CardInspectModal } from './CardInspectModal';
 import { CardSearch } from './CardSearch';
+import { ColorPaletteFilter } from './ColorPaletteFilter';
 import { DeckDrawer } from './DeckDrawer';
 import { DeckExport } from './DeckExport';
 import { DeckLibrary } from './DeckLibrary';
@@ -35,7 +36,7 @@ const availableSets = ['OP-01', 'OP-02', 'OP-03', 'ST-01'];
 
 const emptyFilters: CardFilters = {
   searchText: '',
-  color: '',
+  selectedColors: [],
   cardType: '',
   cost: '',
   counter: '',
@@ -165,10 +166,14 @@ export function DeckbuilderPage() {
   const isDeckSaved = savedDecks.some(
     (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
   );
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const activeFilterCount =
+    (filters.searchText ? 1 : 0) +
+    filters.selectedColors.length +
+    (filters.cardType ? 1 : 0) +
+    (filters.cost ? 1 : 0) +
+    (filters.counter ? 1 : 0);
   const filterOptions = useMemo(
     () => ({
-      colors: uniqueValues(sortedCards, (card) => card.card_color),
       cardTypes: uniqueValues(sortedCards, (card) => card.card_type),
       costs: uniqueValues(sortedCards, (card) => String(card.card_cost ?? '')),
       counters: uniqueValues(sortedCards, (card) => String(card.counter_amount ?? '')),
@@ -457,6 +462,15 @@ export function DeckbuilderPage() {
             leaderName={deck.leaderName}
             onOpenFilters={() => setFiltersOpen(true)}
           />
+          <div className="panel">
+            <ColorPaletteFilter
+              onChange={(selectedColors) => setFilters((currentFilters) => ({
+                ...currentFilters,
+                selectedColors,
+              }))}
+              selectedColors={filters.selectedColors}
+            />
+          </div>
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
           {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}
           {error && <div className="panel status-panel status-panel--error">{error}</div>}

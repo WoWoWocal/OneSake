@@ -1,7 +1,11 @@
 import type { CardDto } from '../../types/cards';
 import type { CardFilters } from './CardFilterSheet';
 import { CardTile } from './CardTile';
-import { cardMatchesLeaderColors, isLeaderCardType } from './utils/deckValidation';
+import {
+  cardMatchesLeaderColors,
+  cardMatchesSelectedColors,
+  isLeaderCardType,
+} from './utils/deckValidation';
 
 interface CardGridProps {
   cards: CardDto[];
@@ -26,7 +30,7 @@ export function CardGrid({ cards, filters, leaderColors, onAddCard, onSelectCard
       !normalizedSearch ||
       normalize(card.card_name).includes(normalizedSearch) ||
       normalize(card.card_set_id).includes(normalizedSearch);
-    const matchesColor = !filters.color || card.card_color === filters.color;
+    const matchesColor = cardMatchesSelectedColors(card.card_color, filters.selectedColors);
     const matchesType = !filters.cardType || card.card_type === filters.cardType;
     const matchesCost = !filters.cost || String(card.card_cost ?? '') === filters.cost;
     const matchesCounter =
