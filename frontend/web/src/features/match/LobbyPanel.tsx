@@ -5,6 +5,7 @@ interface LobbyPanelProps {
   displayNameInput: string;
   canJoin: boolean;
   canStart: boolean;
+  deckNotice: string;
   pending: boolean;
   onRoomCodeChange: (value: string) => void;
   onDisplayNameChange: (value: string) => void;
@@ -15,6 +16,7 @@ interface LobbyPanelProps {
 export function LobbyPanel({
   canJoin,
   canStart,
+  deckNotice,
   displayNameInput,
   onDisplayNameChange,
   onJoinRoom,
@@ -53,6 +55,7 @@ export function LobbyPanel({
           StartMatch
         </Button>
       </div>
+      {deckNotice && <p className="match-lobby-notice">{deckNotice}</p>}
     </section>
   );
 }

@@ -59,6 +59,7 @@ dotnet build OneSake.sln -c Release
 
 dotnet test OneSake.Tests\OneSake.Tests.csproj -c Release
 
+
 ## Täglicher Git-Workflow auf dev
 
 git checkout dev
@@ -67,4 +68,13 @@ git pull origin dev
 ##Änderungen committen und auf dev pushen
 
 git push origin dev
+
+## Database setup
+
+The backend uses PostgreSQL with Entity Framework Core.
+
+### Start PostgreSQL locally
+
+```bash
+docker compose up -d
 

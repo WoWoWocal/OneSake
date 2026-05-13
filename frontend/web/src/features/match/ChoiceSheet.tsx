@@ -5,10 +5,16 @@ import { BottomSheet } from '../../components/ui/BottomSheet';
 interface ChoiceSheetProps {
   currentPrompt: ChoicePromptDto | null;
   pending: boolean;
+  canSubmitChoice: boolean;
   onSubmitChoice: (option: string) => void;
 }
 
-export function ChoiceSheet({ currentPrompt, onSubmitChoice, pending }: ChoiceSheetProps) {
+export function ChoiceSheet({
+  canSubmitChoice,
+  currentPrompt,
+  onSubmitChoice,
+  pending,
+}: ChoiceSheetProps) {
   return (
     <BottomSheet open={Boolean(currentPrompt)} title={currentPrompt?.title ?? 'Choice'}>
       {currentPrompt && (
@@ -21,7 +27,7 @@ export function ChoiceSheet({ currentPrompt, onSubmitChoice, pending }: ChoiceSh
               <Button
                 key={option}
                 className="choice-button"
-                disabled={pending}
+                disabled={pending || !canSubmitChoice}
                 onClick={() => onSubmitChoice(option)}
                 variant="secondary"
               >

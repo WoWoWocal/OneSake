@@ -1,4 +1,12 @@
-export type MatchPhase = 'Lobby' | 'Mulligan' | 'Main' | 'GameOver' | number;
+export type MatchPhase =
+  | 'Lobby'
+  | 'Mulligan'
+  | 'Refresh'
+  | 'Draw'
+  | 'Main'
+  | 'End'
+  | 'GameOver'
+  | number;
 
 export interface PlayerStateDto {
   playerId: string;
@@ -7,6 +15,24 @@ export interface PlayerStateDto {
   deckCount: number;
   handCount: number;
   lifeCount: number;
+  boardCount: number;
+  deckName: string;
+  leaderCardId: string;
+  mainDeckCount: number;
+  hasDeck: boolean;
+}
+
+export interface PlayerDeckCardDto {
+  cardId: string;
+  name: string;
+  quantity: number;
+}
+
+export interface PlayerDeckSubmissionDto {
+  deckId: string;
+  deckName: string;
+  leaderCardId: string;
+  cards: PlayerDeckCardDto[];
 }
 
 export interface GameStateDto {

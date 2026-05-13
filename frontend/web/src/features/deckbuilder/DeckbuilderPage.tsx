@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getCardsBySetId } from '../../api/cardsApi';
 import { Drawer } from '../../components/ui/Drawer';
 import type { CardDto } from '../../types/cards';
-import type { Deck } from '../../types/decks';
+import type { Deck, DeckCard } from '../../types/decks';
 import { CardFilterSheet, type CardFilters } from './CardFilterSheet';
 import { CardGrid } from './CardGrid';
 import { CardInspectModal } from './CardInspectModal';
@@ -20,6 +20,7 @@ import {
   loadStoredDeck,
   loadStoredDecks,
   saveStoredDeck,
+  saveStoredDecks,
   touchDeck,
   upsertStoredDeck,
 } from './utils/deckStorage';
@@ -39,6 +40,64 @@ function uniqueValues(cards: CardDto[], readValue: (card: CardDto) => string): s
   return [...new Set(cards.map(readValue).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b, undefined, { numeric: true }),
   );
+}
+
+function optionalCardText(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function createDeckCard(card: CardDto, quantity: number): DeckCard {
+  return {
+    cardId: card.card_set_id,
+    name: card.card_name,
+    quantity,
+    color: optionalCardText(card.card_color),
+    type: optionalCardText(card.card_type),
+    cost: card.card_cost,
+    power: card.card_power,
+    counter: card.counter_amount,
+    attribute: optionalCardText(card.attribute),
+    subTypes: optionalCardText(card.sub_types),
+    rarity: optionalCardText(card.rarity),
+  };
+}
+
+function needsDeckCardHydration(deckCard: DeckCard): boolean {
+  return (
+    deckCard.color === undefined &&
+    deckCard.type === undefined &&
+    deckCard.cost === undefined &&
+    deckCard.power === undefined &&
+    deckCard.counter === undefined &&
+    deckCard.attribute === undefined &&
+    deckCard.subTypes === undefined &&
+    deckCard.rarity === undefined
+  );
+}
+
+function hydrateDeckWithCards(deckToHydrate: Deck, loadedCards: CardDto[]): Deck {
+  if (loadedCards.length === 0 || deckToHydrate.cards.length === 0) {
+    return deckToHydrate;
+  }
+
+  const loadedCardsById = new Map(loadedCards.map((card) => [card.card_set_id, card]));
+  let changed = false;
+  const hydratedCards = deckToHydrate.cards.map((deckCard) => {
+    const loadedCard = loadedCardsById.get(deckCard.cardId);
+    if (!loadedCard) {
+      return deckCard;
+    }
+
+    if (!needsDeckCardHydration(deckCard)) {
+      return deckCard;
+    }
+
+    const hydratedCard = createDeckCard(loadedCard, deckCard.quantity);
+    changed = true;
+    return hydratedCard;
+  });
+
+  return changed ? { ...deckToHydrate, cards: hydratedCards } : deckToHydrate;
 }
 
 export function DeckbuilderPage() {
@@ -72,6 +131,30 @@ export function DeckbuilderPage() {
   useEffect(() => {
     saveStoredDeck(deck);
   }, [deck]);
+
+  useEffect(() => {
+    if (cards.length === 0) {
+      return;
+    }
+
+    setDeck((currentDeck) => hydrateDeckWithCards(currentDeck, cards));
+
+    const storedDecks = loadStoredDecks();
+    let changed = false;
+    const hydratedDecks = storedDecks.map((storedDeck) => {
+      const hydratedDeck = hydrateDeckWithCards(storedDeck, cards);
+      if (hydratedDeck !== storedDeck) {
+        changed = true;
+      }
+
+      return hydratedDeck;
+    });
+
+    if (changed) {
+      saveStoredDecks(hydratedDecks);
+      setSavedDecks(hydratedDecks);
+    }
+  }, [cards]);
 
   useEffect(() => {
     if (!deckNotice) {
@@ -147,7 +230,7 @@ export function DeckbuilderPage() {
           ...currentDeck,
           cards: currentDeck.cards.map((deckCard) =>
             deckCard.cardId === card.card_set_id
-              ? { ...deckCard, quantity: deckCard.quantity + 1 }
+              ? { ...createDeckCard(card, deckCard.quantity + 1), quantity: deckCard.quantity + 1 }
               : deckCard,
           ),
         };
@@ -159,9 +242,7 @@ export function DeckbuilderPage() {
         cards: [
           ...currentDeck.cards,
           {
-            cardId: card.card_set_id,
-            name: card.card_name,
-            quantity: 1,
+            ...createDeckCard(card, 1),
           },
         ],
       };

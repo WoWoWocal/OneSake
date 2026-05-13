@@ -31,6 +31,14 @@ public class MatchHub : Hub
         await PublishMatchUpdate(normalizedRoomCode, update);
     }
 
+    public async Task SetPlayerDeck(string roomCode, PlayerDeckSubmissionDto deck)
+    {
+        var normalizedRoomCode = NormalizeRoomCode(roomCode);
+        var room = GetExistingRoom(normalizedRoomCode);
+        var update = room.SetPlayerDeck(Context.ConnectionId, deck);
+        await PublishMatchUpdate(normalizedRoomCode, update);
+    }
+
     public async Task SubmitChoice(string roomCode, ChoiceSubmissionDto submission)
     {
         var normalizedRoomCode = NormalizeRoomCode(roomCode);

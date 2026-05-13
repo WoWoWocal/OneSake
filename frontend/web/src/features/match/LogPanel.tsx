@@ -8,8 +8,12 @@ interface LogPanelProps {
 export function LogPanel({ logEvents }: LogPanelProps) {
   return (
     <section className="panel logs-panel">
-      <h2>Log Events</h2>
+      <div className="panel-title-row">
+        <h2>Match Log</h2>
+        <span>{logEvents.length}</span>
+      </div>
       <div className="scroll-list">
+        {logEvents.length === 0 && <div className="list-entry is-empty">No events yet.</div>}
         {logEvents.map((event) => (
           <div key={`${event.seq}-${event.tsUnixMs}`} className="list-entry">
             <div>

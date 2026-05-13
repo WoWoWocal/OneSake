@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
-import { SignalRClient } from '../../api/signalrClient';
+import { SignalRClient, type ConnectionStatus } from '../../api/signalrClient';
 import {
   ChatMessageDto,
   ChoicePromptDto,
@@ -8,10 +8,15 @@ import {
   GameStateDto,
   LogEventDto,
 } from '../../types/realtime';
+import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
+import { validateDeck } from '../deckbuilder/utils/deckValidation';
 import { ChatPanel } from './ChatPanel';
 import { ChoiceSheet } from './ChoiceSheet';
+import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 import { LobbyPanel } from './LobbyPanel';
 import { LogPanel } from './LogPanel';
+import { toPlayerDeckSubmission } from './matchDeckMapper';
+import { MatchDeckSelect } from './MatchDeckSelect';
 import { MatchStatePanel } from './MatchStatePanel';
 
 export function MatchPage() {
@@ -29,6 +34,9 @@ export function MatchPage() {
   const [chatInput, setChatInput] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+  const [savedDecks] = useState(() => loadStoredDecks());
+  const [selectedDeckId, setSelectedDeckId] = useState('');
 
   useEffect(() => {
     const client = signalRClient.current;
@@ -47,10 +55,65 @@ export function MatchPage() {
     client.onLogEvent((event) => {
       setLogEvents((previous) => [...previous, event]);
     });
+
+    client.onConnectionStatus((status) => {
+      setConnectionStatus(status);
+    });
   }, []);
 
-  const canJoin = roomCodeInput.trim().length > 0 && displayNameInput.trim().length > 0;
-  const canStart = joinedRoomCode.length > 0;
+  useEffect(() => {
+    if (!selectedDeckId && savedDecks[0]) {
+      setSelectedDeckId(savedDecks[0].id);
+    }
+  }, [savedDecks, selectedDeckId]);
+
+  const isConnected = connectionStatus === 'connected';
+  const selectedDeck = useMemo(
+    () => savedDecks.find((deck) => deck.id === selectedDeckId) ?? null,
+    [savedDecks, selectedDeckId],
+  );
+  const selectedDeckValidation = useMemo(
+    () => (selectedDeck ? validateDeck(selectedDeck) : null),
+    [selectedDeck],
+  );
+  const hasSavedDecks = savedDecks.length > 0;
+  const hasValidSelectedDeck = Boolean(selectedDeckValidation?.isValid);
+  const canJoin =
+    roomCodeInput.trim().length > 0 &&
+    displayNameInput.trim().length > 0 &&
+    connectionStatus !== 'connecting';
+  const canStart =
+    joinedRoomCode.length > 0 && connectionStatus === 'connected' && hasValidSelectedDeck;
+  const deckNotice = useMemo(() => {
+    if (!hasSavedDecks) {
+      return 'Create and save a deck in the Deckbuilder first.';
+    }
+
+    if (!selectedDeck || !selectedDeckValidation?.isValid) {
+      return 'Selected deck is not valid yet.';
+    }
+
+    return '';
+  }, [hasSavedDecks, selectedDeck, selectedDeckValidation]);
+  const connectionNotice = useMemo(() => {
+    if (connectionStatus === 'reconnecting') {
+      return 'Connection lost. Reconnecting to the match server...';
+    }
+
+    if (connectionStatus === 'disconnected') {
+      return 'Not connected yet. Join a room to connect to the match server.';
+    }
+
+    if (connectionStatus === 'error') {
+      return 'Connection error. Check the backend server and try again.';
+    }
+
+    if (connectionStatus === 'connecting') {
+      return 'Connecting to the match server...';
+    }
+
+    return '';
+  }, [connectionStatus]);
 
   const activePlayerDisplay = useMemo(() => {
     if (!gameState) {
@@ -82,6 +145,13 @@ export function MatchPage() {
       await signalRClient.current.joinRoom(normalizedRoomCode, normalizedDisplayName);
       setJoinedRoomCode(normalizedRoomCode);
       setRoomCodeInput(normalizedRoomCode);
+
+      if (selectedDeck && selectedDeckValidation?.isValid) {
+        await signalRClient.current.setPlayerDeck(
+          normalizedRoomCode,
+          toPlayerDeckSubmission(selectedDeck),
+        );
+      }
     } catch (joinError) {
       const message = joinError instanceof Error ? joinError.message : 'Join fehlgeschlagen.';
       setError(message);
@@ -108,7 +178,7 @@ export function MatchPage() {
   };
 
   const submitChoice = async (option: string): Promise<void> => {
-    if (!currentPrompt || !joinedRoomCode) {
+    if (!currentPrompt || !joinedRoomCode || !isConnected) {
       return;
     }
 
@@ -136,7 +206,7 @@ export function MatchPage() {
     event.preventDefault();
 
     const normalizedText = chatInput.trim();
-    if (!joinedRoomCode || !normalizedText) {
+    if (!joinedRoomCode || !normalizedText || !isConnected) {
       return;
     }
 
@@ -156,14 +226,25 @@ export function MatchPage() {
   return (
     <section className="match-page">
       <header className="panel header-panel">
-        <h1>OneSake Match</h1>
-        <p>Join, start, choices, log and chat in one mobile-ready view.</p>
+        <div className="match-header-row">
+          <div>
+            <h1>OneSake Match</h1>
+            <p>Join, start, choices, log and chat in one mobile-ready view.</p>
+          </div>
+          <ConnectionStatusBadge status={connectionStatus} />
+        </div>
+        {connectionNotice && (
+          <p className={`connection-notice connection-notice--${connectionStatus}`}>
+            {connectionNotice}
+          </p>
+        )}
         {error && <p className="error-banner">{error}</p>}
       </header>
 
       <LobbyPanel
         canJoin={canJoin}
         canStart={canStart}
+        deckNotice={deckNotice}
         displayNameInput={displayNameInput}
         onDisplayNameChange={setDisplayNameInput}
         onJoinRoom={() => void joinRoom()}
@@ -173,14 +254,27 @@ export function MatchPage() {
         roomCodeInput={roomCodeInput}
       />
 
+      <MatchDeckSelect
+        decks={savedDecks}
+        onSelectDeck={setSelectedDeckId}
+        selectedDeckId={selectedDeckId}
+      />
+
       <main className="content-grid">
         <MatchStatePanel
           activePlayerDisplay={activePlayerDisplay}
+          canSubmitChoice={isConnected}
+          currentPrompt={currentPrompt}
           gameState={gameState}
           joinedRoomCode={joinedRoomCode}
+          onSubmitChoice={(option) => void submitChoice(option)}
+          pending={pending}
+          selectedDeck={selectedDeck}
+          selectedDeckValidation={selectedDeckValidation}
         />
         <LogPanel logEvents={logEvents} />
         <ChatPanel
+          canSendChat={isConnected}
           chatInput={chatInput}
           chatMessages={chatMessages}
           joinedRoomCode={joinedRoomCode}
@@ -191,6 +285,7 @@ export function MatchPage() {
       </main>
 
       <ChoiceSheet
+        canSubmitChoice={isConnected}
         currentPrompt={currentPrompt}
         onSubmitChoice={(option) => void submitChoice(option)}
         pending={pending}

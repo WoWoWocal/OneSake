@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
 import { getTotalCards } from '../deckbuilder/utils/deckValidation';
 import { MulliganTrainer } from './mulligan/MulliganTrainer';
+import { ProbabilityCalculator } from './probability/ProbabilityCalculator';
 import { SavedDeckSelect } from './SavedDeckSelect';
 
 export function ToolsPage() {
@@ -40,11 +41,7 @@ export function ToolsPage() {
 
       <div className="tools-grid">
         <MulliganTrainer deck={selectedDeck} />
-
-        <section className="panel tools-panel">
-          <h2>Probability Calculator</h2>
-          <p>This will use the selected saved deck for draw and starting-hand odds.</p>
-        </section>
+        <ProbabilityCalculator deck={selectedDeck} />
       </div>
     </section>
   );
