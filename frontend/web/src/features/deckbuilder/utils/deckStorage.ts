@@ -51,6 +51,15 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
 }
 
+function optionalStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const strings = value.filter((item): item is string => typeof item === 'string' && Boolean(item.trim()));
+  return strings.length > 0 ? strings : undefined;
+}
+
 function optionalNumber(value: unknown): number | null | undefined {
   if (value === null) {
     return null;
@@ -90,6 +99,8 @@ export function sanitizeDeck(deck: Partial<Deck> | null | undefined): Deck {
     id: typeof safeDeck.id === 'string' && safeDeck.id.trim() ? safeDeck.id : createDeckId(),
     name: typeof safeDeck.name === 'string' && safeDeck.name.trim() ? safeDeck.name : 'New Deck',
     leaderCardId: typeof safeDeck.leaderCardId === 'string' ? safeDeck.leaderCardId : '',
+    leaderName: optionalString(safeDeck.leaderName),
+    leaderColors: optionalStringArray(safeDeck.leaderColors),
     createdAt:
       typeof safeDeck.createdAt === 'string' && safeDeck.createdAt ? safeDeck.createdAt : now,
     updatedAt:

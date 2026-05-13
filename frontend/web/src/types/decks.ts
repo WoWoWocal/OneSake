@@ -16,6 +16,8 @@ export interface Deck {
   id: string;
   name: string;
   leaderCardId: string;
+  leaderName?: string;
+  leaderColors?: string[];
   createdAt: string;
   updatedAt: string;
   cards: DeckCard[];

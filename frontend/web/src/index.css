@@ -1002,6 +1002,11 @@ label {
   color: #637581;
 }
 
+.card-search .auto-filter-note {
+  color: #176f65;
+  font-weight: 800;
+}
+
 .set-picker {
   display: grid;
   gap: 6px;
@@ -1599,6 +1604,11 @@ label {
 .validation-list .is-pending {
   color: #6c4b00;
   background: #fff2c8;
+}
+
+.validation-list .is-warning {
+  color: #7a4f00;
+  background: #fff8df;
 }
 
 .empty-state {

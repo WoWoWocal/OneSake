@@ -1,6 +1,7 @@
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import type { CardDto } from '../../types/cards';
+import { isLeaderCardType } from './utils/deckValidation';
 
 interface CardInspectModalProps {
   card: CardDto | null;
@@ -9,7 +10,7 @@ interface CardInspectModalProps {
 }
 
 export function CardInspectModal({ card, onAddCard, onClose }: CardInspectModalProps) {
-  const actionLabel = card?.card_type.toLowerCase() === 'leader' ? 'Set leader' : 'Add card';
+  const actionLabel = isLeaderCardType(card?.card_type) ? 'Set leader' : 'Add card';
 
   const handleAction = (): void => {
     if (!card) {

@@ -1,5 +1,6 @@
 import { Button } from '../../components/ui/Button';
 import type { CardDto } from '../../types/cards';
+import { isLeaderCardType } from './utils/deckValidation';
 
 interface CardTileProps {
   card: CardDto;
@@ -8,7 +9,7 @@ interface CardTileProps {
 }
 
 export function CardTile({ card, onAdd, onSelect }: CardTileProps) {
-  const actionLabel = card.card_type.toLowerCase() === 'leader' ? 'Set leader' : 'Add card';
+  const actionLabel = isLeaderCardType(card.card_type) ? 'Set leader' : 'Add card';
 
   return (
     <article className="panel card-tile">

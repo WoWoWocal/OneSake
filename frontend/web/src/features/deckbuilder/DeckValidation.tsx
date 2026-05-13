@@ -19,6 +19,11 @@ export function DeckValidation({ validation }: DeckValidationProps) {
             </li>
           ))
         )}
+        {validation.warnings.map((validationWarning) => (
+          <li key={validationWarning} className="is-warning">
+            {validationWarning}
+          </li>
+        ))}
       </ul>
     </section>
   );

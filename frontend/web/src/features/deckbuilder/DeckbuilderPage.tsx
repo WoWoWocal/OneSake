@@ -24,7 +24,12 @@ import {
   touchDeck,
   upsertStoredDeck,
 } from './utils/deckStorage';
-import { validateDeck } from './utils/deckValidation';
+import {
+  cardMatchesLeaderColors,
+  getCardColors,
+  isLeaderCardType,
+  validateDeck,
+} from './utils/deckValidation';
 
 const availableSets = ['OP-01', 'OP-02', 'OP-03', 'ST-01'];
 
@@ -62,6 +67,30 @@ function createDeckCard(card: CardDto, quantity: number): DeckCard {
   };
 }
 
+function areStringArraysEqual(left: string[] | undefined, right: string[] | undefined): boolean {
+  const leftValues = left ?? [];
+  const rightValues = right ?? [];
+
+  return (
+    leftValues.length === rightValues.length &&
+    leftValues.every((value, index) => value === rightValues[index])
+  );
+}
+
+function compareCardsForDeckbuilder(left: CardDto, right: CardDto): number {
+  const leftIsLeader = isLeaderCardType(left.card_type);
+  const rightIsLeader = isLeaderCardType(right.card_type);
+
+  if (leftIsLeader !== rightIsLeader) {
+    return leftIsLeader ? -1 : 1;
+  }
+
+  return (
+    left.card_set_id.localeCompare(right.card_set_id, undefined, { numeric: true }) ||
+    left.card_name.localeCompare(right.card_name, undefined, { numeric: true })
+  );
+}
+
 function needsDeckCardHydration(deckCard: DeckCard): boolean {
   return (
     deckCard.color === undefined &&
@@ -76,12 +105,29 @@ function needsDeckCardHydration(deckCard: DeckCard): boolean {
 }
 
 function hydrateDeckWithCards(deckToHydrate: Deck, loadedCards: CardDto[]): Deck {
-  if (loadedCards.length === 0 || deckToHydrate.cards.length === 0) {
+  if (loadedCards.length === 0) {
     return deckToHydrate;
   }
 
   const loadedCardsById = new Map(loadedCards.map((card) => [card.card_set_id, card]));
   let changed = false;
+  const leaderCard = loadedCardsById.get(deckToHydrate.leaderCardId);
+  let leaderName = deckToHydrate.leaderName;
+  let leaderColors = deckToHydrate.leaderColors;
+
+  if (leaderCard) {
+    const nextLeaderColors = getCardColors(leaderCard.card_color);
+
+    if (
+      deckToHydrate.leaderName !== leaderCard.card_name ||
+      !areStringArraysEqual(deckToHydrate.leaderColors, nextLeaderColors)
+    ) {
+      leaderName = leaderCard.card_name;
+      leaderColors = nextLeaderColors;
+      changed = true;
+    }
+  }
+
   const hydratedCards = deckToHydrate.cards.map((deckCard) => {
     const loadedCard = loadedCardsById.get(deckCard.cardId);
     if (!loadedCard) {
@@ -97,7 +143,7 @@ function hydrateDeckWithCards(deckToHydrate: Deck, loadedCards: CardDto[]): Deck
     return hydratedCard;
   });
 
-  return changed ? { ...deckToHydrate, cards: hydratedCards } : deckToHydrate;
+  return changed ? { ...deckToHydrate, leaderName, leaderColors, cards: hydratedCards } : deckToHydrate;
 }
 
 export function DeckbuilderPage() {
@@ -114,18 +160,20 @@ export function DeckbuilderPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const validation = useMemo(() => validateDeck(deck), [deck]);
+  const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
+  const activeLeaderColors = deck.leaderColors ?? [];
   const isDeckSaved = savedDecks.some(
     (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
   );
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
   const filterOptions = useMemo(
     () => ({
-      colors: uniqueValues(cards, (card) => card.card_color),
-      cardTypes: uniqueValues(cards, (card) => card.card_type),
-      costs: uniqueValues(cards, (card) => String(card.card_cost ?? '')),
-      counters: uniqueValues(cards, (card) => String(card.counter_amount ?? '')),
+      colors: uniqueValues(sortedCards, (card) => card.card_color),
+      cardTypes: uniqueValues(sortedCards, (card) => card.card_type),
+      costs: uniqueValues(sortedCards, (card) => String(card.card_cost ?? '')),
+      counters: uniqueValues(sortedCards, (card) => String(card.counter_amount ?? '')),
     }),
-    [cards],
+    [sortedCards],
   );
 
   useEffect(() => {
@@ -207,12 +255,22 @@ export function DeckbuilderPage() {
   };
 
   const addCardToDeck = (card: CardDto): void => {
-    if (card.card_type.toLowerCase() === 'leader') {
+    if (isLeaderCardType(card.card_type)) {
       updateDeck((currentDeck) => ({
         ...currentDeck,
         leaderCardId: card.card_set_id,
+        leaderName: card.card_name,
+        leaderColors: getCardColors(card.card_color),
       }));
       showDeckNotice(`${card.card_name} set as leader.`);
+      return;
+    }
+
+    if (
+      activeLeaderColors.length > 0 &&
+      !cardMatchesLeaderColors(card.card_color, activeLeaderColors)
+    ) {
+      showDeckNotice(`${card.card_name} does not match the active leader colors.`);
       return;
     }
 
@@ -309,6 +367,8 @@ export function DeckbuilderPage() {
     updateDeck((currentDeck) => ({
       ...currentDeck,
       leaderCardId: '',
+      leaderName: undefined,
+      leaderColors: undefined,
     }));
   };
 
@@ -393,6 +453,8 @@ export function DeckbuilderPage() {
 
           <CardSearch
             activeFilterCount={activeFilterCount}
+            leaderColors={activeLeaderColors}
+            leaderName={deck.leaderName}
             onOpenFilters={() => setFiltersOpen(true)}
           />
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
@@ -400,8 +462,9 @@ export function DeckbuilderPage() {
           {error && <div className="panel status-panel status-panel--error">{error}</div>}
           {!loading && !error && (
             <CardGrid
-              cards={cards}
+              cards={sortedCards}
               filters={filters}
+              leaderColors={activeLeaderColors}
               onAddCard={addCardToDeck}
               onSelectCard={setSelectedCard}
             />

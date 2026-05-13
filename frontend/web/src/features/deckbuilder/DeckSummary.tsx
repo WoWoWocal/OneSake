@@ -1,5 +1,5 @@
 import type { Deck } from '../../types/decks';
-import { getTotalCards } from './utils/deckValidation';
+import { formatCardColors, getTotalCards } from './utils/deckValidation';
 
 interface DeckSummaryProps {
   deck: Deck;
@@ -36,7 +36,11 @@ export function DeckSummary({
       </label>
       <div className="kv-grid">
         <span>Leader</span>
+        <strong>{deck.leaderName || deck.leaderCardId || '-'}</strong>
+        <span>Leader ID</span>
         <strong>{deck.leaderCardId || '-'}</strong>
+        <span>Leader colors</span>
+        <strong>{formatCardColors(deck.leaderColors ?? [])}</strong>
         <span>Main Deck</span>
         <strong>{totalCards}/50</strong>
         <span>Unique</span>
