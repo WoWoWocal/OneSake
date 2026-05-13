@@ -355,7 +355,132 @@ public class MatchRoomTests
         Assert.Equal("MAIN_ACTION", nextPrompt.Kind);
         Assert.Equal("p1", nextPrompt.PlayerId);
         Assert.Contains("PLAY_CARD", nextPrompt.Options);
+        Assert.Contains("ATTACK", nextPrompt.Options);
         Assert.Contains("END_TURN", nextPrompt.Options);
+    }
+
+    [Fact]
+    public void MainActionPrompt_OffersAttackAfterPlayCard()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var update = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "PLAY_CARD"
+        });
+        var activePlayer = update.StateSnapshot.Players.Single(player => player.PlayerId == "p1");
+        var nextPrompt = Assert.Single(update.ChoicePrompts);
+
+        Assert.Equal(1, activePlayer.BoardCount);
+        Assert.Equal("MAIN_ACTION", nextPrompt.Kind);
+        Assert.Contains("ATTACK", nextPrompt.Options);
+    }
+
+    [Fact]
+    public void MainActionAttack_ReducesOpponentLifeAndCreatesNextMainActionPrompt()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+        var playUpdate = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "PLAY_CARD"
+        });
+        var attackPrompt = Assert.Single(playUpdate.ChoicePrompts);
+
+        var attackUpdate = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = attackPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "ATTACK"
+        });
+        var opponent = attackUpdate.StateSnapshot.Players.Single(player => player.PlayerId == "p2");
+        var nextPrompt = Assert.Single(attackUpdate.ChoicePrompts);
+
+        Assert.Equal(MatchPhase.Main, attackUpdate.StateSnapshot.Phase);
+        Assert.Equal(4, opponent.LifeCount);
+        Assert.Contains(attackUpdate.LogEvents, logEvent => logEvent.Type == "ATTACK");
+        Assert.Contains(attackUpdate.LogEvents, logEvent => logEvent.Type == "LIFE_LOST");
+        Assert.Equal("MAIN_ACTION", nextPrompt.Kind);
+        Assert.Equal("p1", nextPrompt.PlayerId);
+        Assert.Contains("ATTACK", nextPrompt.Options);
+    }
+
+    [Fact]
+    public void MainActionAttack_IsNotOfferedWithoutPlayedCards()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        Assert.DoesNotContain("ATTACK", mainActionPrompt.Options);
+        var error = Assert.Throws<InvalidOperationException>(() => room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "ATTACK"
+        }));
+
+        Assert.Equal("Selected option is invalid.", error.Message);
+    }
+
+    [Fact]
+    public void MainActionAttack_FailsForNonActivePlayer()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+        var playUpdate = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "PLAY_CARD"
+        });
+        var attackPrompt = Assert.Single(playUpdate.ChoicePrompts);
+
+        var error = Assert.Throws<InvalidOperationException>(() => room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = attackPrompt.ChoiceId,
+            PlayerId = "p2",
+            SelectedOption = "ATTACK"
+        }));
+
+        Assert.Equal("Choice prompt does not belong to this player.", error.Message);
+    }
+
+    [Fact]
+    public void MainActionAttack_EndsGameWhenOpponentLifeReachesZero()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+        var playUpdate = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "PLAY_CARD"
+        });
+
+        var currentPrompt = Assert.Single(playUpdate.ChoicePrompts);
+        MatchUpdate attackUpdate = playUpdate;
+        for (var attackIndex = 0; attackIndex < 5; attackIndex += 1)
+        {
+            attackUpdate = room.SubmitChoice(new ChoiceSubmissionDto
+            {
+                ChoiceId = currentPrompt.ChoiceId,
+                PlayerId = "p1",
+                SelectedOption = "ATTACK"
+            });
+
+            if (attackIndex < 4)
+            {
+                currentPrompt = Assert.Single(attackUpdate.ChoicePrompts);
+            }
+        }
+
+        var opponent = attackUpdate.StateSnapshot.Players.Single(player => player.PlayerId == "p2");
+        Assert.Equal(MatchPhase.GameOver, attackUpdate.StateSnapshot.Phase);
+        Assert.Equal(0, opponent.LifeCount);
+        Assert.Empty(attackUpdate.ChoicePrompts);
+        Assert.Contains(attackUpdate.LogEvents, logEvent => logEvent.Type == "ATTACK");
+        Assert.Contains(attackUpdate.LogEvents, logEvent => logEvent.Type == "LIFE_LOST");
+        Assert.Contains(attackUpdate.LogEvents, logEvent => logEvent.Type == "GAME_OVER");
     }
 
     [Fact]

@@ -210,6 +210,10 @@ public sealed class MatchRoom
                     PlayCard(player);
                     CreateMainActionPrompt(player);
                 }
+                else if (string.Equals(normalizedOption, "ATTACK", StringComparison.Ordinal))
+                {
+                    ResolveAttack(player);
+                }
                 else if (string.Equals(normalizedOption, "END_TURN", StringComparison.Ordinal))
                 {
                     ResolveEndTurn(player);
@@ -372,11 +376,21 @@ public sealed class MatchRoom
 
     private void CreateMainActionPrompt(PlayerSlot player)
     {
+        if (_phase == MatchPhase.GameOver)
+        {
+            return;
+        }
+
         var options = new List<string>();
 
         if (player.Hand.Count > 0)
         {
             options.Add("PLAY_CARD");
+        }
+
+        if (player.PlayedCards.Count > 0)
+        {
+            options.Add("ATTACK");
         }
 
         options.Add("END_TURN");
@@ -390,6 +404,11 @@ public sealed class MatchRoom
 
     private void PlayCard(PlayerSlot player)
     {
+        if (_phase == MatchPhase.GameOver)
+        {
+            throw new InvalidOperationException("The game is already over.");
+        }
+
         if (_phase != MatchPhase.Main)
         {
             throw new InvalidOperationException("Play card is only available in the main phase.");
@@ -413,8 +432,51 @@ public sealed class MatchRoom
         CreateLogEvent("PLAY_CARD", $"{player.DisplayName} played a card.");
     }
 
+    private void ResolveAttack(PlayerSlot attacker)
+    {
+        if (_phase == MatchPhase.GameOver)
+        {
+            throw new InvalidOperationException("The game is already over.");
+        }
+
+        if (_phase != MatchPhase.Main)
+        {
+            throw new InvalidOperationException("Attack is only available in the main phase.");
+        }
+
+        if (!string.Equals(attacker.PlayerId, _activePlayerId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Only the active player can attack.");
+        }
+
+        if (attacker.PlayedCards.Count == 0)
+        {
+            throw new InvalidOperationException("Player has no cards on board to attack with.");
+        }
+
+        var opponent = GetPlayerSlot(GetOtherPlayerId(attacker.PlayerId));
+        opponent.LifeCount = Math.Max(0, opponent.LifeCount - 1);
+
+        CreateLogEvent("ATTACK", $"{attacker.DisplayName} attacked {opponent.DisplayName}.");
+        CreateLogEvent("LIFE_LOST", $"{opponent.DisplayName} lost 1 life.");
+
+        if (opponent.LifeCount <= 0)
+        {
+            _phase = MatchPhase.GameOver;
+            CreateLogEvent("GAME_OVER", $"{attacker.DisplayName} wins.");
+            return;
+        }
+
+        CreateMainActionPrompt(attacker);
+    }
+
     private void ResolveEndTurn(PlayerSlot player)
     {
+        if (_phase == MatchPhase.GameOver)
+        {
+            throw new InvalidOperationException("The game is already over.");
+        }
+
         if (_phase != MatchPhase.Main)
         {
             throw new InvalidOperationException("End turn is only available in the main phase.");
