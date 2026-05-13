@@ -8,6 +8,7 @@ import { CardFilterSheet, type CardFilters } from './CardFilterSheet';
 import { CardGrid } from './CardGrid';
 import { CardInspectModal } from './CardInspectModal';
 import { CardSearch } from './CardSearch';
+import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
 import { DeckDrawer } from './DeckDrawer';
 import { DeckExport } from './DeckExport';
@@ -33,6 +34,16 @@ import {
 } from './utils/deckValidation';
 
 const availableSets = ['OP-01', 'OP-02', 'OP-03', 'ST-01'];
+const cardsPerRowStorageKey = 'onesake.deckbuilder.cardsPerRow';
+const defaultCardsPerRow = 3;
+
+function clampCardsPerRow(value: number): number {
+  if (!Number.isFinite(value)) {
+    return defaultCardsPerRow;
+  }
+
+  return Math.min(10, Math.max(1, Math.round(value)));
+}
 
 const emptyFilters: CardFilters = {
   searchText: '',
@@ -50,6 +61,23 @@ function uniqueValues(cards: CardDto[], readValue: (card: CardDto) => string): s
 
 function optionalCardText(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function loadCardsPerRow(): number {
+  try {
+    const storedValue = window.localStorage.getItem(cardsPerRowStorageKey);
+    return storedValue ? clampCardsPerRow(Number(storedValue)) : defaultCardsPerRow;
+  } catch {
+    return defaultCardsPerRow;
+  }
+}
+
+function saveCardsPerRow(cardsPerRow: number): void {
+  try {
+    window.localStorage.setItem(cardsPerRowStorageKey, String(clampCardsPerRow(cardsPerRow)));
+  } catch {
+    // The grid size preference is optional; deckbuilding should work without storage.
+  }
 }
 
 function createDeckCard(card: CardDto, quantity: number): DeckCard {
@@ -159,6 +187,7 @@ export function DeckbuilderPage() {
   const [deckNotice, setDeckNotice] = useState('');
   const [deckOpen, setDeckOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
 
   const validation = useMemo(() => validateDeck(deck), [deck]);
   const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
@@ -184,6 +213,10 @@ export function DeckbuilderPage() {
   useEffect(() => {
     saveStoredDeck(deck);
   }, [deck]);
+
+  useEffect(() => {
+    saveCardsPerRow(cardsPerRow);
+  }, [cardsPerRow]);
 
   useEffect(() => {
     if (cards.length === 0) {
@@ -470,6 +503,7 @@ export function DeckbuilderPage() {
               }))}
               selectedColors={filters.selectedColors}
             />
+            <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
           </div>
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
           {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}
@@ -477,6 +511,7 @@ export function DeckbuilderPage() {
           {!loading && !error && (
             <CardGrid
               cards={sortedCards}
+              cardsPerRow={cardsPerRow}
               filters={filters}
               leaderColors={activeLeaderColors}
               onAddCard={addCardToDeck}
