@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: onesake-postgres
+    environment:
+      POSTGRES_DB: onesake
+      POSTGRES_USER: onesake
+      POSTGRES_PASSWORD: onesake
+    ports:
+      - "5432:5432"
+    volumes:
+      - onesake_pgdata:/var/lib/postgresql/data
+
+volumes:
+  onesake_pgdata:

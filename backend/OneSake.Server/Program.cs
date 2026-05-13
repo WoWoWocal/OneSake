@@ -2,8 +2,12 @@ using System.Text.Json.Serialization;
 using OneSake.Server.Hubs;
 using OneSake.Server.Match;
 using OneSake.Server.Services;
+using Microsoft.EntityFrameworkCore;
+using OneSake.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<OneSakeDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // =========================
 // SERVICE CONFIGURATION

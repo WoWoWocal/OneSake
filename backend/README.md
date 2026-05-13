@@ -6,22 +6,13 @@ The backend uses PostgreSQL with Entity Framework Core.
 
 ### Start PostgreSQL locally
 
-Run this command from the root folder of the project:
+Run this command from the project root folder:
 
 ```bash
 docker compose up -d
 ```
 
-The root folder is the folder that contains the `docker-compose.yml` file.
-
-Example:
-
-```text
-OneSake/
-├── backend/
-├── frontend/
-├── docker-compose.yml
-```
+The project root folder is the folder that contains the `docker-compose.yml` file.
 
 ### Connection string
 
@@ -47,18 +38,6 @@ Run this command from the `backend` folder:
 
 ```bash
 dotnet ef database update --project OneSake.Persistence --startup-project OneSake.Server
-```
-
-The `backend` folder is this folder:
-
-```text
-OneSake/backend
-```
-
-Example path on Windows:
-
-```text
-C:\Users\Tino\schule\OneSake\backend
 ```
 
 ### Current schema
