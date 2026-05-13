@@ -3,8 +3,11 @@ import type { MatchPhase } from '../../types/realtime';
 const PHASE_LABELS: Record<number, string> = {
   0: 'Lobby',
   1: 'Mulligan',
-  2: 'Main',
-  3: 'GameOver',
+  2: 'Refresh',
+  3: 'Draw',
+  4: 'Main',
+  5: 'End',
+  6: 'GameOver',
 };
 
 export function formatPhase(phase: MatchPhase): string {

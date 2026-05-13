@@ -187,13 +187,8 @@ public sealed class MatchRoom
 
                 if (_mulliganPlayerDecisions.Count == _players.Count)
                 {
-                    _phase = MatchPhase.Main;
                     CreateLogEvent("MULLIGAN_RESOLVED", "Both players finalized mulligan.");
-                    CreateChoicePrompt(
-                        _activePlayerId,
-                        "END_TURN",
-                        "End your turn?",
-                        ["END_TURN"]);
+                    BeginTurn(GetPlayerSlot(_activePlayerId));
                 }
             }
             else if (string.Equals(prompt.Kind, "END_TURN", StringComparison.Ordinal))
@@ -213,18 +208,15 @@ public sealed class MatchRoom
                     throw new InvalidOperationException("Only the active player can end the turn.");
                 }
 
-                var previousActivePlayerId = _activePlayerId;
+                var currentPlayer = GetPlayerSlot(_activePlayerId);
+                EnterEndPhase(currentPlayer);
+
+                var previousActivePlayerId = currentPlayer.PlayerId;
                 CreateLogEvent("TURN_END", $"Player {previousActivePlayerId} ended turn {_turnNumber}.");
 
                 _turnNumber += 1;
                 _activePlayerId = GetOtherPlayerId(previousActivePlayerId);
-
-                CreateLogEvent("TURN_START", $"Turn {_turnNumber} started for player {_activePlayerId}.");
-                CreateChoicePrompt(
-                    _activePlayerId,
-                    "END_TURN",
-                    "End your turn?",
-                    ["END_TURN"]);
+                BeginTurn(GetPlayerSlot(_activePlayerId));
             }
             else
             {
@@ -339,6 +331,51 @@ public sealed class MatchRoom
     {
         return _players.FirstOrDefault(player => player.PlayerId == playerId)
             ?? throw new InvalidOperationException("Player is not in this room.");
+    }
+
+    private void BeginTurn(PlayerSlot player)
+    {
+        _activePlayerId = player.PlayerId;
+        EnterRefreshPhase(player);
+        EnterDrawPhase(player);
+        EnterMainPhase(player);
+    }
+
+    private void EnterRefreshPhase(PlayerSlot player)
+    {
+        _phase = MatchPhase.Refresh;
+        CreateLogEvent("REFRESH_PHASE", $"Refresh phase for {player.DisplayName}.");
+    }
+
+    private void EnterDrawPhase(PlayerSlot player)
+    {
+        _phase = MatchPhase.Draw;
+
+        if (player.DrawDeck.Count > 0)
+        {
+            DrawCards(player, 1);
+            CreateLogEvent("DRAW_CARD", $"{player.DisplayName} drew 1 card.");
+            return;
+        }
+
+        CreateLogEvent("DECK_EMPTY", $"{player.DisplayName} cannot draw because their deck is empty.");
+    }
+
+    private void EnterMainPhase(PlayerSlot player)
+    {
+        _phase = MatchPhase.Main;
+        CreateLogEvent("MAIN_PHASE", $"Main phase for {player.DisplayName}.");
+        CreateChoicePrompt(
+            player.PlayerId,
+            "END_TURN",
+            "End your turn?",
+            ["END_TURN"]);
+    }
+
+    private void EnterEndPhase(PlayerSlot player)
+    {
+        _phase = MatchPhase.End;
+        CreateLogEvent("END_PHASE", $"End phase for {player.DisplayName}.");
     }
 
     private static void ResolveMulligan(PlayerSlot player)

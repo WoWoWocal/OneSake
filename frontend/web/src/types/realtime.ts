@@ -1,4 +1,12 @@
-export type MatchPhase = 'Lobby' | 'Mulligan' | 'Main' | 'GameOver' | number;
+export type MatchPhase =
+  | 'Lobby'
+  | 'Mulligan'
+  | 'Refresh'
+  | 'Draw'
+  | 'Main'
+  | 'End'
+  | 'GameOver'
+  | number;
 
 export interface PlayerStateDto {
   playerId: string;

@@ -4,7 +4,10 @@ public enum MatchPhase
 {
     Lobby,
     Mulligan,
+    Refresh,
+    Draw,
     Main,
+    End,
     GameOver
 }
 
