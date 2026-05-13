@@ -40,16 +40,16 @@ namespace OneSake.Server.Services
         public string? Life { get; set; }
 
         [JsonPropertyName("card_cost")]
-        public int? CardCost { get; set; }
+        public string? CardCost { get; set; }
 
         [JsonPropertyName("card_power")]
-        public int? CardPower { get; set; }
+        public string? CardPower { get; set; }
 
         [JsonPropertyName("sub_types")]
         public string SubTypes { get; set; } = "";
 
         [JsonPropertyName("counter_amount")]
-        public int? CounterAmount { get; set; }
+        public string? CounterAmount { get; set; }
 
         [JsonPropertyName("attribute")]
         public string Attribute { get; set; } = "";
