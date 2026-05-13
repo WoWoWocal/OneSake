@@ -7,6 +7,23 @@ export interface PlayerStateDto {
   deckCount: number;
   handCount: number;
   lifeCount: number;
+  deckName: string;
+  leaderCardId: string;
+  mainDeckCount: number;
+  hasDeck: boolean;
+}
+
+export interface PlayerDeckCardDto {
+  cardId: string;
+  name: string;
+  quantity: number;
+}
+
+export interface PlayerDeckSubmissionDto {
+  deckId: string;
+  deckName: string;
+  leaderCardId: string;
+  cards: PlayerDeckCardDto[];
 }
 
 export interface GameStateDto {

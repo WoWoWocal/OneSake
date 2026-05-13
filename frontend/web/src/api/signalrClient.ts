@@ -9,6 +9,7 @@ import {
   ChoicePromptDto,
   GameStateDto,
   LogEventDto,
+  PlayerDeckSubmissionDto,
 } from '../types/realtime';
 
 type StateSnapshotHandler = (snapshot: GameStateDto) => void;
@@ -131,6 +132,11 @@ export class SignalRClient {
   async startMatch(roomCode: string): Promise<void> {
     await this.connect();
     await this.connection!.invoke('StartMatch', roomCode);
+  }
+
+  async setPlayerDeck(roomCode: string, deck: PlayerDeckSubmissionDto): Promise<void> {
+    await this.connect();
+    await this.connection!.invoke('SetPlayerDeck', roomCode, deck);
   }
 
   async submitChoice(roomCode: string, submission: ChoiceSubmissionDto): Promise<void> {

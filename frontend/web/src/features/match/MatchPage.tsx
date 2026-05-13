@@ -15,6 +15,7 @@ import { ChoiceSheet } from './ChoiceSheet';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 import { LobbyPanel } from './LobbyPanel';
 import { LogPanel } from './LogPanel';
+import { toPlayerDeckSubmission } from './matchDeckMapper';
 import { MatchDeckSelect } from './MatchDeckSelect';
 import { MatchStatePanel } from './MatchStatePanel';
 
@@ -144,6 +145,13 @@ export function MatchPage() {
       await signalRClient.current.joinRoom(normalizedRoomCode, normalizedDisplayName);
       setJoinedRoomCode(normalizedRoomCode);
       setRoomCodeInput(normalizedRoomCode);
+
+      if (selectedDeck && selectedDeckValidation?.isValid) {
+        await signalRClient.current.setPlayerDeck(
+          normalizedRoomCode,
+          toPlayerDeckSubmission(selectedDeck),
+        );
+      }
     } catch (joinError) {
       const message = joinError instanceof Error ? joinError.message : 'Join fehlgeschlagen.';
       setError(message);

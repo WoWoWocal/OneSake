@@ -113,6 +113,16 @@ function MatchPlayerArea({
         </div>
       </div>
 
+      <div className={player?.hasDeck ? 'player-deck-pill is-ready' : 'player-deck-pill'}>
+        <span>{player?.hasDeck ? 'Deck ready' : 'No deck selected'}</span>
+        {player?.hasDeck && (
+          <strong>
+            {player.deckName || 'Unnamed Deck'} / {player.leaderCardId || 'No leader'} /{' '}
+            {player.mainDeckCount}/50
+          </strong>
+        )}
+      </div>
+
       <div className="board-zone-grid">
         <div className="side-zones">
           <div className="leader-stage-row">

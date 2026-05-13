@@ -11,6 +11,8 @@ public class MatchRoomTests
         var room = new MatchRoom("ABCD");
         room.JoinPlayer("p1", "Alice");
         room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
 
         var update = room.StartMatch();
 
@@ -39,6 +41,8 @@ public class MatchRoomTests
         var room = new MatchRoom("ABCD");
         room.JoinPlayer("p1", "Alice");
         room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
 
         var startUpdate = room.StartMatch();
         var p1MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p1");
@@ -82,5 +86,73 @@ public class MatchRoomTests
         var nextEndTurnPrompt = Assert.Single(endTurnUpdate.ChoicePrompts);
         Assert.Equal("p2", nextEndTurnPrompt.PlayerId);
         Assert.Equal("END_TURN", nextEndTurnPrompt.Kind);
+    }
+
+    [Fact]
+    public void StartMatch_FailsWhenPlayersHaveNoDecks()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+
+        var error = Assert.Throws<InvalidOperationException>(() => room.StartMatch());
+
+        Assert.Equal("Both players must select a deck before starting.", error.Message);
+    }
+
+    [Fact]
+    public void SetPlayerDeck_StoresDeckDataInStateSnapshot()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+
+        var update = room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        var player = Assert.Single(update.StateSnapshot.Players);
+
+        Assert.True(player.HasDeck);
+        Assert.Equal("Alice Deck", player.DeckName);
+        Assert.Equal("OP01-001", player.LeaderCardId);
+        Assert.Equal(50, player.MainDeckCount);
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "DECK_SELECTED");
+    }
+
+    [Fact]
+    public void StartMatch_WorksWhenBothPlayersHaveDecks()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
+
+        var update = room.StartMatch();
+
+        Assert.Equal(MatchPhase.Mulligan, update.StateSnapshot.Phase);
+        Assert.All(update.StateSnapshot.Players, player => Assert.True(player.HasDeck));
+    }
+
+    private static PlayerDeckSubmissionDto CreateDeck(string deckId, string deckName)
+    {
+        return new PlayerDeckSubmissionDto
+        {
+            DeckId = deckId,
+            DeckName = deckName,
+            LeaderCardId = "OP01-001",
+            Cards =
+            [
+                new PlayerDeckCardDto
+                {
+                    CardId = "OP01-016",
+                    Name = "Main Card A",
+                    Quantity = 4
+                },
+                new PlayerDeckCardDto
+                {
+                    CardId = "OP01-025",
+                    Name = "Main Card B",
+                    Quantity = 46
+                }
+            ]
+        };
     }
 }

@@ -16,6 +16,25 @@ public record PlayerStateDto
     public int DeckCount { get; init; }
     public int HandCount { get; init; }
     public int LifeCount { get; init; }
+    public string DeckName { get; init; } = string.Empty;
+    public string LeaderCardId { get; init; } = string.Empty;
+    public int MainDeckCount { get; init; }
+    public bool HasDeck { get; init; }
+}
+
+public record PlayerDeckCardDto
+{
+    public string CardId { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public int Quantity { get; init; }
+}
+
+public record PlayerDeckSubmissionDto
+{
+    public string DeckId { get; init; } = string.Empty;
+    public string DeckName { get; init; } = string.Empty;
+    public string LeaderCardId { get; init; } = string.Empty;
+    public IReadOnlyList<PlayerDeckCardDto> Cards { get; init; } = [];
 }
 
 public record GameStateDto

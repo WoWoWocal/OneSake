@@ -65,6 +65,11 @@ public sealed class MatchRoom
                 throw new InvalidOperationException("StartMatch requires exactly 2 players.");
             }
 
+            if (_players.Any(player => !player.HasDeck))
+            {
+                throw new InvalidOperationException("Both players must select a deck before starting.");
+            }
+
             _turnNumber = 1;
             _phase = MatchPhase.Mulligan;
             _activePlayerId = _players[0].PlayerId;
@@ -92,6 +97,48 @@ public sealed class MatchRoom
                     ["KEEP", "MULLIGAN"]);
             }
 
+            return CreateUpdate();
+        }
+    }
+
+    public MatchUpdate SetPlayerDeck(string connectionId, PlayerDeckSubmissionDto deck)
+    {
+        lock (_sync)
+        {
+            var player = _players.FirstOrDefault(entry => entry.PlayerId == connectionId);
+            if (player is null)
+            {
+                throw new InvalidOperationException("Player is not in this room.");
+            }
+
+            var normalizedCards = deck.Cards
+                .Where(card => !string.IsNullOrWhiteSpace(card.CardId) && card.Quantity > 0)
+                .GroupBy(card => card.CardId.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(group =>
+                {
+                    var firstCard = group.First();
+                    return new PlayerDeckCardDto
+                    {
+                        CardId = group.Key,
+                        Name = string.IsNullOrWhiteSpace(firstCard.Name)
+                            ? group.Key
+                            : firstCard.Name.Trim(),
+                        Quantity = group.Sum(card => card.Quantity)
+                    };
+                })
+                .OrderBy(card => card.CardId, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            player.DeckId = deck.DeckId.Trim();
+            player.DeckName = string.IsNullOrWhiteSpace(deck.DeckName)
+                ? "Unnamed Deck"
+                : deck.DeckName.Trim();
+            player.LeaderCardId = deck.LeaderCardId.Trim();
+            player.DeckCards = normalizedCards;
+            player.MainDeckCount = normalizedCards.Sum(card => card.Quantity);
+            player.HasDeck = !string.IsNullOrWhiteSpace(player.LeaderCardId) && player.MainDeckCount > 0;
+
+            CreateLogEvent("DECK_SELECTED", $"{player.DisplayName} selected deck {player.DeckName}.");
             return CreateUpdate();
         }
     }
@@ -213,7 +260,11 @@ public sealed class MatchRoom
                         Connected = player.Connected,
                         DeckCount = player.DeckCount,
                         HandCount = player.HandCount,
-                        LifeCount = player.LifeCount
+                        LifeCount = player.LifeCount,
+                        DeckName = player.DeckName,
+                        LeaderCardId = player.LeaderCardId,
+                        MainDeckCount = player.MainDeckCount,
+                        HasDeck = player.HasDeck
                     })
                     .ToArray()
             };
@@ -278,6 +329,12 @@ public sealed class MatchRoom
         public int DeckCount { get; set; }
         public int HandCount { get; set; }
         public int LifeCount { get; set; }
+        public string DeckId { get; set; } = string.Empty;
+        public string DeckName { get; set; } = string.Empty;
+        public string LeaderCardId { get; set; } = string.Empty;
+        public int MainDeckCount { get; set; }
+        public bool HasDeck { get; set; }
+        public List<PlayerDeckCardDto> DeckCards { get; set; } = [];
     }
 }
 

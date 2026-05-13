@@ -614,6 +614,34 @@ label {
   background: rgba(31, 196, 159, 0.12);
 }
 
+.player-deck-pill {
+  display: grid;
+  gap: 2px;
+  border: 1px solid rgba(234, 111, 99, 0.34);
+  border-radius: 10px;
+  padding: 8px 10px;
+  color: #ffd1cc;
+  background: rgba(234, 111, 99, 0.1);
+}
+
+.player-deck-pill.is-ready {
+  border-color: rgba(31, 196, 159, 0.42);
+  color: #b9f3df;
+  background: rgba(31, 196, 159, 0.11);
+}
+
+.player-deck-pill span {
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.player-deck-pill strong {
+  color: inherit;
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+
 .board-zone-grid,
 .side-zones,
 .resource-zones {
