@@ -37,8 +37,7 @@ namespace OneSake.Server.Services
         public string Type { get; set; } = "";
 
         [JsonPropertyName("life")]
-        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-        public int? Life { get; set; }
+        public string? Life { get; set; }
 
         [JsonPropertyName("card_cost")]
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
