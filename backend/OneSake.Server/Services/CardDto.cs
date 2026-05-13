@@ -44,8 +44,7 @@ namespace OneSake.Server.Services
         public int? CardCost { get; set; }
 
         [JsonPropertyName("card_power")]
-        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-        public int? CardPower { get; set; }
+        public string? CardPower { get; set; }
 
         [JsonPropertyName("sub_types")]
         public string SubTypes { get; set; } = "";
