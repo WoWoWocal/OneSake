@@ -24,7 +24,7 @@ public class MatchRoomTests
 
         foreach (var player in update.StateSnapshot.Players)
         {
-            Assert.Equal(50, player.DeckCount);
+            Assert.Equal(45, player.DeckCount);
             Assert.Equal(5, player.HandCount);
             Assert.Equal(5, player.LifeCount);
         }
@@ -32,6 +32,7 @@ public class MatchRoomTests
         Assert.Equal(2, update.ChoicePrompts.Count);
         Assert.All(update.ChoicePrompts, prompt => Assert.Equal("MULLIGAN_DECISION", prompt.Kind));
         Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "START_MATCH");
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "SHUFFLE_DECKS");
         Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "DRAW_OPENING_HAND");
     }
 
@@ -129,6 +130,26 @@ public class MatchRoomTests
 
         Assert.Equal(MatchPhase.Mulligan, update.StateSnapshot.Phase);
         Assert.All(update.StateSnapshot.Players, player => Assert.True(player.HasDeck));
+    }
+
+    [Fact]
+    public void StartMatch_UsesRegisteredDeckCardsForDeckAndHandCounts()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
+
+        var update = room.StartMatch();
+
+        Assert.All(update.StateSnapshot.Players, player =>
+        {
+            Assert.Equal(45, player.DeckCount);
+            Assert.Equal(5, player.HandCount);
+            Assert.Equal(5, player.LifeCount);
+            Assert.Equal(50, player.MainDeckCount);
+        });
     }
 
     private static PlayerDeckSubmissionDto CreateDeck(string deckId, string deckName)

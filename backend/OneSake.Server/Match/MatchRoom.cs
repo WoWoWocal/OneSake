@@ -79,13 +79,16 @@ public sealed class MatchRoom
 
             foreach (var player in _players)
             {
-                player.DeckCount = 50;
-                player.HandCount = 5;
+                player.DrawDeck = BuildMatchDeck(player);
+                Shuffle(player.DrawDeck);
+                player.Hand.Clear();
+                DrawCards(player, 5);
                 player.LifeCount = 5;
                 player.Connected = true;
             }
 
             CreateLogEvent("START_MATCH", "Match started.");
+            CreateLogEvent("SHUFFLE_DECKS", "Both players shuffled their decks.");
             CreateLogEvent("DRAW_OPENING_HAND", "Both players drew their opening hand.");
 
             foreach (var player in _players)
@@ -321,6 +324,49 @@ public sealed class MatchRoom
         return otherPlayer.PlayerId;
     }
 
+    private static List<MatchCard> BuildMatchDeck(PlayerSlot player)
+    {
+        return player.DeckCards
+            .Where(card => card.Quantity > 0 && !string.IsNullOrWhiteSpace(card.CardId))
+            .SelectMany(card =>
+                Enumerable.Range(0, card.Quantity).Select(_ => new MatchCard
+                {
+                    CardId = card.CardId,
+                    Name = string.IsNullOrWhiteSpace(card.Name) ? card.CardId : card.Name
+                }))
+            .ToList();
+    }
+
+    private static void Shuffle(IList<MatchCard> cards)
+    {
+        for (var index = cards.Count - 1; index > 0; index -= 1)
+        {
+            var swapIndex = Random.Shared.Next(index + 1);
+            (cards[index], cards[swapIndex]) = (cards[swapIndex], cards[index]);
+        }
+    }
+
+    private static void DrawCards(PlayerSlot player, int amount)
+    {
+        var cardsToDraw = Math.Min(Math.Max(0, amount), player.DrawDeck.Count);
+
+        for (var index = 0; index < cardsToDraw; index += 1)
+        {
+            var drawnCard = player.DrawDeck[0];
+            player.DrawDeck.RemoveAt(0);
+            player.Hand.Add(drawnCard);
+        }
+
+        player.DeckCount = player.DrawDeck.Count;
+        player.HandCount = player.Hand.Count;
+    }
+
+    private sealed record MatchCard
+    {
+        public string CardId { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+    }
+
     private sealed class PlayerSlot
     {
         public string PlayerId { get; init; } = string.Empty;
@@ -335,6 +381,8 @@ public sealed class MatchRoom
         public int MainDeckCount { get; set; }
         public bool HasDeck { get; set; }
         public List<PlayerDeckCardDto> DeckCards { get; set; } = [];
+        public List<MatchCard> DrawDeck { get; set; } = [];
+        public List<MatchCard> Hand { get; set; } = [];
     }
 }
 
