@@ -108,11 +108,7 @@ public sealed class MatchRoom
     {
         lock (_sync)
         {
-            var player = _players.FirstOrDefault(entry => entry.PlayerId == connectionId);
-            if (player is null)
-            {
-                throw new InvalidOperationException("Player is not in this room.");
-            }
+            var player = GetPlayerSlot(connectionId);
 
             var normalizedCards = deck.Cards
                 .Where(card => !string.IsNullOrWhiteSpace(card.CardId) && card.Quantity > 0)
@@ -172,6 +168,21 @@ public sealed class MatchRoom
 
             if (string.Equals(prompt.Kind, "MULLIGAN_DECISION", StringComparison.Ordinal))
             {
+                var player = GetPlayerSlot(submission.PlayerId);
+                if (string.Equals(normalizedOption, "KEEP", StringComparison.Ordinal))
+                {
+                    CreateLogEvent("MULLIGAN_KEEP", $"{player.DisplayName} kept their opening hand.");
+                }
+                else if (string.Equals(normalizedOption, "MULLIGAN", StringComparison.Ordinal))
+                {
+                    ResolveMulligan(player);
+                    CreateLogEvent("MULLIGAN_TAKEN", $"{player.DisplayName} took a mulligan.");
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unsupported option for MULLIGAN_DECISION.");
+                }
+
                 _mulliganPlayerDecisions.Add(submission.PlayerId);
 
                 if (_mulliganPlayerDecisions.Count == _players.Count)
@@ -322,6 +333,20 @@ public sealed class MatchRoom
         }
 
         return otherPlayer.PlayerId;
+    }
+
+    private PlayerSlot GetPlayerSlot(string playerId)
+    {
+        return _players.FirstOrDefault(player => player.PlayerId == playerId)
+            ?? throw new InvalidOperationException("Player is not in this room.");
+    }
+
+    private static void ResolveMulligan(PlayerSlot player)
+    {
+        player.DrawDeck.AddRange(player.Hand);
+        player.Hand.Clear();
+        Shuffle(player.DrawDeck);
+        DrawCards(player, 5);
     }
 
     private static List<MatchCard> BuildMatchDeck(PlayerSlot player)

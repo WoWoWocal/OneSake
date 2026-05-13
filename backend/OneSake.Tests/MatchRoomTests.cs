@@ -58,6 +58,7 @@ public class MatchRoomTests
 
         Assert.Equal(MatchPhase.Mulligan, firstMulligan.StateSnapshot.Phase);
         Assert.Empty(firstMulligan.ChoicePrompts);
+        Assert.Contains(firstMulligan.LogEvents, logEvent => logEvent.Type == "MULLIGAN_KEEP");
 
         var secondMulligan = room.SubmitChoice(new ChoiceSubmissionDto
         {
@@ -67,6 +68,7 @@ public class MatchRoomTests
         });
 
         Assert.Equal(MatchPhase.Main, secondMulligan.StateSnapshot.Phase);
+        Assert.Contains(secondMulligan.LogEvents, logEvent => logEvent.Type == "MULLIGAN_TAKEN");
         Assert.Contains(secondMulligan.LogEvents, logEvent => logEvent.Type == "MULLIGAN_RESOLVED");
         var endTurnPrompt = Assert.Single(secondMulligan.ChoicePrompts);
         Assert.Equal("END_TURN", endTurnPrompt.Kind);
@@ -150,6 +152,93 @@ public class MatchRoomTests
             Assert.Equal(5, player.LifeCount);
             Assert.Equal(50, player.MainDeckCount);
         });
+    }
+
+    [Fact]
+    public void MulliganKeep_DoesNotChangeDeckOrHandCounts()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
+        var startUpdate = room.StartMatch();
+        var p1MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p1");
+
+        var update = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = p1MulliganPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "KEEP"
+        });
+        var player = update.StateSnapshot.Players.Single(entry => entry.PlayerId == "p1");
+
+        Assert.Equal(45, player.DeckCount);
+        Assert.Equal(5, player.HandCount);
+        Assert.Equal(MatchPhase.Mulligan, update.StateSnapshot.Phase);
+        Assert.Empty(update.ChoicePrompts);
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "MULLIGAN_KEEP");
+    }
+
+    [Fact]
+    public void MulliganTaken_RedrawsOpeningHandAndKeepsCountsCorrect()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
+        var startUpdate = room.StartMatch();
+        var p1MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p1");
+
+        var update = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = p1MulliganPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "MULLIGAN"
+        });
+        var player = update.StateSnapshot.Players.Single(entry => entry.PlayerId == "p1");
+
+        Assert.Equal(45, player.DeckCount);
+        Assert.Equal(5, player.HandCount);
+        Assert.Equal(MatchPhase.Mulligan, update.StateSnapshot.Phase);
+        Assert.Empty(update.ChoicePrompts);
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "MULLIGAN_TAKEN");
+    }
+
+    [Fact]
+    public void MulliganDecision_ResolvesOnlyAfterBothPlayersDecide()
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
+        var startUpdate = room.StartMatch();
+        var p1MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p1");
+        var p2MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p2");
+
+        var firstDecision = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = p1MulliganPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "KEEP"
+        });
+
+        Assert.Equal(MatchPhase.Mulligan, firstDecision.StateSnapshot.Phase);
+        Assert.Empty(firstDecision.ChoicePrompts);
+
+        var secondDecision = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = p2MulliganPrompt.ChoiceId,
+            PlayerId = "p2",
+            SelectedOption = "KEEP"
+        });
+
+        Assert.Equal(MatchPhase.Main, secondDecision.StateSnapshot.Phase);
+        var endTurnPrompt = Assert.Single(secondDecision.ChoicePrompts);
+        Assert.Equal("END_TURN", endTurnPrompt.Kind);
+        Assert.Contains(secondDecision.LogEvents, logEvent => logEvent.Type == "MULLIGAN_RESOLVED");
     }
 
     private static PlayerDeckSubmissionDto CreateDeck(string deckId, string deckName)
