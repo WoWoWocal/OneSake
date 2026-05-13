@@ -15,6 +15,7 @@ export interface PlayerStateDto {
   deckCount: number;
   handCount: number;
   lifeCount: number;
+  boardCount: number;
   deckName: string;
   leaderCardId: string;
   mainDeckCount: number;

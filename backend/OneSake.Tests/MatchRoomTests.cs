@@ -27,6 +27,7 @@ public class MatchRoomTests
             Assert.Equal(45, player.DeckCount);
             Assert.Equal(5, player.HandCount);
             Assert.Equal(5, player.LifeCount);
+            Assert.Equal(0, player.BoardCount);
         }
 
         Assert.Equal(2, update.ChoicePrompts.Count);
@@ -80,8 +81,10 @@ public class MatchRoomTests
         Assert.Equal(45, otherPlayerAfterMulligan.DeckCount);
         Assert.Equal(5, otherPlayerAfterMulligan.HandCount);
         var endTurnPrompt = Assert.Single(secondMulligan.ChoicePrompts);
-        Assert.Equal("END_TURN", endTurnPrompt.Kind);
+        Assert.Equal("MAIN_ACTION", endTurnPrompt.Kind);
         Assert.Equal("p1", endTurnPrompt.PlayerId);
+        Assert.Contains("PLAY_CARD", endTurnPrompt.Options);
+        Assert.Contains("END_TURN", endTurnPrompt.Options);
 
         var endTurnUpdate = room.SubmitChoice(new ChoiceSubmissionDto
         {
@@ -104,7 +107,9 @@ public class MatchRoomTests
         Assert.Equal(6, newActivePlayer.HandCount);
         var nextEndTurnPrompt = Assert.Single(endTurnUpdate.ChoicePrompts);
         Assert.Equal("p2", nextEndTurnPrompt.PlayerId);
-        Assert.Equal("END_TURN", nextEndTurnPrompt.Kind);
+        Assert.Equal("MAIN_ACTION", nextEndTurnPrompt.Kind);
+        Assert.Contains("PLAY_CARD", nextEndTurnPrompt.Options);
+        Assert.Contains("END_TURN", nextEndTurnPrompt.Options);
     }
 
     [Fact]
@@ -166,6 +171,7 @@ public class MatchRoomTests
             Assert.Equal(45, player.DeckCount);
             Assert.Equal(5, player.HandCount);
             Assert.Equal(5, player.LifeCount);
+            Assert.Equal(0, player.BoardCount);
             Assert.Equal(50, player.MainDeckCount);
         });
     }
@@ -253,8 +259,10 @@ public class MatchRoomTests
 
         Assert.Equal(MatchPhase.Main, secondDecision.StateSnapshot.Phase);
         var endTurnPrompt = Assert.Single(secondDecision.ChoicePrompts);
-        Assert.Equal("END_TURN", endTurnPrompt.Kind);
+        Assert.Equal("MAIN_ACTION", endTurnPrompt.Kind);
         Assert.Equal("p1", endTurnPrompt.PlayerId);
+        Assert.Contains("PLAY_CARD", endTurnPrompt.Options);
+        Assert.Contains("END_TURN", endTurnPrompt.Options);
         Assert.Contains(secondDecision.LogEvents, logEvent => logEvent.Type == "MULLIGAN_RESOLVED");
         Assert.Contains(secondDecision.LogEvents, logEvent => logEvent.Type == "REFRESH_PHASE");
         Assert.Contains(secondDecision.LogEvents, logEvent => logEvent.Type == "DRAW_CARD");
@@ -302,7 +310,126 @@ public class MatchRoomTests
         Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "DECK_EMPTY");
         Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "MAIN_PHASE");
         Assert.Equal("p1", endTurnPrompt.PlayerId);
-        Assert.Equal("END_TURN", endTurnPrompt.Kind);
+        Assert.Equal("MAIN_ACTION", endTurnPrompt.Kind);
+        Assert.Contains("PLAY_CARD", endTurnPrompt.Options);
+        Assert.Contains("END_TURN", endTurnPrompt.Options);
+    }
+
+    [Fact]
+    public void MainPhasePrompt_OffersPlayCardAndEndTurnWhenActivePlayerHasHandCards()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var state = room.CreateStateSnapshot();
+        var activePlayer = state.Players.Single(player => player.PlayerId == state.ActivePlayerId);
+
+        Assert.Equal(MatchPhase.Main, state.Phase);
+        Assert.Equal(6, activePlayer.HandCount);
+        Assert.Equal("MAIN_ACTION", mainActionPrompt.Kind);
+        Assert.Equal(activePlayer.PlayerId, mainActionPrompt.PlayerId);
+        Assert.Contains("PLAY_CARD", mainActionPrompt.Options);
+        Assert.Contains("END_TURN", mainActionPrompt.Options);
+    }
+
+    [Fact]
+    public void MainActionPlayCard_ReducesHandAndCreatesNextMainActionPrompt()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var update = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "PLAY_CARD"
+        });
+        var activePlayer = update.StateSnapshot.Players.Single(player => player.PlayerId == "p1");
+        var nextPrompt = Assert.Single(update.ChoicePrompts);
+
+        Assert.Equal(MatchPhase.Main, update.StateSnapshot.Phase);
+        Assert.Equal(1, update.StateSnapshot.TurnNumber);
+        Assert.Equal("p1", update.StateSnapshot.ActivePlayerId);
+        Assert.Equal(5, activePlayer.HandCount);
+        Assert.Equal(1, activePlayer.BoardCount);
+        Assert.Equal(44, activePlayer.DeckCount);
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "PLAY_CARD");
+        Assert.Equal("MAIN_ACTION", nextPrompt.Kind);
+        Assert.Equal("p1", nextPrompt.PlayerId);
+        Assert.Contains("PLAY_CARD", nextPrompt.Options);
+        Assert.Contains("END_TURN", nextPrompt.Options);
+    }
+
+    [Fact]
+    public void MainActionEndTurn_AdvancesToNextPlayerTurn()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var update = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "END_TURN"
+        });
+        var newActivePlayer = update.StateSnapshot.Players.Single(player => player.PlayerId == "p2");
+        var nextPrompt = Assert.Single(update.ChoicePrompts);
+
+        Assert.Equal(MatchPhase.Main, update.StateSnapshot.Phase);
+        Assert.Equal(2, update.StateSnapshot.TurnNumber);
+        Assert.Equal("p2", update.StateSnapshot.ActivePlayerId);
+        Assert.Equal(44, newActivePlayer.DeckCount);
+        Assert.Equal(6, newActivePlayer.HandCount);
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "END_PHASE");
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "TURN_END");
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "REFRESH_PHASE");
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "DRAW_CARD");
+        Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "MAIN_PHASE");
+        Assert.Equal("MAIN_ACTION", nextPrompt.Kind);
+        Assert.Equal("p2", nextPrompt.PlayerId);
+        Assert.Contains("PLAY_CARD", nextPrompt.Options);
+        Assert.Contains("END_TURN", nextPrompt.Options);
+    }
+
+    [Fact]
+    public void MainActionPlayCard_FailsForNonActivePlayer()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var error = Assert.Throws<InvalidOperationException>(() => room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p2",
+            SelectedOption = "PLAY_CARD"
+        }));
+
+        Assert.Equal("Choice prompt does not belong to this player.", error.Message);
+    }
+
+    private static MatchRoom CreateStartedMainPhaseRoom(out ChoicePromptDto mainActionPrompt)
+    {
+        var room = new MatchRoom("ABCD");
+        room.JoinPlayer("p1", "Alice");
+        room.JoinPlayer("p2", "Bob");
+        room.SetPlayerDeck("p1", CreateDeck("deck-1", "Alice Deck"));
+        room.SetPlayerDeck("p2", CreateDeck("deck-2", "Bob Deck"));
+        var startUpdate = room.StartMatch();
+        var p1MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p1");
+        var p2MulliganPrompt = startUpdate.ChoicePrompts.Single(prompt => prompt.PlayerId == "p2");
+
+        room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = p1MulliganPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "KEEP"
+        });
+
+        var mainUpdate = room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = p2MulliganPrompt.ChoiceId,
+            PlayerId = "p2",
+            SelectedOption = "KEEP"
+        });
+
+        mainActionPrompt = Assert.Single(mainUpdate.ChoicePrompts);
+        return room;
     }
 
     private static PlayerDeckSubmissionDto CreateDeck(string deckId, string deckName)

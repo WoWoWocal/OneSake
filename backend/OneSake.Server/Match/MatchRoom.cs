@@ -82,6 +82,7 @@ public sealed class MatchRoom
                 player.DrawDeck = BuildMatchDeck(player);
                 Shuffle(player.DrawDeck);
                 player.Hand.Clear();
+                player.PlayedCards.Clear();
                 DrawCards(player, 5);
                 player.LifeCount = 5;
                 player.Connected = true;
@@ -193,30 +194,30 @@ public sealed class MatchRoom
             }
             else if (string.Equals(prompt.Kind, "END_TURN", StringComparison.Ordinal))
             {
-                if (_phase != MatchPhase.Main)
-                {
-                    throw new InvalidOperationException("End turn is only available in the main phase.");
-                }
-
                 if (!string.Equals(normalizedOption, "END_TURN", StringComparison.Ordinal))
                 {
                     throw new InvalidOperationException("Unsupported option for END_TURN.");
                 }
 
-                if (!string.Equals(submission.PlayerId, _activePlayerId, StringComparison.Ordinal))
+                ResolveEndTurn(GetPlayerSlot(submission.PlayerId));
+            }
+            else if (string.Equals(prompt.Kind, "MAIN_ACTION", StringComparison.Ordinal))
+            {
+                var player = GetPlayerSlot(submission.PlayerId);
+
+                if (string.Equals(normalizedOption, "PLAY_CARD", StringComparison.Ordinal))
                 {
-                    throw new InvalidOperationException("Only the active player can end the turn.");
+                    PlayCard(player);
+                    CreateMainActionPrompt(player);
                 }
-
-                var currentPlayer = GetPlayerSlot(_activePlayerId);
-                EnterEndPhase(currentPlayer);
-
-                var previousActivePlayerId = currentPlayer.PlayerId;
-                CreateLogEvent("TURN_END", $"Player {previousActivePlayerId} ended turn {_turnNumber}.");
-
-                _turnNumber += 1;
-                _activePlayerId = GetOtherPlayerId(previousActivePlayerId);
-                BeginTurn(GetPlayerSlot(_activePlayerId));
+                else if (string.Equals(normalizedOption, "END_TURN", StringComparison.Ordinal))
+                {
+                    ResolveEndTurn(player);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unsupported option for MAIN_ACTION.");
+                }
             }
             else
             {
@@ -267,6 +268,7 @@ public sealed class MatchRoom
                         DeckCount = player.DeckCount,
                         HandCount = player.HandCount,
                         LifeCount = player.LifeCount,
+                        BoardCount = player.PlayedCards.Count,
                         DeckName = player.DeckName,
                         LeaderCardId = player.LeaderCardId,
                         MainDeckCount = player.MainDeckCount,
@@ -365,11 +367,72 @@ public sealed class MatchRoom
     {
         _phase = MatchPhase.Main;
         CreateLogEvent("MAIN_PHASE", $"Main phase for {player.DisplayName}.");
+        CreateMainActionPrompt(player);
+    }
+
+    private void CreateMainActionPrompt(PlayerSlot player)
+    {
+        var options = new List<string>();
+
+        if (player.Hand.Count > 0)
+        {
+            options.Add("PLAY_CARD");
+        }
+
+        options.Add("END_TURN");
+
         CreateChoicePrompt(
             player.PlayerId,
-            "END_TURN",
-            "End your turn?",
-            ["END_TURN"]);
+            "MAIN_ACTION",
+            "Choose your main phase action.",
+            options);
+    }
+
+    private void PlayCard(PlayerSlot player)
+    {
+        if (_phase != MatchPhase.Main)
+        {
+            throw new InvalidOperationException("Play card is only available in the main phase.");
+        }
+
+        if (!string.Equals(player.PlayerId, _activePlayerId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Only the active player can play a card.");
+        }
+
+        if (player.Hand.Count == 0)
+        {
+            throw new InvalidOperationException("Player has no cards in hand.");
+        }
+
+        var playedCard = player.Hand[0];
+        player.Hand.RemoveAt(0);
+        player.PlayedCards.Add(playedCard);
+        player.HandCount = player.Hand.Count;
+
+        CreateLogEvent("PLAY_CARD", $"{player.DisplayName} played a card.");
+    }
+
+    private void ResolveEndTurn(PlayerSlot player)
+    {
+        if (_phase != MatchPhase.Main)
+        {
+            throw new InvalidOperationException("End turn is only available in the main phase.");
+        }
+
+        if (!string.Equals(player.PlayerId, _activePlayerId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Only the active player can end the turn.");
+        }
+
+        EnterEndPhase(player);
+
+        var previousActivePlayerId = player.PlayerId;
+        CreateLogEvent("TURN_END", $"Player {previousActivePlayerId} ended turn {_turnNumber}.");
+
+        _turnNumber += 1;
+        _activePlayerId = GetOtherPlayerId(previousActivePlayerId);
+        BeginTurn(GetPlayerSlot(_activePlayerId));
     }
 
     private void EnterEndPhase(PlayerSlot player)
@@ -445,6 +508,7 @@ public sealed class MatchRoom
         public List<PlayerDeckCardDto> DeckCards { get; set; } = [];
         public List<MatchCard> DrawDeck { get; set; } = [];
         public List<MatchCard> Hand { get; set; } = [];
+        public List<MatchCard> PlayedCards { get; set; } = [];
     }
 }
 

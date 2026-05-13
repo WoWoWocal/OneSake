@@ -16,12 +16,12 @@ interface MatchStatePanelProps {
   onSubmitChoice: (option: string) => void;
 }
 
-const ACTION_LABELS = ['Mulligan', 'Keep', 'End Turn', 'Attack', 'Activate Main', 'Pass'];
+const ACTION_LABELS = ['Mulligan', 'Keep', 'Play Card', 'End Turn', 'Attack', 'Activate Main', 'Pass'];
 const CHARACTER_SLOTS = [1, 2, 3, 4, 5];
 const LIFE_SLOTS = [1, 2, 3, 4, 5];
 
 function normalizeAction(value: string): string {
-  return value.replace(/\s+/g, '').toLowerCase();
+  return value.replace(/[^a-z0-9]/gi, '').toLowerCase();
 }
 
 function getActionOption(prompt: ChoicePromptDto | null, actionLabel: string): string | null {
@@ -37,7 +37,10 @@ function getActionOption(prompt: ChoicePromptDto | null, actionLabel: string): s
   );
 }
 
-function getZoneCount(player: PlayerStateDto | null, key: 'deckCount' | 'handCount' | 'lifeCount') {
+function getZoneCount(
+  player: PlayerStateDto | null,
+  key: 'deckCount' | 'handCount' | 'lifeCount' | 'boardCount',
+) {
   const count = player ? player[key] : 0;
   return Number.isFinite(count) ? Math.max(0, count) : 0;
 }
@@ -145,6 +148,7 @@ function MatchPlayerArea({
 
         <div className="resource-zones">
           <BoardStack count={getZoneCount(player, 'deckCount')} label="Deck" />
+          <BoardStack count={getZoneCount(player, 'boardCount')} label="Board" tone="gold" />
           <BoardStack count={0} label="Trash" tone="trash" />
           <div className="life-zone">
             <div>

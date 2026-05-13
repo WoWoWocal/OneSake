@@ -19,6 +19,7 @@ public record PlayerStateDto
     public int DeckCount { get; init; }
     public int HandCount { get; init; }
     public int LifeCount { get; init; }
+    public int BoardCount { get; init; }
     public string DeckName { get; init; } = string.Empty;
     public string LeaderCardId { get; init; } = string.Empty;
     public int MainDeckCount { get; init; }
