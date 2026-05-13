@@ -1357,6 +1357,20 @@ label {
   color: #637581;
 }
 
+.probability-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.probability-calculation-state {
+  border: 1px solid #b9d8cf;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #125143;
+  font-weight: 800;
+  background: #eefaf6;
+}
+
 .probability-result {
   display: grid;
   gap: 4px;
@@ -1525,6 +1539,10 @@ label {
   }
 
   .probability-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .probability-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

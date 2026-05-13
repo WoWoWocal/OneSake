@@ -1,3 +1,5 @@
+import type { Deck } from '../../../types/decks';
+
 export interface ProbabilityDeckCard {
   cardId: string;
   name: string;
@@ -26,3 +28,19 @@ export interface ProbabilityResult {
   handSize: number;
   presetName?: string;
 }
+
+export interface ProbabilityWorkerRequest {
+  type: 'RUN_PROBABILITY';
+  deck: Deck;
+  input: ProbabilitySimulationInput;
+}
+
+export type ProbabilityWorkerResponse =
+  | {
+      type: 'PROBABILITY_RESULT';
+      result: ProbabilityResult;
+    }
+  | {
+      type: 'PROBABILITY_ERROR';
+      message: string;
+    };

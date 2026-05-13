@@ -1,11 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import type { Deck } from '../../../types/decks';
 import { getTotalCards } from '../../deckbuilder/utils/deckValidation';
 import { maxSimulations, runProbabilitySimulation } from './probabilityLogic';
 import { probabilityPresets } from './probabilityPresets';
-import type { ProbabilityResult } from './probabilityTypes';
+import type {
+  ProbabilityResult,
+  ProbabilitySimulationInput,
+  ProbabilityWorkerRequest,
+  ProbabilityWorkerResponse,
+} from './probabilityTypes';
 
 interface ProbabilityCalculatorProps {
   deck: Deck | null;
@@ -94,6 +99,8 @@ function getInputError(
 }
 
 export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
+  const workerRef = useRef<Worker | null>(null);
+  const fallbackTimerRef = useRef<number | null>(null);
   const [selectedTargetIds, setSelectedTargetIds] = useState<string[]>([]);
   const [targetSearch, setTargetSearch] = useState('');
   const [presetName, setPresetName] = useState(probabilityPresets[0].name);
@@ -102,6 +109,8 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
   const [simulations, setSimulations] = useState(10000);
   const [result, setResult] = useState<ProbabilityResult | null>(null);
   const [calculating, setCalculating] = useState(false);
+  const [calculationMessage, setCalculationMessage] = useState('');
+  const [calculationError, setCalculationError] = useState('');
 
   const totalCards = deck ? getTotalCards(deck.cards) : 0;
   const normalizedSearch = normalizeSearch(targetSearch);
@@ -127,7 +136,19 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
     setSelectedTargetIds(deck?.cards[0] ? [deck.cards[0].cardId] : []);
     setTargetSearch('');
     setResult(null);
+    setCalculationError('');
+    setCalculationMessage('');
   }, [deck]);
+
+  useEffect(
+    () => () => {
+      workerRef.current?.terminate();
+      if (fallbackTimerRef.current !== null) {
+        window.clearTimeout(fallbackTimerRef.current);
+      }
+    },
+    [],
+  );
 
   const applyPreset = (name: string): void => {
     const preset = probabilityPresets.find((entry) => entry.name === name);
@@ -155,25 +176,112 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
     setResult(null);
   };
 
+  const finishCalculation = (): void => {
+    workerRef.current?.terminate();
+    workerRef.current = null;
+    fallbackTimerRef.current = null;
+    setCalculating(false);
+  };
+
+  const runFallbackCalculation = (calculationDeck: Deck, input: ProbabilitySimulationInput): void => {
+    // Fallback keeps the feature usable in browsers or test environments where module workers fail.
+    setCalculationMessage('Worker unavailable; using UI-thread fallback.');
+    fallbackTimerRef.current = window.setTimeout(() => {
+      try {
+        const nextResult = runProbabilitySimulation(calculationDeck, input);
+        setSimulations(nextResult.simulations);
+        setResult(nextResult);
+        setCalculationError('');
+      } catch (error) {
+        setCalculationError(
+          error instanceof Error ? error.message : 'Probability calculation failed.',
+        );
+      } finally {
+        finishCalculation();
+      }
+    }, 0);
+  };
+
   const calculate = (): void => {
     if (!deck || !canCalculate) {
       return;
     }
 
     const normalizedSimulations = Math.min(maxSimulations, Math.max(1, simulations));
+    const input: ProbabilitySimulationInput = {
+      targetCardIds: selectedTargetIds,
+      minimumHits,
+      handSize,
+      simulations: normalizedSimulations,
+      presetName,
+    };
+    const request: ProbabilityWorkerRequest = {
+      type: 'RUN_PROBABILITY',
+      deck,
+      input,
+    };
+
+    workerRef.current?.terminate();
+    if (fallbackTimerRef.current !== null) {
+      window.clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+
     setCalculating(true);
-    window.setTimeout(() => {
-      const nextResult = runProbabilitySimulation(deck, {
-        targetCardIds: selectedTargetIds,
-        minimumHits,
-        handSize,
-        simulations: normalizedSimulations,
-        presetName,
+    setResult(null);
+    setCalculationError('');
+    setCalculationMessage('Running simulation in background worker.');
+
+    try {
+      const worker = new Worker(new URL('./probabilityWorker.ts', import.meta.url), {
+        type: 'module',
       });
-      setSimulations(nextResult.simulations);
-      setResult(nextResult);
-      setCalculating(false);
-    }, 0);
+      workerRef.current = worker;
+
+      worker.onmessage = (event: MessageEvent<ProbabilityWorkerResponse>) => {
+        if (workerRef.current !== worker) {
+          return;
+        }
+
+        if (event.data.type === 'PROBABILITY_RESULT') {
+          setSimulations(event.data.result.simulations);
+          setResult(event.data.result);
+          setCalculationMessage('Calculation complete.');
+          setCalculationError('');
+        } else {
+          setCalculationError(event.data.message);
+          setCalculationMessage('');
+        }
+
+        finishCalculation();
+      };
+
+      worker.onerror = () => {
+        if (workerRef.current !== worker) {
+          return;
+        }
+
+        setCalculationError('Probability worker failed.');
+        setCalculationMessage('');
+        finishCalculation();
+      };
+
+      worker.postMessage(request);
+    } catch {
+      runFallbackCalculation(deck, input);
+    }
+  };
+
+  const cancelCalculation = (): void => {
+    workerRef.current?.terminate();
+    workerRef.current = null;
+    if (fallbackTimerRef.current !== null) {
+      window.clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+    setCalculating(false);
+    setCalculationError('');
+    setCalculationMessage('Calculation cancelled.');
   };
 
   if (!deck) {
@@ -308,10 +416,23 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
       </div>
 
       {inputError && <div className="status-panel status-panel--error">{inputError}</div>}
+      {calculationError && (
+        <div className="status-panel status-panel--error">{calculationError}</div>
+      )}
+      {calculationMessage && (
+        <div className="probability-calculation-state">{calculationMessage}</div>
+      )}
 
-      <Button disabled={!canCalculate} onClick={calculate}>
-        {calculating ? 'Calculating...' : 'Calculate'}
-      </Button>
+      <div className="probability-actions">
+        <Button disabled={!canCalculate} onClick={calculate}>
+          {calculating ? 'Calculating...' : 'Calculate'}
+        </Button>
+        {calculating && (
+          <Button onClick={cancelCalculation} variant="danger">
+            Cancel
+          </Button>
+        )}
+      </div>
 
       {result && (
         <div className="probability-result">
