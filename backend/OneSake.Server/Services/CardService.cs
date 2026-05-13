@@ -33,8 +33,9 @@ public class CardService
             return cards;
         }
 
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             return new List<CardDto>();
         }
     }
@@ -54,8 +55,9 @@ public class CardService
 
             return set;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             return new List<CardDto>();
         }
     }
