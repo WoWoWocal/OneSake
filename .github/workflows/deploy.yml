@@ -19,3 +19,21 @@ jobs:
           script: |
             cd /home/dano/OneSake
             git pull origin main
+
+            # BACKEND
+
+            cd backend
+            dotnet publish -c Release
+            sudo systemctl restart onesake-backend
+
+            # FRONTEND
+
+            cd /home/dano/OneSake/frontend/web
+            npm install
+            npm run build
+
+            sudo rm -rf /var/www/html/*
+            sudo cp -r dist/* /var/www/html/
+
+            sudo systemctl reload nginx
+            
