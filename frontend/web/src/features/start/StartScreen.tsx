@@ -11,7 +11,7 @@ export function StartScreen({ onPlay }: StartScreenProps) {
         <img className="start-screen__art" src={startScreenImage} alt="OneSake pirate game board" />
       </div>
       <button className="start-play-button" type="button" onClick={onPlay}>
-        PLAY
+        <span className="start-play-button__label">PLAY</span>
       </button>
     </main>
   );
