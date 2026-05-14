@@ -21,7 +21,11 @@ public class CardService
     {
         if (_cardCache.ContainsKey(id)) return _cardCache[id];
         // API Endpoint
-        var url = $"https://optcgapi.com/api/sets/card/{id}/";
+
+        var url = "";
+
+        if (id.StartsWith("ST")) url = $"https://www.optcgapi.com/api/decks/card/{id}/";
+        else url = $"https://optcgapi.com/api/sets/card/{id}/";
 
         try
         {
@@ -45,7 +49,10 @@ public class CardService
         if (_setCache.ContainsKey(set_id)) return _setCache[set_id];
 
         // API Endpoint
-        var url = $"https://optcgapi.com/api/sets/{set_id}/";
+        var url = "";
+
+        if (set_id.StartsWith("ST")) url = $"https://www.optcgapi.com/api/decks/{set_id}/";
+        else url = $"https://optcgapi.com/api/sets/{set_id}/";
 
         try
         {
