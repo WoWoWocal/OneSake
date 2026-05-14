@@ -33,7 +33,53 @@ import {
   validateDeck,
 } from './utils/deckValidation';
 
-const availableSets = ['OP-01', 'OP-02', 'OP-03', 'ST-01'];
+
+const availableSets = [
+  'OP-01',
+  'OP-02',
+  'OP-03',
+  'OP-04',
+  'OP-05',
+  'OP-06',
+  'OP-07',
+  'OP-08',
+  'OP-09',
+  'OP-10',
+  'OP-11',
+  'OP-12',
+  'OP-13',
+  'OP-14',
+  'OP-15',
+
+  'ST-01',
+  'ST-02',
+  'ST-03',
+  'ST-04',
+  'ST-05',
+  'ST-06',
+  'ST-07',
+  'ST-08',
+  'ST-09',
+  'ST-10',
+  'ST-11',
+  'ST-12',
+  'ST-13',
+  'ST-14',
+  'ST-15',
+  'ST-16',
+  'ST-17',
+  'ST-18',
+  'ST-19',
+  'ST-20',
+  'ST-21',
+  'ST-22',
+  'ST-23',
+  'ST-24',
+  'ST-25',
+  'ST-26',
+  'ST-27',
+  'ST-28',
+];
 const cardsPerRowStorageKey = 'onesake.deckbuilder.cardsPerRow';
 const defaultCardsPerRow = 3;
 
