@@ -49,7 +49,7 @@ namespace OneSake.Server.Services
         public string SubTypes { get; set; } = "";
 
         [JsonPropertyName("counter_amount")]
-        public string CounterAmount { get; set; } = "";
+        public string? CounterAmount { get; set; } = "";
 
         [JsonPropertyName("attribute")]
         public string Attribute { get; set; } = "";
