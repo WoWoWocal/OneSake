@@ -1226,31 +1226,40 @@ label {
 
 .card-quantity-controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(26px, 0.8fr) minmax(34px, auto) minmax(26px, 0.8fr);
   align-items: center;
-  gap: 1px;
+  gap: 0;
 }
 
 .card-quantity-button {
   min-width: 0;
   min-height: 32px;
-  border: 1px solid #cbd9dc;
+  border: 1px solid transparent;
   border-radius: 4px;
   padding: 0;
-  color: #176f65;
-  background: #ffffff;
+  color: #ffffff;
   font-size: 1rem;
   font-weight: 900;
   line-height: 1;
 }
 
+.card-quantity-button--minus {
+  background: #b93434;
+}
+
+.card-quantity-button--plus {
+  background: #167a4a;
+}
+
 .card-quantity-button:disabled {
+  border-color: #d6e0e3;
   color: #8ba0a8;
   background: #eef3f4;
 }
 
 .card-quantity-value {
   min-width: 0;
+  padding: 0 2px;
   color: #344f5d;
   font-size: 0.72rem;
   text-align: center;
