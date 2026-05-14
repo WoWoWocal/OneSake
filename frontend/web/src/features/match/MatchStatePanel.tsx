@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react';
+
+import pirateBoardUrl from '../../assets/boards/pirate-match-board.png';
 import type { Deck } from '../../types/decks';
 import type { ChoicePromptDto, GameStateDto, PlayerStateDto } from '../../types/realtime';
 import type { DeckValidationResult } from '../deckbuilder/utils/deckValidation';
@@ -16,9 +19,9 @@ interface MatchStatePanelProps {
   onSubmitChoice: (option: string) => void;
 }
 
-const ACTION_LABELS = ['Mulligan', 'Keep', 'Play Card', 'End Turn', 'Attack', 'Activate Main', 'Pass'];
 const CHARACTER_SLOTS = [1, 2, 3, 4, 5];
 const LIFE_SLOTS = [1, 2, 3, 4, 5];
+const BOARD_ACTIONS = ['Mulligan', 'Keep', 'Play Card', 'Attack', 'Activate Main', 'Pass'];
 
 function normalizeAction(value: string): string {
   return value.replace(/[^a-z0-9]/gi, '').toLowerCase();
@@ -45,134 +48,255 @@ function getZoneCount(
   return Number.isFinite(count) ? Math.max(0, count) : 0;
 }
 
-function BoardCard({ label, meta }: { label: string; meta?: string }) {
+function getPlayerName(player: PlayerStateDto | null, fallback: string): string {
+  return player?.displayName || fallback;
+}
+
+function BoardZone({
+  children,
+  className,
+  label,
+}: {
+  children?: ReactNode;
+  className: string;
+  label: string;
+}) {
   return (
-    <div className="board-card">
+    <div className={`pirate-board-zone ${className}`} aria-label={label}>
+      {children}
+    </div>
+  );
+}
+
+function CardSlot({
+  filled = false,
+  label,
+  meta,
+}: {
+  filled?: boolean;
+  label: string;
+  meta?: string;
+}) {
+  return (
+    <div className={`pirate-card-slot ${filled ? 'is-filled' : ''}`}>
       <span>{label}</span>
       {meta && <strong>{meta}</strong>}
     </div>
   );
 }
 
-function BoardStack({
+function CharacterSlots({ count, side }: { count: number; side: 'opponent' | 'player' }) {
+  return (
+    <>
+      {CHARACTER_SLOTS.map((slot) => (
+        <BoardZone
+          key={`${side}-${slot}`}
+          className={`character-zone character-zone--${side}-${slot}`}
+          label={`${side} character slot ${slot}`}
+        >
+          <CardSlot filled={slot <= count} label="Character" meta={`${slot}/5`} />
+        </BoardZone>
+      ))}
+    </>
+  );
+}
+
+function LifeCounter({ count, side }: { count: number; side: 'opponent' | 'player' }) {
+  return (
+    <BoardZone className={`life-counter life-counter--${side}`} label={`${side} life cards`}>
+      <span>Life</span>
+      <strong>{count}</strong>
+      <div className="pirate-life-pips">
+        {LIFE_SLOTS.map((slot) => (
+          <i key={slot} className={slot <= count ? 'is-filled' : ''} />
+        ))}
+      </div>
+    </BoardZone>
+  );
+}
+
+function CountZone({
   count,
+  className,
   label,
-  tone = 'default',
 }: {
   count: number;
+  className: string;
   label: string;
-  tone?: 'default' | 'gold' | 'trash';
 }) {
   return (
-    <div className={`board-stack board-stack--${tone}`}>
+    <BoardZone className={className} label={label}>
       <span>{label}</span>
       <strong>{count}</strong>
-    </div>
+    </BoardZone>
   );
 }
 
-function LifeCards({ count }: { count: number }) {
+function LeaderZone({ player, side }: { player: PlayerStateDto | null; side: 'opponent' | 'player' }) {
   return (
-    <div className="life-row" aria-label={`${count} life cards`}>
-      {LIFE_SLOTS.map((slot) => (
-        <span key={slot} className={slot <= count ? 'is-filled' : ''} />
-      ))}
-    </div>
+    <BoardZone className={`leader-zone leader-zone--${side}`} label={`${side} leader`}>
+      <CardSlot
+        filled={Boolean(player?.leaderCardId)}
+        label="Leader"
+        meta={player?.leaderCardId || 'Unset'}
+      />
+    </BoardZone>
   );
 }
 
-function CharacterArea() {
+function StageZone({ side }: { side: 'opponent' | 'player' }) {
   return (
-    <div className="character-row">
-      {CHARACTER_SLOTS.map((slot) => (
-        <div key={slot} className="drop-zone character-slot">
-          Character {slot}
-        </div>
-      ))}
-    </div>
+    <BoardZone className={`stage-zone stage-zone--${side}`} label={`${side} stage`}>
+      <CardSlot label="Stage" meta="Empty" />
+    </BoardZone>
   );
 }
 
-function MatchPlayerArea({
-  isOpponent = false,
+function DonCounter({ side }: { side: 'opponent' | 'player' }) {
+  return (
+    <BoardZone className={`don-counter don-counter--${side}`} label={`${side} DON counter`}>
+      <span>DON!!</span>
+      <strong>0 / 0</strong>
+    </BoardZone>
+  );
+}
+
+function PlayerPlate({
   player,
+  side,
 }: {
-  isOpponent?: boolean;
   player: PlayerStateDto | null;
+  side: 'opponent' | 'player';
 }) {
-  const displayName = player?.displayName ?? (isOpponent ? 'Opponent' : 'Player');
-  const playerId = player?.playerId ?? 'Waiting for player';
+  const fallback = side === 'opponent' ? 'Opponent' : 'Player';
 
   return (
-    <section className={`board-player-area ${isOpponent ? 'is-opponent' : 'is-player'}`}>
-      <div className="board-player-status">
-        <div>
-          <span>{isOpponent ? 'Opponent Area' : 'Player Area'}</span>
-          <strong>{displayName}</strong>
-          <small>{playerId}</small>
-        </div>
-        <div className={player?.connected ? 'connection-pill is-online' : 'connection-pill'}>
-          {player?.connected ? 'Online' : 'Offline'}
-        </div>
+    <BoardZone className={`player-plate player-plate--${side}`} label={`${side} status`}>
+      <span>{side === 'opponent' ? 'Opponent' : 'You'}</span>
+      <strong>{getPlayerName(player, fallback)}</strong>
+      <small>{player?.hasDeck ? player.deckName || 'Deck ready' : 'No deck selected'}</small>
+    </BoardZone>
+  );
+}
+
+function HandRail({ player }: { player: PlayerStateDto | null }) {
+  const handCount = getZoneCount(player, 'handCount');
+
+  return (
+    <div className="pirate-hand-rail" aria-label="Player hand cards">
+      <div>
+        <span>Hand</span>
+        <strong>{handCount} cards</strong>
       </div>
-
-      <div className={player?.hasDeck ? 'player-deck-pill is-ready' : 'player-deck-pill'}>
-        <span>{player?.hasDeck ? 'Deck ready' : 'No deck selected'}</span>
-        {player?.hasDeck && (
-          <strong>
-            {player.deckName || 'Unnamed Deck'} / {player.leaderCardId || 'No leader'} /{' '}
-            {player.mainDeckCount}/50
-          </strong>
-        )}
+      <div className="pirate-hand-cards">
+        {Array.from({ length: Math.min(handCount, 10) }, (_, index) => (
+          <CardSlot key={index} filled label="Hand" meta={`#${index + 1}`} />
+        ))}
+        {handCount === 0 && <CardSlot label="Hand" meta="Empty" />}
       </div>
+    </div>
+  );
+}
 
-      <div className="board-zone-grid">
-        <div className="side-zones">
-          <div className="leader-stage-row">
-            <div className="drop-zone leader-zone">
-              <span>Leader</span>
-              <strong>Leader Zone</strong>
-            </div>
-            <div className="drop-zone stage-zone">
-              <span>Stage</span>
-              <strong>Stage Zone</strong>
-            </div>
-          </div>
-          <div className="don-zone">
-            <span>Cost / DON!!</span>
-            <strong>0 active / 0 rested</strong>
-          </div>
-        </div>
+function BoardActionButton({
+  children,
+  className = '',
+  disabled,
+  onClick,
+}: {
+  children: ReactNode;
+  className?: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={`board-action-button ${className}`}
+      disabled={disabled}
+      onClick={onClick}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
 
-        <CharacterArea />
+function ChoiceOverlay({
+  canSubmitChoice,
+  currentPrompt,
+  onSubmitChoice,
+  pending,
+}: {
+  canSubmitChoice: boolean;
+  currentPrompt: ChoicePromptDto | null;
+  onSubmitChoice: (option: string) => void;
+  pending: boolean;
+}) {
+  if (!currentPrompt) {
+    return null;
+  }
 
-        <div className="resource-zones">
-          <BoardStack count={getZoneCount(player, 'deckCount')} label="Deck" />
-          <BoardStack count={getZoneCount(player, 'boardCount')} label="Board" tone="gold" />
-          <BoardStack count={0} label="Trash" tone="trash" />
-          <div className="life-zone">
-            <div>
-              <span>Life Cards</span>
-              <strong>{getZoneCount(player, 'lifeCount')}</strong>
-            </div>
-            <LifeCards count={Math.min(getZoneCount(player, 'lifeCount'), LIFE_SLOTS.length)} />
-          </div>
-        </div>
+  const endTurnOption = getActionOption(currentPrompt, 'End Turn');
+  const mappedOptions = new Set([endTurnOption].filter(Boolean));
+  const visibleOptions = currentPrompt.options.filter((option) => !mappedOptions.has(option));
+
+  if (visibleOptions.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="pirate-choice-overlay">
+      <div>
+        <span>{currentPrompt.kind}</span>
+        <strong>{currentPrompt.title}</strong>
       </div>
-
-      <div className="hand-zone">
-        <div>
-          <span>Hand Cards</span>
-          <strong>{getZoneCount(player, 'handCount')}</strong>
-        </div>
-        <div className="hand-card-row">
-          {Array.from({ length: Math.min(getZoneCount(player, 'handCount'), 8) }, (_, index) => (
-            <BoardCard key={index} label="Hand" meta={`#${index + 1}`} />
-          ))}
-          {getZoneCount(player, 'handCount') === 0 && <BoardCard label="Hand" meta="Empty" />}
-        </div>
+      <div className="pirate-choice-actions">
+        {visibleOptions.map((option) => (
+          <BoardActionButton
+            key={option}
+            disabled={pending || !canSubmitChoice}
+            onClick={() => onSubmitChoice(option)}
+          >
+            {option}
+          </BoardActionButton>
+        ))}
       </div>
-    </section>
+    </div>
+  );
+}
+
+function ActionDock({
+  canSubmitChoice,
+  currentPrompt,
+  onSubmitChoice,
+  pending,
+}: {
+  canSubmitChoice: boolean;
+  currentPrompt: ChoicePromptDto | null;
+  onSubmitChoice: (option: string) => void;
+  pending: boolean;
+}) {
+  return (
+    <aside className="match-action-bar" aria-label="Match actions">
+      <div>
+        <span>Actions</span>
+        <strong>{currentPrompt?.title ?? 'Waiting'}</strong>
+        {currentPrompt && <small>{currentPrompt.kind}</small>}
+      </div>
+      {BOARD_ACTIONS.map((actionLabel) => {
+        const option = getActionOption(currentPrompt, actionLabel);
+        return (
+          <button
+            key={actionLabel}
+            disabled={!option || pending || !canSubmitChoice}
+            onClick={() => option && onSubmitChoice(option)}
+            type="button"
+          >
+            {actionLabel}
+          </button>
+        );
+      })}
+    </aside>
   );
 }
 
@@ -191,6 +315,8 @@ export function MatchStatePanel({
   const players = gameState?.players ?? [];
   const player = players[0] ?? null;
   const opponent = players[1] ?? null;
+  const endTurnOption = getActionOption(currentPrompt, 'End Turn');
+  const canEndTurn = Boolean(endTurnOption) && !pending && canSubmitChoice;
 
   return (
     <section className="match-board-shell">
@@ -229,34 +355,63 @@ export function MatchStatePanel({
       </div>
 
       <div className="match-board-layout">
-        <div className="match-board">
-          <MatchPlayerArea isOpponent player={opponent} />
-          <div className="board-divider">
-            <span>Character Area</span>
+        <div className="pirate-board-panel">
+          <div className="pirate-board-scroll">
+            <div className="pirate-board" aria-label="OneSake pirate match board">
+              <img alt="Pirate card game board" className="pirate-board-image" src={pirateBoardUrl} />
+
+              <PlayerPlate player={opponent} side="opponent" />
+              <LeaderZone player={opponent} side="opponent" />
+              <StageZone side="opponent" />
+              <CharacterSlots count={getZoneCount(opponent, 'boardCount')} side="opponent" />
+              <CountZone
+                className="deck-counter deck-counter--opponent"
+                count={getZoneCount(opponent, 'deckCount')}
+                label="Deck"
+              />
+              <CountZone className="trash-counter trash-counter--opponent" count={0} label="Trash" />
+              <LifeCounter count={getZoneCount(opponent, 'lifeCount')} side="opponent" />
+              <DonCounter side="opponent" />
+
+              <PlayerPlate player={player} side="player" />
+              <LeaderZone player={player} side="player" />
+              <StageZone side="player" />
+              <CharacterSlots count={getZoneCount(player, 'boardCount')} side="player" />
+              <CountZone
+                className="deck-counter deck-counter--player"
+                count={getZoneCount(player, 'deckCount')}
+                label="Deck"
+              />
+              <CountZone className="trash-counter trash-counter--player" count={0} label="Trash" />
+              <LifeCounter count={getZoneCount(player, 'lifeCount')} side="player" />
+              <DonCounter side="player" />
+
+              <BoardActionButton
+                className="end-turn-board-button"
+                disabled={!canEndTurn}
+                onClick={() => endTurnOption && onSubmitChoice(endTurnOption)}
+              >
+                End Turn
+              </BoardActionButton>
+
+              <ChoiceOverlay
+                canSubmitChoice={canSubmitChoice}
+                currentPrompt={currentPrompt}
+                onSubmitChoice={onSubmitChoice}
+                pending={pending}
+              />
+            </div>
           </div>
-          <MatchPlayerArea player={player} />
+
+          <HandRail player={player} />
         </div>
 
-        <aside className="match-action-bar" aria-label="Match actions">
-          <div>
-            <span>Actions</span>
-            <strong>{currentPrompt?.title ?? 'Waiting'}</strong>
-            {currentPrompt && <small>{currentPrompt.kind}</small>}
-          </div>
-          {ACTION_LABELS.map((actionLabel) => {
-            const option = getActionOption(currentPrompt, actionLabel);
-            return (
-              <button
-                key={actionLabel}
-                disabled={!option || pending || !canSubmitChoice}
-                onClick={() => option && onSubmitChoice(option)}
-                type="button"
-              >
-                {actionLabel}
-              </button>
-            );
-          })}
-        </aside>
+        <ActionDock
+          canSubmitChoice={canSubmitChoice}
+          currentPrompt={currentPrompt}
+          onSubmitChoice={onSubmitChoice}
+          pending={pending}
+        />
       </div>
     </section>
   );
