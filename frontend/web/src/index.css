@@ -972,6 +972,17 @@ label {
 .deckbuilder-header {
   grid-template-columns: 1fr auto;
   align-items: center;
+  overflow: hidden;
+}
+
+.deckbuilder-banner-image {
+  display: block;
+  width: 100%;
+  max-width: 980px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 8px;
+  object-fit: contain;
 }
 
 .deck-toggle {
