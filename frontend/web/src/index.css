@@ -63,6 +63,98 @@ button:focus-visible {
   min-height: 100vh;
 }
 
+.start-screen {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  place-items: center;
+  gap: clamp(12px, 2.4vh, 24px);
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(10px, 2vw, 24px);
+  padding-bottom: calc(clamp(16px, 3vh, 34px) + env(safe-area-inset-bottom));
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 58%, rgb(142 83 26 / 24%), transparent 28%),
+    radial-gradient(circle at 16% 12%, rgb(24 92 103 / 24%), transparent 26%),
+    linear-gradient(180deg, #020509 0%, #07111a 48%, #030609 100%);
+}
+
+.start-screen__art-wrap {
+  display: grid;
+  width: min(100%, 1760px);
+  min-height: 0;
+  place-items: center;
+}
+
+.start-screen__art {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100svh - 128px);
+  object-fit: contain;
+  filter:
+    drop-shadow(0 24px 36px rgb(0 0 0 / 58%))
+    drop-shadow(0 0 22px rgb(224 158 55 / 12%));
+  user-select: none;
+}
+
+.start-play-button {
+  min-width: clamp(164px, 22vw, 264px);
+  min-height: clamp(54px, 7vh, 72px);
+  border: 2px solid #d9ad51;
+  border-radius: 10px;
+  padding: 12px 34px;
+  color: #f9da7c;
+  background:
+    linear-gradient(180deg, rgb(255 220 128 / 11%), transparent 42%),
+    linear-gradient(180deg, #17100a 0%, #090706 100%);
+  box-shadow:
+    0 0 0 1px rgb(92 54 14 / 80%),
+    inset 0 0 18px rgb(0 0 0 / 72%),
+    0 0 22px rgb(217 173 81 / 26%),
+    0 12px 28px rgb(0 0 0 / 52%);
+  font-size: clamp(1.15rem, 2.2vw, 1.65rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-shadow:
+    0 1px 0 #1a0e04,
+    0 0 12px rgb(249 218 124 / 44%);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.start-play-button:hover {
+  border-color: #ffe19a;
+  color: #fff3c7;
+  background:
+    linear-gradient(180deg, rgb(255 224 145 / 20%), transparent 46%),
+    linear-gradient(180deg, #211407 0%, #0d0906 100%);
+  box-shadow:
+    0 0 0 1px rgb(118 76 22 / 90%),
+    inset 0 0 18px rgb(0 0 0 / 68%),
+    0 0 30px rgb(255 207 102 / 42%),
+    0 16px 34px rgb(0 0 0 / 58%);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.start-play-button:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow:
+    0 0 0 1px rgb(92 54 14 / 80%),
+    inset 0 0 22px rgb(0 0 0 / 82%),
+    0 0 16px rgb(217 173 81 / 20%);
+}
+
+.start-play-button:focus-visible {
+  outline: 3px solid #ffe19a;
+  outline-offset: 4px;
+}
+
 .app-shell {
   min-height: 100vh;
   padding: 12px;
