@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="OneSake neon background">
+  <defs>
+    <radialGradient id="sceneGlow" cx="50%" cy="43%" r="45%">
+      <stop offset="0%" stop-color="#f9f2a7" stop-opacity="0.5"/>
+      <stop offset="36%" stop-color="#7ec7d8" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#10171d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hat" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#f3da5c"/>
+      <stop offset="48%" stop-color="#d94b35"/>
+      <stop offset="100%" stop-color="#924335"/>
+    </linearGradient>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" result="glow" type="matrix" values="1 0 0 0 0.95 0 1 0 0 0.92 0 0 1 0 0.7 0 0 0 0.75 0"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="wideGlow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feColorMatrix in="blur" type="saturate" values="0.9"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="#13191d"/>
+  <rect width="1600" height="900" fill="url(#sceneGlow)"/>
+  <g opacity="0.18">
+    <path d="M0 720 C260 650 440 820 720 720 C980 625 1180 705 1600 640 L1600 900 L0 900 Z" fill="#233039"/>
+    <path d="M0 125 C230 95 335 170 580 125 C800 85 1080 115 1600 70" fill="none" stroke="#31434d" stroke-width="24" opacity="0.32"/>
+    <path d="M0 210 C270 185 440 240 690 205 C1020 160 1170 210 1600 180" fill="none" stroke="#283840" stroke-width="18" opacity="0.28"/>
+  </g>
+
+  <g transform="translate(800 438)" filter="url(#wideGlow)" opacity="0.68">
+    <circle cx="0" cy="0" r="195" fill="#fff7a8" opacity="0.12"/>
+    <circle cx="0" cy="0" r="155" fill="#90c7d9" opacity="0.12"/>
+  </g>
+
+  <g transform="translate(800 445)" filter="url(#softGlow)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#edf7f6" stroke-width="16" opacity="0.88">
+      <path d="M-225 -158 L-335 -260"/>
+      <path d="M225 -158 L335 -260"/>
+      <path d="M-220 150 L-340 255"/>
+      <path d="M220 150 L340 255"/>
+      <circle cx="-370" cy="-292" r="38"/>
+      <circle cx="-430" cy="-260" r="34"/>
+      <circle cx="-325" cy="-340" r="36"/>
+      <circle cx="370" cy="-292" r="38"/>
+      <circle cx="430" cy="-260" r="34"/>
+      <circle cx="325" cy="-340" r="36"/>
+      <circle cx="-372" cy="286" r="38"/>
+      <circle cx="-430" cy="252" r="34"/>
+      <circle cx="-325" cy="336" r="36"/>
+      <circle cx="372" cy="286" r="38"/>
+      <circle cx="430" cy="252" r="34"/>
+      <circle cx="325" cy="336" r="36"/>
+    </g>
+
+    <path d="M-176 -25 C-170 -145 -100 -225 0 -225 C100 -225 170 -145 176 -25 C182 100 110 220 0 220 C-110 220 -182 100 -176 -25 Z" stroke="#edf7f6" stroke-width="14" opacity="0.9"/>
+    <path d="M-245 -76 H245" stroke="#fbf38e" stroke-width="18"/>
+    <path d="M-160 -82 C-140 -192 -78 -250 0 -250 C78 -250 140 -192 160 -82 Z" fill="url(#hat)" stroke="#fbf38e" stroke-width="9"/>
+    <path d="M-178 -88 H178" stroke="#edf7f6" stroke-width="9" opacity="0.65"/>
+
+    <circle cx="-70" cy="0" r="40" fill="#f7f2d2" stroke="#f9f2a7" stroke-width="9"/>
+    <circle cx="70" cy="0" r="40" fill="#f7f2d2" stroke="#f9f2a7" stroke-width="9"/>
+    <circle cx="0" cy="62" r="12" stroke="#edf7f6" stroke-width="10"/>
+
+    <path d="M-96 108 C-50 146 50 146 96 108" stroke="#edf7f6" stroke-width="13"/>
+    <path d="M-110 78 C-68 106 -22 120 0 120 C22 120 68 106 110 78" stroke="#edf7f6" stroke-width="12"/>
+    <path d="M-70 100 L-70 150" stroke="#edf7f6" stroke-width="8"/>
+    <path d="M-25 118 L-25 165" stroke="#edf7f6" stroke-width="8"/>
+    <path d="M25 118 L25 165" stroke="#edf7f6" stroke-width="8"/>
+    <path d="M70 100 L70 150" stroke="#edf7f6" stroke-width="8"/>
+
+    <path d="M-85 -175 L-98 -150" stroke="#fbf38e" stroke-width="8"/>
+    <path d="M-38 -192 L-45 -165" stroke="#fbf38e" stroke-width="8"/>
+    <path d="M42 -192 L50 -165" stroke="#fbf38e" stroke-width="8"/>
+    <path d="M88 -175 L100 -150" stroke="#fbf38e" stroke-width="8"/>
+  </g>
+</svg>

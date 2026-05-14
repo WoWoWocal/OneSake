@@ -14,7 +14,15 @@
 body {
   margin: 0;
   min-width: 320px;
-  background: #eef3f4;
+  min-height: 100vh;
+  background-color: #eef3f4;
+  background-image:
+    linear-gradient(rgb(238 243 244 / 86%), rgb(238 243 244 / 82%)),
+    url("./assets/backgrounds/onesake-background.svg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 button,
@@ -73,10 +81,11 @@ button:focus-visible {
 }
 
 .panel {
-  background: #ffffff;
+  background: rgb(255 255 255 / 94%);
   border: 1px solid #d2dde1;
   border-radius: 8px;
   padding: 12px;
+  box-shadow: 0 10px 30px rgb(16 25 31 / 5%);
 }
 
 .header-panel {
