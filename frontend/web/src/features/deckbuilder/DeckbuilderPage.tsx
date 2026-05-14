@@ -504,7 +504,7 @@ export function DeckbuilderPage() {
 
   return (
     <section className="deckbuilder-page">
-      <header className="panel header-panel deckbuilder-header">
+      <header className="deckbuilder-banner">
         <img
           alt="Deckbuilder banner"
           className="deckbuilder-banner-image"

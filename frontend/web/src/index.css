@@ -969,9 +969,11 @@ label {
   background: #176f65;
 }
 
-.deckbuilder-header {
+.deckbuilder-banner {
+  display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 8px;
   overflow: hidden;
 }
 
@@ -981,7 +983,6 @@ label {
   max-width: 980px;
   height: auto;
   margin: 0 auto;
-  border-radius: 8px;
   object-fit: contain;
 }
 
