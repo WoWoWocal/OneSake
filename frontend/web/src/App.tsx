@@ -1,16 +1,28 @@
 import { useState } from 'react';
 
-import { AppShell } from './components/layout/AppShell';
+import { AppShell, type Page } from './components/layout/AppShell';
 import { StartScreen } from './features/start/StartScreen';
 
 function App() {
   const [hasStarted, setHasStarted] = useState(false);
+  const [initialPage, setInitialPage] = useState<Page>('match');
 
-  if (!hasStarted) {
-    return <StartScreen onPlay={() => setHasStarted(true)} />;
+  function startApp(page: Page) {
+    setInitialPage(page);
+    setHasStarted(true);
   }
 
-  return <AppShell />;
+  if (!hasStarted) {
+    return (
+      <StartScreen
+        onPlay={() => startApp('match')}
+        onOpenDeckbuilder={() => startApp('deckbuilder')}
+        onOpenTools={() => startApp('tools')}
+      />
+    );
+  }
+
+  return <AppShell initialPage={initialPage} onBackToMenu={() => setHasStarted(false)} />;
 }
 
 export default App;
