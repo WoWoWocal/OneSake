@@ -1,4 +1,5 @@
 import type { CardDto } from '../../types/cards';
+import type { DeckCard } from '../../types/decks';
 import type { CardFilters } from './CardFilterSheet';
 import { CardTile } from './CardTile';
 import {
@@ -12,8 +13,13 @@ interface CardGridProps {
   filters: CardFilters;
   leaderColors: string[];
   cardsPerRow?: number;
+  deckCards: DeckCard[];
+  leaderCardId: string;
   onSelectCard: (card: CardDto) => void;
   onAddCard: (card: CardDto) => void;
+  onRemoveCard: (cardId: string) => void;
+  onSetLeader: (card: CardDto) => void;
+  onRemoveLeader: () => void;
 }
 
 function normalize(value: string): string {
@@ -31,12 +37,18 @@ function clampCardsPerRow(value: number | undefined): number {
 export function CardGrid({
   cards,
   cardsPerRow,
+  deckCards,
   filters,
+  leaderCardId,
   leaderColors,
   onAddCard,
+  onRemoveCard,
+  onRemoveLeader,
   onSelectCard,
+  onSetLeader,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
+  const deckQuantities = new Map(deckCards.map((deckCard) => [deckCard.cardId, deckCard.quantity]));
   const normalizedSearch = normalize(filters.searchText);
   const visibleCards = cards.filter((card) => {
     const matchesLeaderColors =
@@ -75,8 +87,13 @@ export function CardGrid({
           <CardTile
             key={`${card.card_set_id}-${card.card_image_id}`}
             card={card}
-            onAdd={onAddCard}
+            isSelectedLeader={leaderCardId === card.card_set_id}
+            onAddCard={onAddCard}
+            onRemoveCard={onRemoveCard}
+            onRemoveLeader={onRemoveLeader}
             onSelect={onSelectCard}
+            onSetLeader={onSetLeader}
+            quantity={deckQuantities.get(card.card_set_id) ?? 0}
           />
         ))}
         {visibleCards.length === 0 && (
