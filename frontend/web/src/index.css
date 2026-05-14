@@ -64,42 +64,47 @@ button:focus-visible {
 }
 
 .start-screen {
+  position: relative;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  place-items: center;
-  gap: clamp(12px, 2.4vh, 24px);
+  place-items: end center;
   width: 100%;
   min-height: 100vh;
   min-height: 100svh;
-  padding: clamp(10px, 2vw, 24px);
-  padding-bottom: calc(clamp(16px, 3vh, 34px) + env(safe-area-inset-bottom));
+  padding: clamp(18px, 3vw, 34px);
+  padding-bottom: calc(clamp(24px, 6vh, 58px) + env(safe-area-inset-bottom));
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 58%, rgb(142 83 26 / 24%), transparent 28%),
-    radial-gradient(circle at 16% 12%, rgb(24 92 103 / 24%), transparent 26%),
-    linear-gradient(180deg, #020509 0%, #07111a 48%, #030609 100%);
+  background: #000000;
 }
 
 .start-screen__art-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   display: grid;
-  width: min(100%, 1760px);
-  min-height: 0;
   place-items: center;
+  overflow: hidden;
+}
+
+.start-screen__art-wrap::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, transparent 62%, rgb(0 0 0 / 58%) 100%);
+  pointer-events: none;
 }
 
 .start-screen__art {
   display: block;
   width: 100%;
-  max-width: 100%;
-  max-height: calc(100svh - 128px);
+  height: 100%;
   object-fit: contain;
-  filter:
-    drop-shadow(0 24px 36px rgb(0 0 0 / 58%))
-    drop-shadow(0 0 22px rgb(224 158 55 / 12%));
+  object-position: center;
   user-select: none;
 }
 
 .start-play-button {
+  position: relative;
+  z-index: 1;
   min-width: clamp(164px, 22vw, 264px);
   min-height: clamp(54px, 7vh, 72px);
   border: 2px solid #d9ad51;
