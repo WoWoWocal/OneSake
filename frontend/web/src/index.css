@@ -70,7 +70,7 @@ button:focus-visible {
 }
 
 .app-main {
-  max-width: 1180px;
+  max-width: 1360px;
   margin: 0 auto;
 }
 
@@ -1168,6 +1168,240 @@ label {
 .pirate-hand-cards .pirate-card-slot {
   flex: 0 0 58px;
   min-height: 82px;
+}
+
+.match-board-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.match-board-frame {
+  display: grid;
+  min-width: 0;
+  border: 1px solid rgba(229, 176, 73, 0.28);
+  border-radius: 12px;
+  background: #050b10;
+  box-shadow: 0 20px 48px rgb(0 0 0 / 28%);
+}
+
+.match-board-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.match-board {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 760px;
+  aspect-ratio: 1672 / 941;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: #050b10;
+}
+
+.match-board-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.match-board-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.board-slot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  min-width: 0;
+  border: 1px dashed rgb(255 221 137 / 62%);
+  border-radius: 6px;
+  padding: 3px;
+  color: #fff7dd;
+  text-align: center;
+  background: rgb(4 11 18 / 36%);
+  box-shadow: inset 0 0 14px rgb(0 0 0 / 42%);
+  backdrop-filter: blur(1px);
+}
+
+.board-slot__label,
+.match-board-player-tag span,
+.match-board-room-tag span {
+  display: block;
+  color: #f2c76d;
+  font-size: clamp(0.48rem, 0.78vw, 0.7rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 85%);
+}
+
+.board-slot__count,
+.match-board-player-tag strong,
+.match-board-room-tag strong {
+  display: block;
+  max-width: 100%;
+  color: #ffffff;
+  font-size: clamp(0.62rem, 1vw, 0.92rem);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 86%);
+}
+
+.board-slot--deck {
+  border-style: solid;
+  border-color: rgb(244 198 87 / 72%);
+  background: rgb(6 17 27 / 58%);
+}
+
+.board-slot--life {
+  border-style: solid;
+  border-color: rgb(233 104 91 / 68%);
+  background: rgb(65 16 20 / 42%);
+}
+
+.board-slot--leader {
+  border-style: solid;
+  border-color: rgb(255 222 128 / 78%);
+  background: rgb(51 34 8 / 36%);
+}
+
+.board-slot--character {
+  border-color: rgb(255 221 137 / 48%);
+}
+
+.board-slot--don-area,
+.board-slot--don-deck {
+  border-color: rgb(65 197 177 / 62%);
+  background: rgb(8 50 50 / 38%);
+}
+
+.board-slot--trash {
+  border-color: rgb(189 117 104 / 64%);
+  background: rgb(48 20 18 / 38%);
+}
+
+.board-slot--hand {
+  border-color: rgb(138 182 238 / 58%);
+  background: rgb(12 36 66 / 42%);
+}
+
+.board-slot--filled {
+  border-style: solid;
+  background:
+    linear-gradient(160deg, rgb(28 64 78 / 74%), rgb(9 19 31 / 82%)),
+    rgb(4 11 18 / 58%);
+}
+
+.board-slot--active {
+  box-shadow:
+    0 0 0 2px rgb(240 191 56 / 72%),
+    inset 0 0 14px rgb(0 0 0 / 42%);
+}
+
+.match-board-player-tag,
+.match-board-room-tag {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  gap: 1px;
+  max-width: 16%;
+  border: 1px solid rgb(229 176 73 / 38%);
+  border-radius: 8px;
+  padding: 5px 7px;
+  background: rgb(4 11 18 / 58%);
+  backdrop-filter: blur(2px);
+}
+
+.match-board-player-tag.is-active {
+  border-color: rgb(240 191 56 / 82%);
+  background: rgb(76 54 16 / 62%);
+}
+
+.match-board-player-tag--opponent {
+  top: 9%;
+  left: 28%;
+}
+
+.match-board-player-tag--player {
+  right: 56%;
+  bottom: 5.6%;
+}
+
+.match-board-room-tag {
+  top: 45.6%;
+  left: 44.5%;
+  width: 11%;
+  text-align: center;
+}
+
+.match-board-game-over {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  z-index: 6;
+  min-width: min(320px, 52%);
+  transform: translateX(-50%);
+  border: 1px solid rgb(240 191 56 / 72%);
+  border-radius: 10px;
+  padding: 12px;
+  color: #ffffff;
+  text-align: center;
+  font-size: clamp(1rem, 2vw, 1.6rem);
+  font-weight: 900;
+  background: rgb(5 11 17 / 82%);
+  box-shadow: 0 18px 38px rgb(0 0 0 / 46%);
+}
+
+.match-player-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.match-player-summary li {
+  display: grid;
+  gap: 7px;
+  border: 1px solid rgba(148, 187, 194, 0.2);
+  border-radius: 10px;
+  padding: 9px;
+  background: #0b1a2a;
+}
+
+.match-player-summary li.is-empty {
+  color: #8ea9b3;
+  font-weight: 800;
+}
+
+.match-player-summary li.is-disconnected {
+  border-color: rgba(234, 111, 99, 0.32);
+}
+
+.match-player-summary strong {
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.end-turn-action-button {
+  border-color: rgba(31, 196, 159, 0.48);
+  background: linear-gradient(180deg, #b8f0df, #31a98c);
 }
 
 .bottom-nav {
