@@ -67,7 +67,7 @@ export function CardTile({
       </button>
       <div className="card-quantity-controls" aria-label={`${card.card_name} quantity`}>
         <button
-          className="card-quantity-button"
+          className="card-quantity-button card-quantity-button--minus"
           disabled={!canDecrease}
           onClick={decreaseQuantity}
           type="button"
@@ -78,7 +78,7 @@ export function CardTile({
           {currentQuantity}/{maxQuantity}
         </strong>
         <button
-          className="card-quantity-button"
+          className="card-quantity-button card-quantity-button--plus"
           disabled={!canIncrease}
           onClick={increaseQuantity}
           type="button"
