@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { getCardsBySetId } from '../../api/cardsApi';
-import deckbuilderBannerUrl from '../../assets/banners/deckbuilder-banner.svg';
+import deckbuilderBannerUrl from '../../assets/banners/deckbuilder-banner.png';
 import { Drawer } from '../../components/ui/Drawer';
 import type { CardDto } from '../../types/cards';
 import type { Deck, DeckCard } from '../../types/decks';
