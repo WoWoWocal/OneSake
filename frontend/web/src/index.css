@@ -1144,7 +1144,7 @@ label {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 2px;
 }
 
 .card-grid-count {
@@ -1156,16 +1156,17 @@ label {
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 2px;
   width: 100%;
-  padding: 8px;
+  border-radius: 4px;
+  padding: 1px;
   color: inherit;
   text-align: left;
 }
 
 .card-tile:hover {
   border-color: #176f65;
-  box-shadow: 0 8px 18px rgb(22 111 101 / 12%);
+  box-shadow: 0 4px 10px rgb(22 111 101 / 14%);
 }
 
 .card-tile__inspect {
@@ -1185,7 +1186,7 @@ label {
   width: 100%;
   aspect-ratio: 5 / 7;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 4px;
   color: #ffffff;
   background: #314b57;
   text-align: center;
@@ -1195,22 +1196,45 @@ label {
 
 .card-tile-image img,
 .card-tile__image img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 4px;
   background: #eef3f4;
 }
 
-.card-tile-actions {
+.card-quantity-controls {
   display: grid;
-  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 1px;
 }
 
-.card-action-button {
-  min-height: 44px;
-  padding-inline: 8px;
-  overflow-wrap: anywhere;
+.card-quantity-button {
+  min-width: 0;
+  min-height: 32px;
+  border: 1px solid #cbd9dc;
+  border-radius: 4px;
+  padding: 0;
+  color: #176f65;
+  background: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.card-quantity-button:disabled {
+  color: #8ba0a8;
+  background: #eef3f4;
+}
+
+.card-quantity-value {
+  min-width: 0;
+  color: #344f5d;
+  font-size: 0.72rem;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .card-inspect {

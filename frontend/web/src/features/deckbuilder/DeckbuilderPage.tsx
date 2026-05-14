@@ -558,10 +558,15 @@ export function DeckbuilderPage() {
             <CardGrid
               cards={sortedCards}
               cardsPerRow={cardsPerRow}
+              deckCards={deck.cards}
               filters={filters}
+              leaderCardId={deck.leaderCardId}
               leaderColors={activeLeaderColors}
               onAddCard={addCardToDeck}
+              onRemoveCard={decreaseDeckCard}
+              onRemoveLeader={removeLeader}
               onSelectCard={setSelectedCard}
+              onSetLeader={addCardToDeck}
             />
           )}
         </main>
