@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { getCardsBySetId } from '../../api/cardsApi';
+import deckbuilderBannerUrl from '../../assets/banners/deckbuilder-banner.svg';
 import { Drawer } from '../../components/ui/Drawer';
 import type { CardDto } from '../../types/cards';
 import type { Deck, DeckCard } from '../../types/decks';
@@ -504,10 +505,11 @@ export function DeckbuilderPage() {
   return (
     <section className="deckbuilder-page">
       <header className="panel header-panel deckbuilder-header">
-        <div>
-          <h1>Deckbuilder</h1>
-          <p>Browse real cards, build a local deck and export a valid list.</p>
-        </div>
+        <img
+          alt="Deckbuilder banner"
+          className="deckbuilder-banner-image"
+          src={deckbuilderBannerUrl}
+        />
         <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
           Deck
         </button>
