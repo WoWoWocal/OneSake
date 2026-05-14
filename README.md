@@ -78,3 +78,8 @@ The backend uses PostgreSQL with Entity Framework Core.
 ```bash
 docker compose up -d
 
+
+
+<img width="997" height="792" alt="grafik" src="https://github.com/user-attachments/assets/4d6d3884-301a-4f76-9cda-38ccd74333bb" />
+
+
