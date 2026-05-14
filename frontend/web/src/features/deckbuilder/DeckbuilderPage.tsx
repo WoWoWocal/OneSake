@@ -48,8 +48,6 @@ const availableSets = [
   'OP-11',
   'OP-12',
   'OP-13',
-  'OP-14',
-  'OP-15',
 
   'ST-01',
   'ST-02',
