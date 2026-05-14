@@ -16,7 +16,9 @@ builder.Services.AddDbContext<OneSakeDbContext>(options =>
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers(); // Support Adden fuer Controllers
+
 builder.Services.AddHttpClient<CardService>();
+builder.Services.AddScoped<CardImportService>();
 
 // Enables Swagger (API documentation UI)
 builder.Services.AddEndpointsApiExplorer();
