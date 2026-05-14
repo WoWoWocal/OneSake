@@ -37,25 +37,25 @@ namespace OneSake.Server.Services
         public string Type { get; set; } = "";
 
         [JsonPropertyName("life")]
-        public string? Life { get; set; }
+        public object? Life { get; set; }
 
         [JsonPropertyName("card_cost")]
-        public string CardCost { get; set; } = "";
+        public object? CardCost { get; set; } = "";
 
         [JsonPropertyName("card_power")]
-        public string CardPower { get; set; } = "";
+        public object? CardPower { get; set; } = "";
 
         [JsonPropertyName("sub_types")]
         public string SubTypes { get; set; } = "";
 
         [JsonPropertyName("counter_amount")]
-        public string? CounterAmount { get; set; } = "";
+        public object? CounterAmount { get; set; } = "";
 
         [JsonPropertyName("attribute")]
         public string Attribute { get; set; } = "";
 
         [JsonPropertyName("date_scraped")]
-        public string DateScraped { get; set; } = "";
+        public object DateScraped { get; set; } = "";
 
         [JsonPropertyName("card_image_id")]
         public string CardImageId { get; set; } = "";
