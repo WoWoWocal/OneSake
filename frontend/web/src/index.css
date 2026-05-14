@@ -66,12 +66,10 @@ button:focus-visible {
 .start-screen {
   position: relative;
   display: grid;
-  place-items: end center;
   width: 100%;
   min-height: 100vh;
   min-height: 100svh;
   padding: clamp(18px, 3vw, 34px);
-  padding-bottom: calc(clamp(24px, 6vh, 58px) + env(safe-area-inset-bottom));
   overflow: hidden;
   background: #000000;
 }
@@ -99,12 +97,14 @@ button:focus-visible {
   height: 100%;
   object-fit: contain;
   object-position: center;
-  transform: translateY(-5vh);
+  transform: translateY(-10vh);
   user-select: none;
 }
 
 .start-play-button {
-  position: relative;
+  position: absolute;
+  top: 63svh;
+  left: 50%;
   z-index: 1;
   display: grid;
   width: clamp(230px, 28vw, 340px);
@@ -123,6 +123,7 @@ button:focus-visible {
   text-shadow:
     0 1px 0 #1a0e04,
     0 0 12px rgb(249 218 124 / 44%);
+  transform: translateX(-50%);
   transition:
     color 160ms ease,
     filter 160ms ease,
@@ -187,11 +188,11 @@ button:focus-visible {
   filter:
     drop-shadow(0 0 28px rgb(255 207 102 / 48%))
     drop-shadow(0 18px 26px rgb(0 0 0 / 62%));
-  transform: translateY(-1px) scale(1.02);
+  transform: translateX(-50%) translateY(-1px) scale(1.02);
 }
 
 .start-play-button:active {
-  transform: translateY(1px) scale(0.99);
+  transform: translateX(-50%) translateY(1px) scale(0.99);
   filter:
     drop-shadow(0 0 14px rgb(217 173 81 / 22%))
     drop-shadow(0 8px 14px rgb(0 0 0 / 58%));
@@ -200,6 +201,12 @@ button:focus-visible {
 .start-play-button:focus-visible {
   outline: 3px solid #ffe19a;
   outline-offset: 4px;
+}
+
+@media (min-width: 760px) {
+  .start-play-button {
+    top: 68svh;
+  }
 }
 
 .app-shell {
