@@ -6,7 +6,7 @@ interface ChoiceSheetProps {
   currentPrompt: ChoicePromptDto | null;
   pending: boolean;
   canSubmitChoice: boolean;
-  onSubmitChoice: (option: string) => void;
+  onSubmitChoice: (option: string, selectedCardInstanceId?: string) => void;
 }
 
 export function ChoiceSheet({
@@ -15,15 +15,23 @@ export function ChoiceSheet({
   onSubmitChoice,
   pending,
 }: ChoiceSheetProps) {
+  const visibleOptions =
+    currentPrompt?.kind === 'MAIN_ACTION'
+      ? currentPrompt.options.filter((option) => option !== 'PLAY_CARD')
+      : currentPrompt?.options ?? [];
+
   return (
-    <BottomSheet open={Boolean(currentPrompt)} title={currentPrompt?.title ?? 'Choice'}>
+    <BottomSheet
+      open={Boolean(currentPrompt) && visibleOptions.length > 0}
+      title={currentPrompt?.title ?? 'Choice'}
+    >
       {currentPrompt && (
         <div className="choice-content">
           <div className="choice-sheet-subtitle">
             {currentPrompt.kind} for {currentPrompt.playerId}
           </div>
           <div className="button-row">
-            {currentPrompt.options.map((option) => (
+            {visibleOptions.map((option) => (
               <Button
                 key={option}
                 className="choice-button"

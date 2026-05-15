@@ -81,17 +81,35 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
 
   if (!deck) {
     return (
-      <section className="panel tools-panel mulligan-trainer">
+      <section className="panel tools-panel tool-card mulligan-trainer">
+        <span className="tools-kicker">Practice</span>
         <h2>Mulligan Trainer</h2>
-        <p>Select a saved deck to start training opening hands.</p>
+        <p>Select a saved deck to train opening hands.</p>
       </section>
     );
   }
 
+  const metricCards = [
+    { label: 'Cards', value: drawResult.metrics.cardCount },
+    { label: 'Unique IDs', value: drawResult.metrics.uniqueCardIds },
+    { label: '2k Counters', value: drawResult.metrics.counter2000Count },
+    { label: 'Events', value: drawResult.metrics.eventCount },
+    { label: 'Low Cost', value: drawResult.metrics.lowCostCount },
+    { label: 'Characters', value: drawResult.metrics.characterCount },
+  ];
+
+  const statCards = [
+    { label: 'Hands Drawn', value: stats.handsDrawn },
+    { label: 'Keeps', value: stats.keeps },
+    { label: 'Mulligans', value: stats.mulligans },
+    { label: 'Keep Rate', value: formatKeepRate(stats) },
+  ];
+
   return (
-    <section className="panel tools-panel mulligan-trainer">
+    <section className="panel tools-panel tool-card mulligan-trainer">
       <div className="mulligan-header">
         <div>
+          <span className="tools-kicker">Practice</span>
           <h2>Mulligan Trainer</h2>
           <p>
             {deck.name} / {totalCards} cards
@@ -117,10 +135,16 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
           <div className="mulligan-hand">
             {drawResult.hand.map((card) => (
               <article key={card.cardId} className="mulligan-card">
-                <strong>{card.name}</strong>
-                <span>{card.cardId}</span>
-                <span>x{card.quantity}</span>
-                <div className="tag-list">
+                <div className="mulligan-card__art" aria-hidden="true">
+                  {card.cardId}
+                </div>
+                <div className="mulligan-card__body">
+                  <strong>{card.name}</strong>
+                  <span>
+                    {card.cardId} / x{card.quantity}
+                  </span>
+                </div>
+                <div className="tag-list mulligan-card__tags">
                   {card.color && <span className="tag-chip">{card.color}</span>}
                   {card.type && <span className="tag-chip">{card.type}</span>}
                   {typeof card.cost === 'number' && (
@@ -135,13 +159,12 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
           </div>
 
           <div className="mulligan-metrics">
-            <span>Cards: {drawResult.metrics.cardCount}</span>
-            <span>Unique IDs: {drawResult.metrics.uniqueCardIds}</span>
-            <span>Grouped cards: {drawResult.metrics.cardsWithQuantity.length}</span>
-            <span>2k counters: {drawResult.metrics.counter2000Count}</span>
-            <span>Events: {drawResult.metrics.eventCount}</span>
-            <span>Low cost: {drawResult.metrics.lowCostCount}</span>
-            <span>Characters: {drawResult.metrics.characterCount}</span>
+            {metricCards.map((metric) => (
+              <div key={metric.label}>
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+              </div>
+            ))}
           </div>
 
           <div className="mulligan-actions">
@@ -154,22 +177,12 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
       )}
 
       <div className="mulligan-stats">
-        <div>
-          <span>Hands drawn</span>
-          <strong>{stats.handsDrawn}</strong>
-        </div>
-        <div>
-          <span>Keeps</span>
-          <strong>{stats.keeps}</strong>
-        </div>
-        <div>
-          <span>Mulligans</span>
-          <strong>{stats.mulligans}</strong>
-        </div>
-        <div>
-          <span>Keep rate</span>
-          <strong>{formatKeepRate(stats)}</strong>
-        </div>
+        {statCards.map((stat) => (
+          <div key={stat.label}>
+            <span>{stat.label}</span>
+            <strong>{stat.value}</strong>
+          </div>
+        ))}
       </div>
 
       <Button onClick={resetSession} variant="ghost">

@@ -18,6 +18,7 @@ export function Drawer({ children, onClose, open, side = 'right', title }: Drawe
   return (
     <div className="ui-overlay" role="presentation">
       <aside
+        aria-label={title}
         aria-modal="true"
         className={`ui-drawer ui-drawer--${side}`}
         role="dialog"

@@ -1,13 +1,26 @@
+import { useState } from 'react';
+
 import onesakeBoardUrl from '../../../assets/boards/onesake-board.png';
-import type { GameStateDto, PlayerStateDto } from '../../../types/realtime';
+import type {
+  CardInstanceDto,
+  ChoicePromptDto,
+  GameStateDto,
+  PlayerStateDto,
+} from '../../../types/realtime';
 import { boardSlots } from './boardLayout';
 import { BoardSlot } from './BoardSlot';
 import type { BoardSide, BoardSlotDefinition } from './boardTypes';
+import { CardInspectOverlay } from './CardInspectOverlay';
+import { MatchCardView } from './MatchCardView';
 
 interface MatchBoardProps {
   gameState: GameStateDto | null;
   activePlayerId: string;
+  canSubmitChoice: boolean;
+  currentPrompt: ChoicePromptDto | null;
   joinedRoomCode?: string;
+  onSubmitChoice: (option: string, selectedCardInstanceId?: string) => void;
+  pending: boolean;
 }
 
 function getCount(
@@ -24,10 +37,14 @@ function getPlayerName(player: PlayerStateDto | null, fallback: string): string 
 
 function getVisiblePlayers(gameState: GameStateDto | null): Record<BoardSide, PlayerStateDto | null> {
   const players = gameState?.players ?? [];
+  const viewerPlayer =
+    players.find((player) => player.playerId === gameState?.viewerPlayerId) ?? players[0] ?? null;
+  const opponentPlayer =
+    players.find((player) => player.playerId !== viewerPlayer?.playerId) ?? null;
 
   return {
-    player: players[0] ?? null,
-    opponent: players[1] ?? null,
+    player: viewerPlayer,
+    opponent: opponentPlayer,
   };
 }
 
@@ -49,7 +66,22 @@ function getSlotCount(slot: BoardSlotDefinition, player: PlayerStateDto | null):
     return getCount(player, 'lifeCount');
   }
 
+  if (slot.kind === 'trash') {
+    return player?.trashCount ?? player?.trashCards.length ?? 0;
+  }
+
   return undefined;
+}
+
+function getSlotCard(
+  slot: BoardSlotDefinition,
+  player: PlayerStateDto | null,
+): CardInstanceDto | undefined {
+  if (slot.kind !== 'character') {
+    return undefined;
+  }
+
+  return player?.boardCards[getCharacterIndex(slot) - 1];
 }
 
 function isSlotFilled(slot: BoardSlotDefinition, player: PlayerStateDto | null): boolean {
@@ -62,32 +94,98 @@ function isSlotFilled(slot: BoardSlotDefinition, player: PlayerStateDto | null):
   }
 
   if (slot.kind === 'character') {
-    return getCharacterIndex(slot) <= getCount(player, 'boardCount');
+    return Boolean(getSlotCard(slot, player)) || getCharacterIndex(slot) <= getCount(player, 'boardCount');
   }
 
   return false;
 }
 
-export function MatchBoard({ activePlayerId, gameState, joinedRoomCode }: MatchBoardProps) {
+function hasPromptOption(prompt: ChoicePromptDto | null, optionName: string): boolean {
+  return Boolean(prompt?.options.some((option) => option === optionName));
+}
+
+function HandCardButton({
+  canPlay,
+  card,
+  onInspect,
+  onPlay,
+}: {
+  canPlay: boolean;
+  card: CardInstanceDto;
+  onInspect: (card: CardInstanceDto) => void;
+  onPlay: (card: CardInstanceDto) => void;
+}) {
+  return (
+    <div className={canPlay ? 'match-hand-card-shell is-playable' : 'match-hand-card-shell'}>
+      <MatchCardView
+        ariaLabel={
+          canPlay
+            ? `Play ${card.name} (${card.cardId})`
+            : `${card.name} (${card.cardId}) cannot be played now`
+        }
+        card={card}
+        clickable={canPlay}
+        disabled={!canPlay}
+        onClick={() => onPlay(card)}
+        size="hand"
+      />
+      <button
+        aria-label={`Inspect ${card.name} (${card.cardId})`}
+        className="match-card-inspect-button"
+        onClick={() => onInspect(card)}
+        type="button"
+      >
+        Inspect
+      </button>
+    </div>
+  );
+}
+
+export function MatchBoard({
+  activePlayerId,
+  canSubmitChoice,
+  currentPrompt,
+  gameState,
+  joinedRoomCode,
+  onSubmitChoice,
+  pending,
+}: MatchBoardProps) {
+  const [inspectedCard, setInspectedCard] = useState<CardInstanceDto | null>(null);
+  const debugBoardLayout =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugBoard');
   const visiblePlayers = getVisiblePlayers(gameState);
+  const localPlayer = visiblePlayers.player;
   const roomCode = gameState?.roomCode || joinedRoomCode || '-';
   const isGameOver = gameState?.phase === 'GameOver';
+  const canPlayHandCards =
+    Boolean(localPlayer) &&
+    currentPrompt?.kind === 'MAIN_ACTION' &&
+    currentPrompt.playerId === localPlayer?.playerId &&
+    hasPromptOption(currentPrompt, 'PLAY_CARD') &&
+    canSubmitChoice &&
+    !pending;
 
   return (
     <div className="match-board-frame">
       <div className="match-board-scroll">
-        <div className="match-board" aria-label="OneSake match board">
+        <div
+          className={debugBoardLayout ? 'match-board match-board--debug' : 'match-board'}
+          aria-label="OneSake match board"
+        >
           <img alt="OneSake pirate wooden game board" className="match-board-image" src={onesakeBoardUrl} />
 
           <div className="match-board-overlay">
             {boardSlots.map((slot) => {
               const slotPlayer = visiblePlayers[slot.side];
+              const slotCard = getSlotCard(slot, slotPlayer);
               return (
                 <BoardSlot
                   key={slot.id}
                   active={slotPlayer?.playerId === activePlayerId}
+                  card={slotCard}
                   count={getSlotCount(slot, slotPlayer)}
-                  filled={isSlotFilled(slot, slotPlayer)}
+                  filled={Boolean(slotCard) || isSlotFilled(slot, slotPlayer)}
+                  onInspectCard={setInspectedCard}
                   slot={slot}
                 />
               );
@@ -124,6 +222,31 @@ export function MatchBoard({ activePlayerId, gameState, joinedRoomCode }: MatchB
           </div>
         </div>
       </div>
+
+      <div className="match-hand-zone" aria-label="Your hand cards">
+        <div className="match-hand-zone__header">
+          <span>Your Hand</span>
+          <strong>{localPlayer?.handCount ?? 0} cards</strong>
+        </div>
+
+        <div className="match-hand-card-row">
+          {localPlayer?.handCards.length ? (
+            localPlayer.handCards.map((card) => (
+              <HandCardButton
+                key={card.instanceId}
+                canPlay={canPlayHandCards}
+                card={card}
+                onInspect={setInspectedCard}
+                onPlay={(selectedCard) => onSubmitChoice('PLAY_CARD', selectedCard.instanceId)}
+              />
+            ))
+          ) : (
+            <div className="match-hand-empty">No visible hand cards.</div>
+          )}
+        </div>
+      </div>
+
+      <CardInspectOverlay card={inspectedCard} onClose={() => setInspectedCard(null)} />
     </div>
   );
 }

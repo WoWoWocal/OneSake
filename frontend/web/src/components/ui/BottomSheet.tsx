@@ -17,7 +17,7 @@ export function BottomSheet({ children, footer, onClose, open, title }: BottomSh
 
   return (
     <div className="ui-sheet-backdrop" role="presentation">
-      <section aria-modal="true" className="ui-bottom-sheet" role="dialog">
+      <section aria-label={title} aria-modal="true" className="ui-bottom-sheet" role="dialog">
         <header className="ui-dialog-header">
           <h2>{title}</h2>
           {onClose && (

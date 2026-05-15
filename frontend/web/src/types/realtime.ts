@@ -20,6 +20,16 @@ export interface PlayerStateDto {
   leaderCardId: string;
   mainDeckCount: number;
   hasDeck: boolean;
+  trashCount: number;
+  handCards: CardInstanceDto[];
+  boardCards: CardInstanceDto[];
+  trashCards: CardInstanceDto[];
+}
+
+export interface CardInstanceDto {
+  instanceId: string;
+  cardId: string;
+  name: string;
 }
 
 export interface PlayerDeckCardDto {
@@ -39,6 +49,7 @@ export interface GameStateDto {
   roomCode: string;
   turnNumber: number;
   activePlayerId: string;
+  viewerPlayerId: string;
   phase: MatchPhase;
   players: PlayerStateDto[];
 }
@@ -55,6 +66,7 @@ export interface ChoiceSubmissionDto {
   choiceId: string;
   playerId: string;
   selectedOption: string;
+  selectedCardInstanceId?: string;
 }
 
 export interface ChatMessageDto {

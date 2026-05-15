@@ -53,7 +53,10 @@ public class MatchHub : Hub
         {
             ChoiceId = submission.ChoiceId.Trim(),
             PlayerId = Context.ConnectionId,
-            SelectedOption = submission.SelectedOption.Trim()
+            SelectedOption = submission.SelectedOption.Trim(),
+            SelectedCardInstanceId = string.IsNullOrWhiteSpace(submission.SelectedCardInstanceId)
+                ? null
+                : submission.SelectedCardInstanceId.Trim()
         };
 
         var update = room.SubmitChoice(normalizedSubmission);
@@ -104,7 +107,17 @@ public class MatchHub : Hub
 
     private async Task PublishMatchUpdate(string roomCode, MatchUpdate update)
     {
-        await Clients.Group(roomCode).SendAsync("StateSnapshot", update.StateSnapshot);
+        if (update.StateSnapshots.Count > 0)
+        {
+            foreach (var playerSnapshot in update.StateSnapshots)
+            {
+                await Clients.Client(playerSnapshot.Key).SendAsync("StateSnapshot", playerSnapshot.Value);
+            }
+        }
+        else
+        {
+            await Clients.Group(roomCode).SendAsync("StateSnapshot", update.StateSnapshot);
+        }
 
         foreach (var logEvent in update.LogEvents)
         {

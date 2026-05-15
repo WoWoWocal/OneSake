@@ -1,61 +1,161 @@
 import { Button } from '../../components/ui/Button';
+import type { ConnectionStatus } from '../../api/signalrClient';
+import { ConnectionStatusBadge } from './ConnectionStatusBadge';
+
+interface ReadinessItem {
+  label: string;
+  ready: boolean;
+  text: string;
+}
 
 interface LobbyPanelProps {
   roomCodeInput: string;
   displayNameInput: string;
   canJoin: boolean;
   canStart: boolean;
+  connectionStatus: ConnectionStatus;
+  copyStatus: '' | 'copied' | 'failed';
   deckNotice: string;
+  joinedRoomCode: string;
   pending: boolean;
+  readinessItems: ReadinessItem[];
   onRoomCodeChange: (value: string) => void;
   onDisplayNameChange: (value: string) => void;
+  onGenerateRoomCode: () => void;
   onJoinRoom: () => void;
+  onCopyRoomCode: () => void;
+  onOpenBoard: () => void;
+  onOpenDeckbuilder?: () => void;
   onStartMatch: () => void;
 }
 
 export function LobbyPanel({
   canJoin,
   canStart,
+  connectionStatus,
+  copyStatus,
   deckNotice,
   displayNameInput,
+  joinedRoomCode,
+  onCopyRoomCode,
   onDisplayNameChange,
+  onGenerateRoomCode,
   onJoinRoom,
+  onOpenBoard,
+  onOpenDeckbuilder,
   onRoomCodeChange,
   onStartMatch,
   pending,
+  readinessItems,
   roomCodeInput,
 }: LobbyPanelProps) {
   return (
-    <section className="panel lobby-panel">
-      <div className="field">
-        <label htmlFor="roomCode">RoomCode</label>
-        <input
-          id="roomCode"
-          maxLength={12}
-          onChange={(event) => onRoomCodeChange(event.target.value)}
-          placeholder="ABCD"
-          value={roomCodeInput}
-        />
+    <section className="match-setup-grid" aria-label="Match setup">
+      <div className="panel lobby-panel match-setup-card">
+        <div className="match-setup-card__header">
+          <span>Player</span>
+          <ConnectionStatusBadge status={connectionStatus} />
+        </div>
+        <div className="field">
+          <label htmlFor="displayName">Display Name</label>
+          <input
+            autoComplete="nickname"
+            id="displayName"
+            maxLength={24}
+            onChange={(event) => onDisplayNameChange(event.target.value)}
+            placeholder="Captain Calvin"
+            value={displayNameInput}
+          />
+        </div>
       </div>
-      <div className="field">
-        <label htmlFor="displayName">DisplayName</label>
-        <input
-          id="displayName"
-          maxLength={24}
-          onChange={(event) => onDisplayNameChange(event.target.value)}
-          placeholder="Player 1"
-          value={displayNameInput}
-        />
+
+      <div className="panel lobby-panel match-setup-card match-room-card">
+        <div className="match-setup-card__header">
+          <span>Room</span>
+          {joinedRoomCode ? <strong className="match-room-code-chip">{joinedRoomCode}</strong> : null}
+        </div>
+        <div className="field">
+          <label htmlFor="roomCode">Room Code</label>
+          <input
+            className="match-room-code-input"
+            id="roomCode"
+            maxLength={12}
+            onChange={(event) => onRoomCodeChange(event.target.value)}
+            placeholder="SAKE42"
+            value={roomCodeInput}
+          />
+        </div>
+        <div className="match-room-actions">
+          <Button onClick={onGenerateRoomCode} variant="secondary">
+            Generate Room Code
+          </Button>
+          {joinedRoomCode && (
+            <Button onClick={onCopyRoomCode} variant="ghost">
+              {copyStatus === 'copied'
+                ? 'Copied'
+                : copyStatus === 'failed'
+                  ? 'Copy Failed'
+                  : 'Copy Room Code'}
+            </Button>
+          )}
+        </div>
+        {copyStatus === 'failed' && (
+          <p className="match-lobby-notice match-lobby-notice--error" role="alert">
+            Clipboard is not available in this browser context.
+          </p>
+        )}
       </div>
-      <div className="button-row">
-        <Button disabled={!canJoin || pending} onClick={onJoinRoom}>
-          Join Room
-        </Button>
-        <Button disabled={!canStart || pending} onClick={onStartMatch} variant="secondary">
-          StartMatch
-        </Button>
+
+      <div className="panel lobby-panel match-setup-card match-readiness-card">
+        <div className="match-setup-card__header">
+          <span>Ready Check</span>
+          <strong>{readinessItems.filter((item) => item.ready).length}/{readinessItems.length}</strong>
+        </div>
+        <ul className="match-readiness-list">
+          {readinessItems.map((item) => (
+            <li key={item.label} className={item.ready ? 'is-ready' : ''}>
+              <span aria-hidden="true">{item.ready ? 'OK' : '...'}</span>
+              <div>
+                <strong>{item.label}</strong>
+                <small>{item.text}</small>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {deckNotice && (
+          <div className="match-readiness-card__deck-action">
+            <p className="match-lobby-notice">{deckNotice}</p>
+            {onOpenDeckbuilder && (
+              <Button onClick={onOpenDeckbuilder} variant="secondary">
+                Open Deckbuilder
+              </Button>
+            )}
+          </div>
+        )}
       </div>
-      {deckNotice && <p className="match-lobby-notice">{deckNotice}</p>}
+
+      <div className="panel lobby-panel match-setup-card match-join-card">
+        <div className="match-setup-card__header">
+          <span>{joinedRoomCode ? 'Joined' : 'Launch'}</span>
+          {joinedRoomCode && <strong className="match-room-code-chip">{joinedRoomCode}</strong>}
+        </div>
+        <div className="match-join-card__actions">
+          <Button disabled={!canJoin || pending || Boolean(joinedRoomCode)} fullWidth onClick={onJoinRoom}>
+            {pending ? 'Joining...' : joinedRoomCode ? 'Joined' : 'Join Room'}
+          </Button>
+          {joinedRoomCode && (
+            <Button fullWidth onClick={onOpenBoard} variant="secondary">
+              Open Board
+            </Button>
+          )}
+          <Button disabled={!canStart || pending} fullWidth onClick={onStartMatch} variant="ghost">
+            Start Match
+          </Button>
+        </div>
+        <p>
+          Join opens the fullscreen board automatically. If you exit the board, use Open Board to return.
+        </p>
+      </div>
     </section>
   );
 }

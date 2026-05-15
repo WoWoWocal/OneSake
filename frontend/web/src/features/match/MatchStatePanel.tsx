@@ -16,7 +16,7 @@ interface MatchStatePanelProps {
   canSubmitChoice: boolean;
   selectedDeck: Deck | null;
   selectedDeckValidation: DeckValidationResult | null;
-  onSubmitChoice: (option: string) => void;
+  onSubmitChoice: (option: string, selectedCardInstanceId?: string) => void;
 }
 
 const BOARD_ACTIONS = ['Mulligan', 'Keep', 'Play Card', 'Attack', 'Activate Main', 'Pass'];
@@ -94,7 +94,7 @@ function ActionDock({
 }: {
   canSubmitChoice: boolean;
   currentPrompt: ChoicePromptDto | null;
-  onSubmitChoice: (option: string) => void;
+  onSubmitChoice: (option: string, selectedCardInstanceId?: string) => void;
   pending: boolean;
 }) {
   const endTurnOption = getActionOption(currentPrompt, 'End Turn');
@@ -109,10 +109,12 @@ function ActionDock({
 
       {BOARD_ACTIONS.map((actionLabel) => {
         const option = getActionOption(currentPrompt, actionLabel);
+        const isBoardHandAction =
+          currentPrompt?.kind === 'MAIN_ACTION' && normalizeAction(actionLabel) === 'playcard';
         return (
           <BoardActionButton
             key={actionLabel}
-            disabled={!option || pending || !canSubmitChoice}
+            disabled={!option || isBoardHandAction || pending || !canSubmitChoice}
             onClick={() => option && onSubmitChoice(option)}
           >
             {actionLabel}
@@ -185,8 +187,12 @@ export function MatchStatePanel({
         <div className="match-board-main">
           <MatchBoard
             activePlayerId={gameState?.activePlayerId ?? ''}
+            canSubmitChoice={canSubmitChoice}
+            currentPrompt={currentPrompt}
             gameState={gameState}
             joinedRoomCode={joinedRoomCode}
+            onSubmitChoice={onSubmitChoice}
+            pending={pending}
           />
 
           <ul className="match-player-summary" aria-label="Player zone counts">

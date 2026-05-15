@@ -28,7 +28,22 @@ public class MatchRoomTests
             Assert.Equal(5, player.HandCount);
             Assert.Equal(5, player.LifeCount);
             Assert.Equal(0, player.BoardCount);
+            Assert.Empty(player.HandCards);
         }
+
+        var p1PrivatePlayer = update.StateSnapshots["p1"].Players.Single(player => player.PlayerId == "p1");
+        var p2AsSeenByP1 = update.StateSnapshots["p1"].Players.Single(player => player.PlayerId == "p2");
+        var p1AsSeenByP2 = update.StateSnapshots["p2"].Players.Single(player => player.PlayerId == "p1");
+        Assert.Equal(5, p1PrivatePlayer.HandCards.Count);
+        Assert.All(p1PrivatePlayer.HandCards, card =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(card.InstanceId));
+            Assert.False(string.IsNullOrWhiteSpace(card.CardId));
+            Assert.False(string.IsNullOrWhiteSpace(card.Name));
+        });
+        Assert.Equal(5, p1PrivatePlayer.HandCards.Select(card => card.InstanceId).Distinct().Count());
+        Assert.Empty(p2AsSeenByP1.HandCards);
+        Assert.Empty(p1AsSeenByP2.HandCards);
 
         Assert.Equal(2, update.ChoicePrompts.Count);
         Assert.All(update.ChoicePrompts, prompt => Assert.Equal("MULLIGAN_DECISION", prompt.Kind));
@@ -336,12 +351,7 @@ public class MatchRoomTests
     {
         var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
 
-        var update = room.SubmitChoice(new ChoiceSubmissionDto
-        {
-            ChoiceId = mainActionPrompt.ChoiceId,
-            PlayerId = "p1",
-            SelectedOption = "PLAY_CARD"
-        });
+        var update = room.SubmitChoice(CreatePlayCardSubmission(room, mainActionPrompt, "p1"));
         var activePlayer = update.StateSnapshot.Players.Single(player => player.PlayerId == "p1");
         var nextPrompt = Assert.Single(update.ChoicePrompts);
 
@@ -351,6 +361,7 @@ public class MatchRoomTests
         Assert.Equal(5, activePlayer.HandCount);
         Assert.Equal(1, activePlayer.BoardCount);
         Assert.Equal(44, activePlayer.DeckCount);
+        Assert.Single(activePlayer.BoardCards);
         Assert.Contains(update.LogEvents, logEvent => logEvent.Type == "PLAY_CARD");
         Assert.Equal("MAIN_ACTION", nextPrompt.Kind);
         Assert.Equal("p1", nextPrompt.PlayerId);
@@ -360,16 +371,55 @@ public class MatchRoomTests
     }
 
     [Fact]
-    public void MainActionPrompt_OffersAttackAfterPlayCard()
+    public void MainActionPlayCard_FailsWithoutSelectedCardInstanceId()
     {
         var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var error = Assert.Throws<InvalidOperationException>(() => room.SubmitChoice(new ChoiceSubmissionDto
+        {
+            ChoiceId = mainActionPrompt.ChoiceId,
+            PlayerId = "p1",
+            SelectedOption = "PLAY_CARD"
+        }));
+
+        Assert.Equal("Playing a card requires selectedCardInstanceId.", error.Message);
+        var activePlayer = room.CreateStateSnapshot("p1").Players.Single(player => player.PlayerId == "p1");
+        Assert.Equal(6, activePlayer.HandCount);
+        Assert.Equal(0, activePlayer.BoardCount);
+    }
+
+    [Fact]
+    public void MainActionPlayCard_PlaysSelectedCardInstance()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+        var selectedCard = room
+            .CreateStateSnapshot("p1")
+            .Players.Single(player => player.PlayerId == "p1")
+            .HandCards[1];
 
         var update = room.SubmitChoice(new ChoiceSubmissionDto
         {
             ChoiceId = mainActionPrompt.ChoiceId,
             PlayerId = "p1",
-            SelectedOption = "PLAY_CARD"
+            SelectedOption = "PLAY_CARD",
+            SelectedCardInstanceId = selectedCard.InstanceId
         });
+        var activePlayer = update.StateSnapshots["p1"].Players.Single(player => player.PlayerId == "p1");
+        var boardCard = Assert.Single(activePlayer.BoardCards);
+
+        Assert.Equal(selectedCard.InstanceId, boardCard.InstanceId);
+        Assert.Equal(selectedCard.CardId, boardCard.CardId);
+        Assert.DoesNotContain(activePlayer.HandCards, card => card.InstanceId == selectedCard.InstanceId);
+        Assert.Equal(5, activePlayer.HandCount);
+        Assert.Equal(1, activePlayer.BoardCount);
+    }
+
+    [Fact]
+    public void MainActionPrompt_OffersAttackAfterPlayCard()
+    {
+        var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
+
+        var update = room.SubmitChoice(CreatePlayCardSubmission(room, mainActionPrompt, "p1"));
         var activePlayer = update.StateSnapshot.Players.Single(player => player.PlayerId == "p1");
         var nextPrompt = Assert.Single(update.ChoicePrompts);
 
@@ -382,12 +432,7 @@ public class MatchRoomTests
     public void MainActionAttack_ReducesOpponentLifeAndCreatesNextMainActionPrompt()
     {
         var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
-        var playUpdate = room.SubmitChoice(new ChoiceSubmissionDto
-        {
-            ChoiceId = mainActionPrompt.ChoiceId,
-            PlayerId = "p1",
-            SelectedOption = "PLAY_CARD"
-        });
+        var playUpdate = room.SubmitChoice(CreatePlayCardSubmission(room, mainActionPrompt, "p1"));
         var attackPrompt = Assert.Single(playUpdate.ChoicePrompts);
 
         var attackUpdate = room.SubmitChoice(new ChoiceSubmissionDto
@@ -428,12 +473,7 @@ public class MatchRoomTests
     public void MainActionAttack_FailsForNonActivePlayer()
     {
         var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
-        var playUpdate = room.SubmitChoice(new ChoiceSubmissionDto
-        {
-            ChoiceId = mainActionPrompt.ChoiceId,
-            PlayerId = "p1",
-            SelectedOption = "PLAY_CARD"
-        });
+        var playUpdate = room.SubmitChoice(CreatePlayCardSubmission(room, mainActionPrompt, "p1"));
         var attackPrompt = Assert.Single(playUpdate.ChoicePrompts);
 
         var error = Assert.Throws<InvalidOperationException>(() => room.SubmitChoice(new ChoiceSubmissionDto
@@ -450,12 +490,7 @@ public class MatchRoomTests
     public void MainActionAttack_EndsGameWhenOpponentLifeReachesZero()
     {
         var room = CreateStartedMainPhaseRoom(out var mainActionPrompt);
-        var playUpdate = room.SubmitChoice(new ChoiceSubmissionDto
-        {
-            ChoiceId = mainActionPrompt.ChoiceId,
-            PlayerId = "p1",
-            SelectedOption = "PLAY_CARD"
-        });
+        var playUpdate = room.SubmitChoice(CreatePlayCardSubmission(room, mainActionPrompt, "p1"));
 
         var currentPrompt = Assert.Single(playUpdate.ChoicePrompts);
         MatchUpdate attackUpdate = playUpdate;
@@ -526,6 +561,26 @@ public class MatchRoomTests
         }));
 
         Assert.Equal("Choice prompt does not belong to this player.", error.Message);
+    }
+
+    private static ChoiceSubmissionDto CreatePlayCardSubmission(
+        MatchRoom room,
+        ChoicePromptDto prompt,
+        string playerId,
+        int handIndex = 0)
+    {
+        var card = room
+            .CreateStateSnapshot(playerId)
+            .Players.Single(player => player.PlayerId == playerId)
+            .HandCards[handIndex];
+
+        return new ChoiceSubmissionDto
+        {
+            ChoiceId = prompt.ChoiceId,
+            PlayerId = playerId,
+            SelectedOption = "PLAY_CARD",
+            SelectedCardInstanceId = card.InstanceId
+        };
     }
 
     private static MatchRoom CreateStartedMainPhaseRoom(out ChoicePromptDto mainActionPrompt)
