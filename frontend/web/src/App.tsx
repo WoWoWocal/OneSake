@@ -16,8 +16,7 @@ function App() {
     return (
       <StartScreen
         onPlay={() => startApp('match')}
-        onOpenDeckbuilder={() => startApp('deckbuilder')}
-        onOpenTools={() => startApp('tools')}
+        onLogin={() => startApp('profile')}
       />
     );
   }
