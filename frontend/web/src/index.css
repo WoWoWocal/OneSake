@@ -2,7 +2,7 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.4;
   color: #16222d;
-  background: #eef3f4;
+  background: #0d151c;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -15,14 +15,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #eef3f4;
-  background-image:
-    linear-gradient(rgb(238 243 244 / 86%), rgb(238 243 244 / 82%)),
-    url("./assets/backgrounds/onesake-background.svg");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background:
+    radial-gradient(circle at 50% 0%, rgb(32 49 62 / 72%), transparent 36rem),
+    linear-gradient(180deg, #0c141b 0%, #101a22 52%, #0d151c 100%);
 }
 
 button,
@@ -1676,21 +1671,21 @@ label {
   background: #176f65;
 }
 
-.deckbuilder-banner {
+.deckbuilder-header {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 8px;
-  overflow: hidden;
 }
 
-.deckbuilder-banner-image {
-  display: block;
-  width: 100%;
-  max-width: 980px;
-  height: auto;
-  margin: 0 auto;
-  object-fit: contain;
+.deckbuilder-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.deckbuilder-header p {
+  margin: 2px 0 0;
+  color: #536776;
 }
 
 .deck-toggle {
