@@ -34,7 +34,9 @@ export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps)
           />
         )}
         {activeSection === 'deckbuilder' && <DeckbuilderPage />}
-        {activeSection === 'tools' && <ToolsPage />}
+        {activeSection === 'tools' && (
+          <ToolsPage onOpenDeckbuilder={() => setActiveSection('deckbuilder')} />
+        )}
         {activeSection === 'profile' && <ProfilePage />}
       </main>
       {!isImmersiveMode && <BottomNav activeSection={activeSection} onChange={setActiveSection} />}

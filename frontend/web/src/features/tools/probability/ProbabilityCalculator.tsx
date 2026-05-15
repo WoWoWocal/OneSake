@@ -286,7 +286,8 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
 
   if (!deck) {
     return (
-      <section className="panel tools-panel probability-calculator">
+      <section className="panel tools-panel tool-card probability-calculator">
+        <span className="tools-kicker">Odds</span>
         <h2>Probability Calculator</h2>
         <p>Select a saved deck to calculate opening-hand odds.</p>
       </section>
@@ -294,125 +295,140 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
   }
 
   return (
-    <section className="panel tools-panel probability-calculator">
-      <div>
+    <section className="panel tools-panel tool-card probability-calculator">
+      <div className="tool-card__header">
+        <span className="tools-kicker">Odds</span>
         <h2>Probability Calculator</h2>
         <p>
           Chance to draw at least {minimumHits} card from selected targets in {handSize} cards.
         </p>
       </div>
 
-      <div className="probability-form">
-        <label className="field" htmlFor="probabilityPreset">
-          Preset
-          <select
-            id="probabilityPreset"
-            onChange={(event) => applyPreset(event.target.value)}
-            value={presetName}
-          >
-            {probabilityPresets.map((preset) => (
-              <option key={preset.name} value={preset.name}>
-                {preset.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="field" htmlFor="minimumHits">
-          Minimum Hits
-          <input
-            id="minimumHits"
-            min={1}
-            onChange={(event) => {
-              setMinimumHits(Number(event.target.value));
-              setResult(null);
-            }}
-            type="number"
-            value={minimumHits}
-          />
-        </label>
-
-        <label className="field" htmlFor="handSize">
-          Hand Size
-          <input
-            id="handSize"
-            min={1}
-            onChange={(event) => {
-              setHandSize(Number(event.target.value));
-              setResult(null);
-            }}
-            type="number"
-            value={handSize}
-          />
-        </label>
-
-        <label className="field" htmlFor="simulations">
-          Simulations
-          <input
-            id="simulations"
-            max={maxSimulations}
-            min={1}
-            onChange={(event) => {
-              setSimulations(Number(event.target.value));
-              setResult(null);
-            }}
-            type="number"
-            value={simulations}
-          />
-        </label>
-      </div>
-
-      <div className="probability-targets">
-        <label className="field" htmlFor="targetSearch">
-          Target search
-          <input
-            id="targetSearch"
-            onChange={(event) => setTargetSearch(event.target.value)}
-            placeholder="Search name or card ID"
-            value={targetSearch}
-          />
-        </label>
-
-        <div className="probability-target-summary">
-          {selectedTargetIds.length} selected / {deck.cards.length} deck entries
-        </div>
-
-        {quickTargetGroups.length > 0 && (
-          <div className="probability-quick-targets" aria-label="Quick target groups">
-            {quickTargetGroups.map((group) => (
-              <button
-                key={group.label}
-                onClick={() => applyQuickTargetGroup(group.cardIds)}
-                type="button"
-              >
-                {group.label} ({group.cardIds.length})
-              </button>
-            ))}
+      <div className="probability-sections">
+        <section className="probability-section">
+          <div className="probability-section__title">
+            <h3>Target Selection</h3>
+            <span>{selectedTargetIds.length} selected</span>
           </div>
-        )}
 
-        <div className="probability-target-list">
-          {visibleCards.map((card) => {
-            const cardTags = formatCardTags(card);
+          <label className="field" htmlFor="targetSearch">
+            Target search
+            <input
+              id="targetSearch"
+              onChange={(event) => setTargetSearch(event.target.value)}
+              placeholder="Search name or card ID"
+              value={targetSearch}
+            />
+          </label>
 
-            return (
-              <label key={card.cardId} className="probability-target">
-                <input
-                  checked={selectedTargetIds.includes(card.cardId)}
-                  onChange={() => toggleTarget(card.cardId)}
-                  type="checkbox"
-                />
-                <span>
-                  <strong>{card.name}</strong>
-                  <small>
-                    {card.cardId} / x{card.quantity}
-                  </small>
-                  {cardTags && <small>{cardTags}</small>}
-                </span>
-              </label>
-            );
-          })}
-        </div>
+          <div className="probability-target-summary">
+            {selectedTargetIds.length} selected / {deck.cards.length} deck entries
+          </div>
+
+          {quickTargetGroups.length > 0 && (
+            <div className="probability-quick-targets" aria-label="Quick target groups">
+              {quickTargetGroups.map((group) => (
+                <button
+                  key={group.label}
+                  onClick={() => applyQuickTargetGroup(group.cardIds)}
+                  type="button"
+                >
+                  {group.label} ({group.cardIds.length})
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="probability-target-list">
+            {visibleCards.map((card) => {
+              const cardTags = formatCardTags(card);
+
+              return (
+                <label key={card.cardId} className="probability-target">
+                  <input
+                    checked={selectedTargetIds.includes(card.cardId)}
+                    onChange={() => toggleTarget(card.cardId)}
+                    type="checkbox"
+                  />
+                  <span>
+                    <strong>{card.name}</strong>
+                    <small>
+                      {card.cardId} / x{card.quantity}
+                    </small>
+                    {cardTags && <small>{cardTags}</small>}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="probability-section">
+          <div className="probability-section__title">
+            <h3>Simulation Settings</h3>
+            <span>{presetName}</span>
+          </div>
+
+          <div className="probability-form">
+            <label className="field" htmlFor="probabilityPreset">
+              Preset
+              <select
+                id="probabilityPreset"
+                onChange={(event) => applyPreset(event.target.value)}
+                value={presetName}
+              >
+                {probabilityPresets.map((preset) => (
+                  <option key={preset.name} value={preset.name}>
+                    {preset.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="field" htmlFor="minimumHits">
+              Minimum Hits
+              <input
+                id="minimumHits"
+                min={1}
+                onChange={(event) => {
+                  setMinimumHits(Number(event.target.value));
+                  setResult(null);
+                }}
+                type="number"
+                value={minimumHits}
+              />
+            </label>
+
+            <label className="field" htmlFor="handSize">
+              Hand Size
+              <input
+                id="handSize"
+                min={1}
+                onChange={(event) => {
+                  setHandSize(Number(event.target.value));
+                  setResult(null);
+                }}
+                type="number"
+                value={handSize}
+              />
+            </label>
+
+            <label className="field" htmlFor="simulations">
+              Simulations
+              <input
+                id="simulations"
+                max={maxSimulations}
+                min={1}
+                onChange={(event) => {
+                  setSimulations(Number(event.target.value));
+                  setResult(null);
+                }}
+                type="number"
+                value={simulations}
+              />
+            </label>
+          </div>
+        </section>
       </div>
 
       {inputError && <div className="status-panel status-panel--error">{inputError}</div>}
@@ -438,12 +454,25 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
         <div className="probability-result">
           <span>{result.presetName ?? 'Custom'}</span>
           <strong>{result.probabilityPercent.toFixed(1)}%</strong>
+          <div className="probability-result__stats">
+            <div>
+              <span>Hits</span>
+              <strong>{result.hits}</strong>
+            </div>
+            <div>
+              <span>Trials</span>
+              <strong>{result.simulations}</strong>
+            </div>
+            <div>
+              <span>Deck Cards</span>
+              <strong>{totalCards}</strong>
+            </div>
+          </div>
           <p>
             {result.hits}/{result.simulations} simulations drew at least{' '}
             {result.minimumHits} card from {result.targetCardIds.length} selected target
             {result.targetCardIds.length === 1 ? '' : 's'} in {result.handSize} cards.
           </p>
-          <p>Total deck cards: {totalCards}</p>
         </div>
       )}
     </section>
