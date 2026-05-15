@@ -35,7 +35,12 @@ export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps)
         </div>
       )}
       <main className="app-main">
-        {activeSection === 'match' && <MatchPage onImmersiveModeChange={setIsImmersiveMode} />}
+        {activeSection === 'match' && (
+          <MatchPage
+            onImmersiveModeChange={setIsImmersiveMode}
+            onOpenDeckbuilder={() => setActiveSection('deckbuilder')}
+          />
+        )}
         {activeSection === 'deckbuilder' && <DeckbuilderPage />}
         {activeSection === 'tools' && <ToolsPage />}
         {activeSection === 'profile' && <PlaceholderPage title="Profile" />}

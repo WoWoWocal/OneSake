@@ -23,6 +23,16 @@ import { MatchStatePanel } from './MatchStatePanel';
 
 interface MatchPageProps {
   onImmersiveModeChange?: (isImmersiveMode: boolean) => void;
+  onOpenDeckbuilder?: () => void;
+}
+
+type CopyStatus = '' | 'copied' | 'failed';
+
+function createRoomCode(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join(
+    '',
+  );
 }
 
 async function requestBoardPresentation(): Promise<void> {
@@ -63,7 +73,7 @@ async function exitBoardPresentation(): Promise<void> {
   }
 }
 
-export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
+export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPageProps) {
   const signalRClient = useRef(
     new SignalRClient(`${import.meta.env.VITE_BACKEND_URL}/matchHub`),
   );
@@ -82,6 +92,7 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
   const [savedDecks] = useState(() => loadStoredDecks());
   const [selectedDeckId, setSelectedDeckId] = useState('');
   const [isBoardMode, setIsBoardMode] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>('');
 
   useEffect(() => {
     const client = signalRClient.current;
@@ -120,6 +131,15 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
     };
   }, [isBoardMode, onImmersiveModeChange]);
 
+  useEffect(() => {
+    if (!copyStatus) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => setCopyStatus(''), 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [copyStatus]);
+
   const isConnected = connectionStatus === 'connected';
   const selectedDeck = useMemo(
     () => savedDecks.find((deck) => deck.id === selectedDeckId) ?? null,
@@ -131,9 +151,12 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
   );
   const hasSavedDecks = savedDecks.length > 0;
   const hasValidSelectedDeck = Boolean(selectedDeckValidation?.isValid);
+  const hasPlayerName = displayNameInput.trim().length > 0;
+  const hasRoomCode = roomCodeInput.trim().length > 0;
   const canJoin =
-    roomCodeInput.trim().length > 0 &&
-    displayNameInput.trim().length > 0 &&
+    hasRoomCode &&
+    hasPlayerName &&
+    hasValidSelectedDeck &&
     connectionStatus !== 'connecting';
   const canStart =
     joinedRoomCode.length > 0 && connectionStatus === 'connected' && hasValidSelectedDeck;
@@ -142,8 +165,12 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
       return 'Create and save a deck in the Deckbuilder first.';
     }
 
-    if (!selectedDeck || !selectedDeckValidation?.isValid) {
-      return 'Selected deck is not valid yet.';
+    if (!selectedDeck) {
+      return 'Select a saved deck before joining a room.';
+    }
+
+    if (!selectedDeckValidation?.isValid) {
+      return selectedDeckValidation?.errors[0] ?? 'Selected deck is not valid yet.';
     }
 
     return '';
@@ -167,6 +194,46 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
 
     return '';
   }, [connectionStatus]);
+
+  const readinessItems = useMemo(
+    () => [
+      {
+        label: 'Player name',
+        ready: hasPlayerName,
+        text: hasPlayerName ? displayNameInput.trim() : 'Enter a display name.',
+      },
+      {
+        label: 'Room code',
+        ready: hasRoomCode,
+        text: hasRoomCode ? roomCodeInput.trim().toUpperCase() : 'Create or enter a room code.',
+      },
+      {
+        label: 'Valid deck',
+        ready: hasValidSelectedDeck,
+        text: hasValidSelectedDeck ? selectedDeck?.name ?? 'Ready' : deckNotice,
+      },
+      {
+        label: joinedRoomCode ? 'Joined' : 'Connection',
+        ready: joinedRoomCode.length > 0 || connectionStatus === 'connected',
+        text: joinedRoomCode
+          ? `Room ${joinedRoomCode}`
+          : connectionStatus === 'connected'
+            ? 'Connected to match server.'
+            : 'Join a room to connect.',
+      },
+    ],
+    [
+      connectionStatus,
+      deckNotice,
+      displayNameInput,
+      hasPlayerName,
+      hasRoomCode,
+      hasValidSelectedDeck,
+      joinedRoomCode,
+      roomCodeInput,
+      selectedDeck,
+    ],
+  );
 
   const activePlayerDisplay = useMemo(() => {
     if (!gameState) {
@@ -213,6 +280,28 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
       setError(message);
     } finally {
       setPending(false);
+    }
+  };
+
+  const generateRoomCode = (): void => {
+    setRoomCodeInput(createRoomCode());
+    setCopyStatus('');
+  };
+
+  const updateRoomCodeInput = (value: string): void => {
+    setRoomCodeInput(value.toUpperCase());
+  };
+
+  const copyRoomCode = async (): Promise<void> => {
+    if (!joinedRoomCode) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(joinedRoomCode);
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('failed');
     }
   };
 
@@ -321,8 +410,9 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
       <header className="panel header-panel">
         <div className="match-header-row">
           <div>
-            <h1>OneSake Match</h1>
-            <p>Join, start, choices, log and chat in one mobile-ready view.</p>
+            <span className="match-setup-kicker">Game Lobby</span>
+            <h1>Prepare Match</h1>
+            <p>Choose your deck, create or join a room, then enter the fullscreen board.</p>
           </div>
           <ConnectionStatusBadge status={connectionStatus} />
         </div>
@@ -337,29 +427,47 @@ export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
       <LobbyPanel
         canJoin={canJoin}
         canStart={canStart}
+        connectionStatus={connectionStatus}
+        copyStatus={copyStatus}
         deckNotice={deckNotice}
         displayNameInput={displayNameInput}
+        joinedRoomCode={joinedRoomCode}
+        onCopyRoomCode={() => void copyRoomCode()}
         onDisplayNameChange={setDisplayNameInput}
+        onGenerateRoomCode={generateRoomCode}
         onJoinRoom={() => void joinRoom()}
-        onRoomCodeChange={setRoomCodeInput}
+        onOpenBoard={openBoardMode}
+        onOpenDeckbuilder={onOpenDeckbuilder}
+        onRoomCodeChange={updateRoomCodeInput}
         onStartMatch={() => void startMatch()}
         pending={pending}
+        readinessItems={readinessItems}
         roomCodeInput={roomCodeInput}
       />
 
       <MatchDeckSelect
         decks={savedDecks}
+        onOpenDeckbuilder={onOpenDeckbuilder}
         onSelectDeck={setSelectedDeckId}
         selectedDeckId={selectedDeckId}
       />
 
       {joinedRoomCode && (
-        <section className="panel match-open-board-panel">
+        <section className="panel match-open-board-panel match-joined-panel">
           <div>
-            <h2>Board Mode</h2>
-            <p>Room {joinedRoomCode} is joined. Open the fullscreen board without reconnecting.</p>
+            <span className="match-setup-kicker">Joined Room</span>
+            <h2>{joinedRoomCode}</h2>
+            <p>You are still in this room. Open the board again without reconnecting.</p>
           </div>
-          <Button onClick={openBoardMode}>Open Board</Button>
+          <div className="match-joined-panel__actions">
+            <Button onClick={() => void copyRoomCode()} variant="secondary">
+              {copyStatus === 'copied' ? 'Copied' : 'Copy Room Code'}
+            </Button>
+            <Button onClick={openBoardMode}>Open Board</Button>
+            <Button disabled={!canStart || pending} onClick={() => void startMatch()} variant="secondary">
+              Start Match
+            </Button>
+          </div>
         </section>
       )}
 
