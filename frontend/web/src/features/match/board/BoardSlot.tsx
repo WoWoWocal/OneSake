@@ -1,9 +1,11 @@
+import type { CardInstanceDto } from '../../../types/realtime';
 import type { BoardSlotDefinition } from './boardTypes';
 
 interface BoardSlotProps {
   slot: BoardSlotDefinition;
   count?: number;
   active?: boolean;
+  card?: CardInstanceDto;
   filled?: boolean;
 }
 
@@ -11,7 +13,7 @@ function toSlotClassName(kind: BoardSlotDefinition['kind']): string {
   return kind.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
 }
 
-export function BoardSlot({ active = false, count, filled = false, slot }: BoardSlotProps) {
+export function BoardSlot({ active = false, card, count, filled = false, slot }: BoardSlotProps) {
   const hasCount = typeof count === 'number';
 
   return (
@@ -34,8 +36,17 @@ export function BoardSlot({ active = false, count, filled = false, slot }: Board
       }}
     >
       <span className="board-slot__label">{slot.label}</span>
-      {hasCount && <strong className="board-slot__count">{count}</strong>}
-      {!hasCount && filled && <strong className="board-slot__count">Ready</strong>}
+      {card ? (
+        <span className="board-slot-card">
+          <strong>{card.name}</strong>
+          <small>{card.cardId}</small>
+        </span>
+      ) : (
+        <>
+          {hasCount && <strong className="board-slot__count">{count}</strong>}
+          {!hasCount && filled && <strong className="board-slot__count">Ready</strong>}
+        </>
+      )}
     </div>
   );
 }

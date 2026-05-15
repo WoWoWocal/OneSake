@@ -83,6 +83,7 @@ public sealed class MatchRoom
                 Shuffle(player.DrawDeck);
                 player.Hand.Clear();
                 player.PlayedCards.Clear();
+                player.TrashCards.Clear();
                 DrawCards(player, 5);
                 player.LifeCount = 5;
                 player.Connected = true;
@@ -165,8 +166,6 @@ public sealed class MatchRoom
                 throw new InvalidOperationException("Selected option is invalid.");
             }
 
-            _openChoicePrompts.Remove(prompt.ChoiceId);
-
             if (string.Equals(prompt.Kind, "MULLIGAN_DECISION", StringComparison.Ordinal))
             {
                 var player = GetPlayerSlot(submission.PlayerId);
@@ -207,7 +206,7 @@ public sealed class MatchRoom
 
                 if (string.Equals(normalizedOption, "PLAY_CARD", StringComparison.Ordinal))
                 {
-                    PlayCard(player);
+                    PlayCard(player, submission.SelectedCardInstanceId);
                     CreateMainActionPrompt(player);
                 }
                 else if (string.Equals(normalizedOption, "ATTACK", StringComparison.Ordinal))
@@ -228,6 +227,7 @@ public sealed class MatchRoom
                 throw new InvalidOperationException($"Unsupported choice kind '{prompt.Kind}'.");
             }
 
+            _openChoicePrompts.Remove(prompt.ChoiceId);
             return CreateUpdate();
         }
     }
@@ -253,7 +253,7 @@ public sealed class MatchRoom
         }
     }
 
-    public GameStateDto CreateStateSnapshot()
+    public GameStateDto CreateStateSnapshot(string? viewerPlayerId = null)
     {
         lock (_sync)
         {
@@ -262,22 +262,10 @@ public sealed class MatchRoom
                 RoomCode = _roomCode,
                 TurnNumber = _turnNumber,
                 ActivePlayerId = _activePlayerId,
+                ViewerPlayerId = viewerPlayerId ?? string.Empty,
                 Phase = _phase,
                 Players = _players
-                    .Select(player => new PlayerStateDto
-                    {
-                        PlayerId = player.PlayerId,
-                        DisplayName = player.DisplayName,
-                        Connected = player.Connected,
-                        DeckCount = player.DeckCount,
-                        HandCount = player.HandCount,
-                        LifeCount = player.LifeCount,
-                        BoardCount = player.PlayedCards.Count,
-                        DeckName = player.DeckName,
-                        LeaderCardId = player.LeaderCardId,
-                        MainDeckCount = player.MainDeckCount,
-                        HasDeck = player.HasDeck
-                    })
+                    .Select(player => CreatePlayerStateSnapshot(player, viewerPlayerId))
                     .ToArray()
             };
         }
@@ -297,6 +285,8 @@ public sealed class MatchRoom
         var update = new MatchUpdate
         {
             StateSnapshot = CreateStateSnapshot(),
+            StateSnapshots = _players
+                .ToDictionary(player => player.PlayerId, player => CreateStateSnapshot(player.PlayerId), StringComparer.Ordinal),
             LogEvents = _pendingLogEvents.ToArray(),
             ChoicePrompts = _pendingChoicePrompts.ToArray()
         };
@@ -402,7 +392,41 @@ public sealed class MatchRoom
             options);
     }
 
-    private void PlayCard(PlayerSlot player)
+    private static PlayerStateDto CreatePlayerStateSnapshot(PlayerSlot player, string? viewerPlayerId)
+    {
+        var isViewer = string.Equals(player.PlayerId, viewerPlayerId, StringComparison.Ordinal);
+
+        return new PlayerStateDto
+        {
+            PlayerId = player.PlayerId,
+            DisplayName = player.DisplayName,
+            Connected = player.Connected,
+            DeckCount = player.DeckCount,
+            HandCount = player.HandCount,
+            LifeCount = player.LifeCount,
+            BoardCount = player.PlayedCards.Count,
+            DeckName = player.DeckName,
+            LeaderCardId = player.LeaderCardId,
+            MainDeckCount = player.MainDeckCount,
+            HasDeck = player.HasDeck,
+            TrashCount = player.TrashCards.Count,
+            HandCards = isViewer ? player.Hand.Select(ToCardInstanceDto).ToArray() : [],
+            BoardCards = player.PlayedCards.Select(ToCardInstanceDto).ToArray(),
+            TrashCards = player.TrashCards.Select(ToCardInstanceDto).ToArray()
+        };
+    }
+
+    private static CardInstanceDto ToCardInstanceDto(MatchCard card)
+    {
+        return new CardInstanceDto
+        {
+            InstanceId = card.InstanceId,
+            CardId = card.CardId,
+            Name = card.Name
+        };
+    }
+
+    private void PlayCard(PlayerSlot player, string? selectedCardInstanceId)
     {
         if (_phase == MatchPhase.GameOver)
         {
@@ -424,8 +448,20 @@ public sealed class MatchRoom
             throw new InvalidOperationException("Player has no cards in hand.");
         }
 
-        var playedCard = player.Hand[0];
-        player.Hand.RemoveAt(0);
+        if (string.IsNullOrWhiteSpace(selectedCardInstanceId))
+        {
+            throw new InvalidOperationException("Playing a card requires selectedCardInstanceId.");
+        }
+
+        var handIndex = player.Hand.FindIndex(card =>
+            string.Equals(card.InstanceId, selectedCardInstanceId, StringComparison.Ordinal));
+        if (handIndex < 0)
+        {
+            throw new InvalidOperationException("Selected card is not in the player's hand.");
+        }
+
+        var playedCard = player.Hand[handIndex];
+        player.Hand.RemoveAt(handIndex);
         player.PlayedCards.Add(playedCard);
         player.HandCount = player.Hand.Count;
 
@@ -516,8 +552,9 @@ public sealed class MatchRoom
         return player.DeckCards
             .Where(card => card.Quantity > 0 && !string.IsNullOrWhiteSpace(card.CardId))
             .SelectMany(card =>
-                Enumerable.Range(0, card.Quantity).Select(_ => new MatchCard
+                Enumerable.Range(0, card.Quantity).Select(index => new MatchCard
                 {
+                    InstanceId = $"{player.PlayerId}:{card.CardId}:{index + 1}:{Guid.NewGuid():N}",
                     CardId = card.CardId,
                     Name = string.IsNullOrWhiteSpace(card.Name) ? card.CardId : card.Name
                 }))
@@ -550,6 +587,7 @@ public sealed class MatchRoom
 
     private sealed record MatchCard
     {
+        public string InstanceId { get; init; } = string.Empty;
         public string CardId { get; init; } = string.Empty;
         public string Name { get; init; } = string.Empty;
     }
@@ -571,12 +609,15 @@ public sealed class MatchRoom
         public List<MatchCard> DrawDeck { get; set; } = [];
         public List<MatchCard> Hand { get; set; } = [];
         public List<MatchCard> PlayedCards { get; set; } = [];
+        public List<MatchCard> TrashCards { get; set; } = [];
     }
 }
 
 public sealed record MatchUpdate
 {
     public GameStateDto StateSnapshot { get; init; } = new();
+    public IReadOnlyDictionary<string, GameStateDto> StateSnapshots { get; init; } =
+        new Dictionary<string, GameStateDto>(StringComparer.Ordinal);
     public IReadOnlyList<LogEventDto> LogEvents { get; init; } = [];
     public IReadOnlyList<ChoicePromptDto> ChoicePrompts { get; init; } = [];
 }

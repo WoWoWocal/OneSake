@@ -177,7 +177,7 @@ export function MatchPage() {
     }
   };
 
-  const submitChoice = async (option: string): Promise<void> => {
+  const submitChoice = async (option: string, selectedCardInstanceId?: string): Promise<void> => {
     if (!currentPrompt || !joinedRoomCode || !isConnected) {
       return;
     }
@@ -186,6 +186,7 @@ export function MatchPage() {
       choiceId: currentPrompt.choiceId,
       playerId: currentPrompt.playerId,
       selectedOption: option,
+      selectedCardInstanceId,
     };
 
     setPending(true);
@@ -267,7 +268,9 @@ export function MatchPage() {
           currentPrompt={currentPrompt}
           gameState={gameState}
           joinedRoomCode={joinedRoomCode}
-          onSubmitChoice={(option) => void submitChoice(option)}
+          onSubmitChoice={(option, selectedCardInstanceId) =>
+            void submitChoice(option, selectedCardInstanceId)
+          }
           pending={pending}
           selectedDeck={selectedDeck}
           selectedDeckValidation={selectedDeckValidation}
@@ -287,7 +290,9 @@ export function MatchPage() {
       <ChoiceSheet
         canSubmitChoice={isConnected}
         currentPrompt={currentPrompt}
-        onSubmitChoice={(option) => void submitChoice(option)}
+        onSubmitChoice={(option, selectedCardInstanceId) =>
+          void submitChoice(option, selectedCardInstanceId)
+        }
         pending={pending}
       />
     </section>

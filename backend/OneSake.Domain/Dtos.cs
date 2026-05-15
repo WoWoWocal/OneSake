@@ -24,6 +24,17 @@ public record PlayerStateDto
     public string LeaderCardId { get; init; } = string.Empty;
     public int MainDeckCount { get; init; }
     public bool HasDeck { get; init; }
+    public int TrashCount { get; init; }
+    public IReadOnlyList<CardInstanceDto> HandCards { get; init; } = [];
+    public IReadOnlyList<CardInstanceDto> BoardCards { get; init; } = [];
+    public IReadOnlyList<CardInstanceDto> TrashCards { get; init; } = [];
+}
+
+public record CardInstanceDto
+{
+    public string InstanceId { get; init; } = string.Empty;
+    public string CardId { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
 }
 
 public record PlayerDeckCardDto
@@ -46,6 +57,7 @@ public record GameStateDto
     public string RoomCode { get; init; } = string.Empty;
     public int TurnNumber { get; init; }
     public string ActivePlayerId { get; init; } = string.Empty;
+    public string ViewerPlayerId { get; init; } = string.Empty;
     public MatchPhase Phase { get; init; } = MatchPhase.Lobby;
     public IReadOnlyList<PlayerStateDto> Players { get; init; } = [];
 }
@@ -64,6 +76,7 @@ public record ChoiceSubmissionDto
     public string ChoiceId { get; init; } = string.Empty;
     public string PlayerId { get; init; } = string.Empty;
     public string SelectedOption { get; init; } = string.Empty;
+    public string? SelectedCardInstanceId { get; init; }
 }
 
 public record ChatMessageDto
