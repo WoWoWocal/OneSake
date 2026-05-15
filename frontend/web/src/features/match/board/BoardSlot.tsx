@@ -1,5 +1,6 @@
 import type { CardInstanceDto } from '../../../types/realtime';
 import type { BoardSlotDefinition } from './boardTypes';
+import { MatchCardView } from './MatchCardView';
 
 interface BoardSlotProps {
   slot: BoardSlotDefinition;
@@ -7,13 +8,21 @@ interface BoardSlotProps {
   active?: boolean;
   card?: CardInstanceDto;
   filled?: boolean;
+  onInspectCard?: (card: CardInstanceDto) => void;
 }
 
 function toSlotClassName(kind: BoardSlotDefinition['kind']): string {
   return kind.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
 }
 
-export function BoardSlot({ active = false, card, count, filled = false, slot }: BoardSlotProps) {
+export function BoardSlot({
+  active = false,
+  card,
+  count,
+  filled = false,
+  onInspectCard,
+  slot,
+}: BoardSlotProps) {
   const hasCount = typeof count === 'number';
 
   return (
@@ -37,13 +46,22 @@ export function BoardSlot({ active = false, card, count, filled = false, slot }:
     >
       <span className="board-slot__label">{slot.label}</span>
       {card ? (
-        <span className="board-slot-card">
-          <strong>{card.name}</strong>
-          <small>{card.cardId}</small>
-        </span>
+        <MatchCardView
+          ariaLabel={`Inspect ${card.name} (${card.cardId})`}
+          card={card}
+          clickable={Boolean(onInspectCard)}
+          onClick={() => onInspectCard?.(card)}
+          size="slot"
+        />
       ) : (
         <>
-          {hasCount && <strong className="board-slot__count">{count}</strong>}
+          {hasCount && (
+            <span className={`board-slot-stack board-slot-stack--${toSlotClassName(slot.kind)}`}>
+              <span className="board-slot-stack__cards" aria-hidden="true" />
+              <strong className="board-slot__count">{count}</strong>
+              <small>{slot.label}</small>
+            </span>
+          )}
           {!hasCount && filled && <strong className="board-slot__count">Ready</strong>}
         </>
       )}

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import onesakeBoardUrl from '../../../assets/boards/onesake-board.png';
 import type {
   CardInstanceDto,
@@ -8,6 +10,8 @@ import type {
 import { boardSlots } from './boardLayout';
 import { BoardSlot } from './BoardSlot';
 import type { BoardSide, BoardSlotDefinition } from './boardTypes';
+import { CardInspectOverlay } from './CardInspectOverlay';
+import { MatchCardView } from './MatchCardView';
 
 interface MatchBoardProps {
   gameState: GameStateDto | null;
@@ -103,22 +107,37 @@ function hasPromptOption(prompt: ChoicePromptDto | null, optionName: string): bo
 function HandCardButton({
   canPlay,
   card,
+  onInspect,
   onPlay,
 }: {
   canPlay: boolean;
   card: CardInstanceDto;
+  onInspect: (card: CardInstanceDto) => void;
   onPlay: (card: CardInstanceDto) => void;
 }) {
   return (
-    <button
-      className="match-hand-card"
-      disabled={!canPlay}
-      onClick={() => onPlay(card)}
-      type="button"
-    >
-      <strong>{card.name}</strong>
-      <span>{card.cardId}</span>
-    </button>
+    <div className={canPlay ? 'match-hand-card-shell is-playable' : 'match-hand-card-shell'}>
+      <MatchCardView
+        ariaLabel={
+          canPlay
+            ? `Play ${card.name} (${card.cardId})`
+            : `${card.name} (${card.cardId}) cannot be played now`
+        }
+        card={card}
+        clickable={canPlay}
+        disabled={!canPlay}
+        onClick={() => onPlay(card)}
+        size="hand"
+      />
+      <button
+        aria-label={`Inspect ${card.name} (${card.cardId})`}
+        className="match-card-inspect-button"
+        onClick={() => onInspect(card)}
+        type="button"
+      >
+        Inspect
+      </button>
+    </div>
   );
 }
 
@@ -131,6 +150,7 @@ export function MatchBoard({
   onSubmitChoice,
   pending,
 }: MatchBoardProps) {
+  const [inspectedCard, setInspectedCard] = useState<CardInstanceDto | null>(null);
   const debugBoardLayout =
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugBoard');
   const visiblePlayers = getVisiblePlayers(gameState);
@@ -165,6 +185,7 @@ export function MatchBoard({
                   card={slotCard}
                   count={getSlotCount(slot, slotPlayer)}
                   filled={Boolean(slotCard) || isSlotFilled(slot, slotPlayer)}
+                  onInspectCard={setInspectedCard}
                   slot={slot}
                 />
               );
@@ -215,6 +236,7 @@ export function MatchBoard({
                 key={card.instanceId}
                 canPlay={canPlayHandCards}
                 card={card}
+                onInspect={setInspectedCard}
                 onPlay={(selectedCard) => onSubmitChoice('PLAY_CARD', selectedCard.instanceId)}
               />
             ))
@@ -223,6 +245,8 @@ export function MatchBoard({
           )}
         </div>
       </div>
+
+      <CardInspectOverlay card={inspectedCard} onClose={() => setInspectedCard(null)} />
     </div>
   );
 }
