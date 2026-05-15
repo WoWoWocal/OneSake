@@ -54,8 +54,36 @@ export function FullscreenMatchView({
   pending,
 }: FullscreenMatchViewProps) {
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
+  const [sidePanelTab, setSidePanelTab] = useState<'log' | 'chat'>('log');
   const phaseLabel = gameState ? formatPhase(gameState.phase) : 'Lobby';
-  const canShowStartMatch = canStart && phaseLabel === 'Lobby';
+  const isLobbyPhase = phaseLabel === 'Lobby';
+  const canShowStartMatch = canStart && isLobbyPhase;
+  const players = gameState?.players ?? [];
+  const viewerPlayer =
+    players.find((player) => player.playerId === gameState?.viewerPlayerId) ?? players[0] ?? null;
+  const hasOpponent = players.some((player) => player.playerId !== viewerPlayer?.playerId);
+  const statusMessages: string[] = [];
+
+  if (!gameState) {
+    statusMessages.push('Waiting for match state...');
+  }
+
+  if (gameState && !hasOpponent) {
+    statusMessages.push('Waiting for opponent...');
+  }
+
+  if (gameState && viewerPlayer && !viewerPlayer.hasDeck) {
+    statusMessages.push('Deck is not registered for this room.');
+  }
+
+  if (gameState && isLobbyPhase) {
+    statusMessages.push('Match is in lobby. Start when players are ready.');
+  }
+
+  function openSidePanel(tab: 'log' | 'chat'): void {
+    setSidePanelTab(tab);
+    setSidePanelOpen(true);
+  }
 
   return (
     <section className="match-fullscreen" aria-label="Fullscreen match board">
@@ -79,7 +107,7 @@ export function FullscreenMatchView({
         <ConnectionStatusBadge status={connectionStatus} />
         {canShowStartMatch && (
           <button
-            className="match-fullscreen__toggle"
+            className="match-fullscreen__toggle match-fullscreen__toggle--primary"
             disabled={pending}
             onClick={onStartMatch}
             type="button"
@@ -89,10 +117,19 @@ export function FullscreenMatchView({
         )}
         <button
           className="match-fullscreen__toggle"
-          onClick={() => setSidePanelOpen((isOpen) => !isOpen)}
+          aria-expanded={sidePanelOpen}
+          aria-label="Toggle match log and chat drawer"
+          onClick={() => {
+            if (sidePanelOpen) {
+              setSidePanelOpen(false);
+              return;
+            }
+
+            openSidePanel(sidePanelTab);
+          }}
           type="button"
         >
-          {sidePanelOpen ? 'Hide Chat' : 'Chat / Log'}
+          {sidePanelOpen ? 'Hide' : 'Log / Chat'}
         </button>
         <button className="match-fullscreen__exit" onClick={onExitBoard} type="button">
           Exit Board
@@ -100,7 +137,7 @@ export function FullscreenMatchView({
       </header>
 
       <div className="match-fullscreen__orientation-notice" role="note">
-        Für die beste Ansicht bitte Gerät quer halten.
+        Bitte Ger&auml;t quer halten f&uuml;r die beste Spielerfahrung.
       </div>
 
       {error && <p className="match-fullscreen__error">{error}</p>}
@@ -113,9 +150,11 @@ export function FullscreenMatchView({
         }
       >
         <div className="match-fullscreen__board">
-          {!gameState && (
-            <div className="match-fullscreen__waiting" role="status">
-              Waiting for match state...
+          {statusMessages.length > 0 && (
+            <div className="match-fullscreen__status-stack" role="status">
+              {statusMessages.map((message) => (
+                <p key={message}>{message}</p>
+              ))}
             </div>
           )}
           <MatchBoard
@@ -137,16 +176,43 @@ export function FullscreenMatchView({
           }
           aria-hidden={!sidePanelOpen}
         >
-          <LogPanel logEvents={logEvents} />
-          <ChatPanel
-            canSendChat={canSubmitChoice}
-            chatInput={chatInput}
-            chatMessages={chatMessages}
-            joinedRoomCode={joinedRoomCode}
-            onChatInputChange={onChatInputChange}
-            onSendChat={onSendChat}
-            pending={pending}
-          />
+          <div className="match-fullscreen__drawer-header">
+            <div>
+              <span>Match Tools</span>
+              <strong>{sidePanelTab === 'log' ? 'Match Log' : 'Table Chat'}</strong>
+            </div>
+            <div className="match-fullscreen__drawer-tabs" role="tablist" aria-label="Match drawer">
+              <button
+                aria-selected={sidePanelTab === 'log'}
+                onClick={() => openSidePanel('log')}
+                role="tab"
+                type="button"
+              >
+                Log <span>{logEvents.length}</span>
+              </button>
+              <button
+                aria-selected={sidePanelTab === 'chat'}
+                onClick={() => openSidePanel('chat')}
+                role="tab"
+                type="button"
+              >
+                Chat <span>{chatMessages.length}</span>
+              </button>
+            </div>
+          </div>
+          {sidePanelTab === 'log' ? (
+            <LogPanel logEvents={logEvents} />
+          ) : (
+            <ChatPanel
+              canSendChat={canSubmitChoice}
+              chatInput={chatInput}
+              chatMessages={chatMessages}
+              joinedRoomCode={joinedRoomCode}
+              onChatInputChange={onChatInputChange}
+              onSendChat={onSendChat}
+              pending={pending}
+            />
+          )}
         </aside>
       </main>
 
