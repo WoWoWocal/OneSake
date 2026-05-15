@@ -1,0 +1,91 @@
+/* Start screen */
+
+.start-screen {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(8px, 2vw, 24px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #000000;
+}
+
+.start-screen__frame {
+  position: relative;
+  width: min(calc(100vw - 16px), 1672px);
+  max-width: 100%;
+  aspect-ratio: 1672 / 941;
+  overflow: hidden;
+  background: #000000;
+  box-shadow: 0 0 46px rgb(0 0 0 / 78%);
+}
+
+.start-screen__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.start-hotspot {
+  position: absolute;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.start-hotspot:hover {
+  border-color: rgb(255 225 154 / 44%);
+  box-shadow: 0 0 28px rgb(255 207 102 / 22%);
+}
+
+.start-hotspot:active {
+  box-shadow: 0 0 16px rgb(255 207 102 / 18%);
+}
+
+.start-hotspot:focus-visible {
+  outline: 3px solid #ffe19a;
+  outline-offset: 3px;
+}
+
+.start-hotspot--play {
+  top: 60.1%;
+  left: 28.8%;
+  width: 44.4%;
+  height: 14.7%;
+}
+
+.start-hotspot--login {
+  top: 78.4%;
+  left: 40.7%;
+  width: 20.6%;
+  height: 10.4%;
+}
+
+@media (orientation: portrait) {
+  .start-screen {
+    align-items: start;
+    padding-top: max(16px, 8svh);
+  }
+
+  .start-screen__frame {
+    width: min(76vw, 1672px);
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .start-screen {
+    padding: 4px;
+  }
+
+  .start-screen__frame {
+    width: min(calc(100vw - 8px), calc(177.78svh - 14px), 1672px);
+  }
+}
+
