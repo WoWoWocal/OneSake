@@ -131,6 +131,8 @@ export function MatchBoard({
   onSubmitChoice,
   pending,
 }: MatchBoardProps) {
+  const debugBoardLayout =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugBoard');
   const visiblePlayers = getVisiblePlayers(gameState);
   const localPlayer = visiblePlayers.player;
   const roomCode = gameState?.roomCode || joinedRoomCode || '-';
@@ -146,7 +148,10 @@ export function MatchBoard({
   return (
     <div className="match-board-frame">
       <div className="match-board-scroll">
-        <div className="match-board" aria-label="OneSake match board">
+        <div
+          className={debugBoardLayout ? 'match-board match-board--debug' : 'match-board'}
+          aria-label="OneSake match board"
+        >
           <img alt="OneSake pirate wooden game board" className="match-board-image" src={onesakeBoardUrl} />
 
           <div className="match-board-overlay">

@@ -4,6 +4,7 @@ export type BoardSlotKind =
   | 'deck'
   | 'life'
   | 'leader'
+  | 'stage'
   | 'character'
   | 'donDeck'
   | 'donArea'

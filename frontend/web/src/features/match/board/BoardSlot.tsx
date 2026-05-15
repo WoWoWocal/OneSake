@@ -47,6 +47,7 @@ export function BoardSlot({ active = false, card, count, filled = false, slot }:
           {!hasCount && filled && <strong className="board-slot__count">Ready</strong>}
         </>
       )}
+      <span className="board-slot__debug">{slot.id}</span>
     </div>
   );
 }
