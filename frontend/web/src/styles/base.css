@@ -7,6 +7,9 @@
   --color-gold-soft: #e3bd68;
   --color-danger: #a83232;
   --color-success: #1fc49f;
+  --color-text-light: #d9e9ee;
+  --color-text-muted: #9db5bd;
+  --color-border-soft: rgb(229 176 73 / 24%);
   --radius-panel: 8px;
   --shadow-panel: 0 18px 42px rgb(3 11 20 / 16%);
 
@@ -22,10 +25,16 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+  background: var(--color-bg);
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 50% 0%, rgb(32 49 62 / 72%), transparent 36rem),
     linear-gradient(180deg, #0c141b 0%, #101a22 52%, var(--color-bg) 100%);
@@ -33,12 +42,15 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
 button {
+  min-width: 0;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 button:disabled {
@@ -47,8 +59,10 @@ button:disabled {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
+  max-width: 100%;
   min-height: 44px;
   border: 1px solid #b9c9ce;
   border-radius: var(--radius-panel);
@@ -60,13 +74,35 @@ select {
 
 input:focus,
 select:focus,
+textarea:focus,
 button:focus-visible {
   outline: 3px solid #f2c94c;
   outline-offset: 2px;
 }
 
+img,
+svg {
+  max-width: 100%;
+}
+
 #root {
   min-height: 100vh;
+}
+
+::selection {
+  color: #171006;
+  background: #f0bf38;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 

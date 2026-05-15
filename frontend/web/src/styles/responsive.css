@@ -34,11 +34,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .match-page .match-setup-card.lobby-panel {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-
   .match-page .lobby-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
     align-items: end;
@@ -315,6 +310,56 @@
 
   .match-fullscreen .ui-bottom-sheet {
     max-height: min(48dvh, 300px);
+  }
+}
+
+@media (max-width: 560px) {
+  .bottom-nav {
+    gap: 3px;
+    padding: 6px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav__item {
+    min-height: 46px;
+    padding: 7px 4px;
+    font-size: 0.82rem;
+  }
+
+  .deckbuilder-header {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-toggle {
+    width: 100%;
+  }
+
+  .tools-deck-context__stats,
+  .probability-result__stats,
+  .mulligan-metrics,
+  .mulligan-stats,
+  .profile-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .probability-section__title,
+  .profile-card__header,
+  .saved-deck-select__header,
+  .match-setup-card__header {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 420px) {
+  .tools-deck-context__stats,
+  .probability-result__stats,
+  .mulligan-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .mulligan-actions {
+    grid-template-columns: 1fr;
   }
 }
 

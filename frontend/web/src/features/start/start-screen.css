@@ -16,6 +16,7 @@
   position: relative;
   width: min(calc(100vw - 16px), 1672px);
   max-width: 100%;
+  max-height: calc(100svh - 16px);
   aspect-ratio: 1672 / 941;
   overflow: hidden;
   background: #000000;
@@ -38,6 +39,10 @@
   color: transparent;
   background: transparent;
   cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
 }
 
 .start-hotspot:hover {
@@ -52,6 +57,7 @@
 .start-hotspot:focus-visible {
   outline: 3px solid #ffe19a;
   outline-offset: 3px;
+  background: rgb(255 225 154 / 5%);
 }
 
 .start-hotspot--play {
@@ -75,7 +81,8 @@
   }
 
   .start-screen__frame {
-    width: min(76vw, 1672px);
+    width: min(92vw, 1672px);
+    max-height: 72svh;
   }
 }
 

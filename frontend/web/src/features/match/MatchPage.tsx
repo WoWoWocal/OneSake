@@ -417,11 +417,11 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           <ConnectionStatusBadge status={connectionStatus} />
         </div>
         {connectionNotice && (
-          <p className={`connection-notice connection-notice--${connectionStatus}`}>
+          <p className={`connection-notice connection-notice--${connectionStatus}`} role="status">
             {connectionNotice}
           </p>
         )}
-        {error && <p className="error-banner">{error}</p>}
+        {error && <p className="error-banner" role="alert">{error}</p>}
       </header>
 
       <LobbyPanel

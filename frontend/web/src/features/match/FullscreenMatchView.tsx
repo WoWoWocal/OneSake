@@ -140,7 +140,7 @@ export function FullscreenMatchView({
         Bitte Ger&auml;t quer halten f&uuml;r die beste Spielerfahrung.
       </div>
 
-      {error && <p className="match-fullscreen__error">{error}</p>}
+      {error && <p className="match-fullscreen__error" role="alert">{error}</p>}
 
       <main
         className={

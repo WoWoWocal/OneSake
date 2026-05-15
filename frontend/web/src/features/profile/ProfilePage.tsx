@@ -10,7 +10,11 @@ function loadGuestName(): string {
     return DEFAULT_GUEST_NAME;
   }
 
-  return window.localStorage.getItem(GUEST_NAME_STORAGE_KEY) || DEFAULT_GUEST_NAME;
+  try {
+    return window.localStorage.getItem(GUEST_NAME_STORAGE_KEY) || DEFAULT_GUEST_NAME;
+  } catch {
+    return DEFAULT_GUEST_NAME;
+  }
 }
 
 const PROFILE_STATS = [
@@ -34,7 +38,11 @@ export function ProfilePage() {
     setDraftName(normalizedName);
     setIsGuestActive(true);
     setIsEditingName(false);
-    window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, normalizedName);
+    try {
+      window.localStorage.setItem(GUEST_NAME_STORAGE_KEY, normalizedName);
+    } catch {
+      // Guest profile storage is optional for the demo UI.
+    }
   };
 
   const logoutGuest = (): void => {
@@ -42,7 +50,11 @@ export function ProfilePage() {
     setDraftName(DEFAULT_GUEST_NAME);
     setIsGuestActive(false);
     setIsEditingName(false);
-    window.localStorage.removeItem(GUEST_NAME_STORAGE_KEY);
+    try {
+      window.localStorage.removeItem(GUEST_NAME_STORAGE_KEY);
+    } catch {
+      // Guest profile storage is optional for the demo UI.
+    }
   };
 
   return (

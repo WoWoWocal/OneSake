@@ -515,6 +515,8 @@ button.match-card-view {
   align-items: center;
   gap: 6px;
   min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
   border: 1px solid rgb(229 176 73 / 24%);
   border-radius: 10px;
   padding: 6px;
@@ -574,9 +576,12 @@ button.match-card-view {
 }
 
 .match-fullscreen__toggle:hover,
-.match-fullscreen__exit:hover {
+.match-fullscreen__toggle:focus-visible,
+.match-fullscreen__exit:hover,
+.match-fullscreen__exit:focus-visible {
   border-color: rgb(255 225 154 / 82%);
   color: #fff3c7;
+  outline: none;
   box-shadow: 0 0 18px rgb(255 207 102 / 22%);
 }
 
@@ -746,6 +751,14 @@ button.match-card-view {
   border-color: rgb(240 191 56 / 62%);
   color: #fff3c7;
   background: rgb(240 191 56 / 13%);
+}
+
+.match-fullscreen__drawer-tabs button:hover,
+.match-fullscreen__drawer-tabs button:focus-visible {
+  border-color: rgb(255 225 154 / 54%);
+  color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 14px rgb(240 191 56 / 12%);
 }
 
 .match-fullscreen__drawer-tabs span {

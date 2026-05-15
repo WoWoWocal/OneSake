@@ -1,30 +1,50 @@
 /* Deckbuilder */
 
+.deckbuilder-page {
+  color: #d9e9ee;
+}
+
+.deckbuilder-page .panel {
+  border-color: rgb(229 176 73 / 22%);
+  color: #d9e9ee;
+  background:
+    linear-gradient(180deg, rgb(255 221 137 / 5%), transparent 38%),
+    #0b1a2a;
+  box-shadow: 0 18px 42px rgb(3 11 20 / 16%);
+}
+
 .deckbuilder-header {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 8px;
+  border-color: rgb(240 191 56 / 34%) !important;
+  background:
+    radial-gradient(circle at 86% 18%, rgb(240 191 56 / 16%), transparent 22rem),
+    linear-gradient(135deg, rgb(240 191 56 / 10%), transparent 36%),
+    #071522 !important;
 }
 
 .deckbuilder-header h1 {
   margin: 0;
-  font-size: 1.35rem;
+  color: #ffffff;
+  font-size: clamp(1.55rem, 5vw, 2.35rem);
 }
 
 .deckbuilder-header p {
   margin: 2px 0 0;
-  color: #536776;
+  color: #9db5bd;
+  font-weight: 700;
 }
 
 .deck-toggle {
   min-height: 44px;
-  border: 1px solid #176f65;
+  border: 1px solid rgb(240 191 56 / 44%);
   border-radius: 8px;
   padding: 10px 14px;
-  color: #176f65;
-  background: #ffffff;
-  font-weight: 700;
+  color: #fff3c7;
+  background: rgb(240 191 56 / 10%);
+  font-weight: 900;
 }
 
 .deckbuilder-layout,
@@ -51,11 +71,11 @@
 
 .card-search p {
   margin: 2px 0 0;
-  color: #637581;
+  color: #9db5bd;
 }
 
 .card-search .auto-filter-note {
-  color: #176f65;
+  color: #b9f3df;
   font-weight: 800;
 }
 
@@ -94,7 +114,7 @@
 }
 
 .color-palette-filter__header span {
-  color: #637581;
+  color: #9db5bd;
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -107,11 +127,11 @@
 
 .color-filter-button {
   min-height: 44px;
-  border: 1px solid #cbd9dc;
+  border: 1px solid rgb(148 187 194 / 28%);
   border-radius: 8px;
   padding: 8px 12px;
-  color: #344f5d;
-  background: #ffffff;
+  color: #d9e9ee;
+  background: rgb(255 255 255 / 5%);
   font-weight: 800;
 }
 
@@ -150,10 +170,10 @@
 }
 
 .color-filter-button--active {
-  border-color: #176f65;
-  color: #125143;
-  background: #e6f7f2;
-  box-shadow: inset 0 0 0 1px #176f65;
+  border-color: rgb(240 191 56 / 64%);
+  color: #fff3c7;
+  background: rgb(240 191 56 / 12%);
+  box-shadow: inset 0 0 0 1px rgb(240 191 56 / 24%);
 }
 
 .card-size-slider {
@@ -161,7 +181,7 @@
   gap: 10px;
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid #dce6e9;
+  border-top: 1px solid rgb(148 187 194 / 18%);
 }
 
 .card-size-slider-header {
@@ -172,8 +192,19 @@
 }
 
 .card-size-slider-header span {
-  color: #176f65;
+  color: #e3bd68;
   font-weight: 800;
+}
+
+.deckbuilder-page input,
+.deckbuilder-page select {
+  border-color: rgb(148 187 194 / 34%);
+  color: #eef8f9;
+  background: #071522;
+}
+
+.deckbuilder-page label {
+  color: #9db5bd;
 }
 
 .card-size-slider-control {
@@ -189,7 +220,7 @@
 }
 
 .card-grid-count {
-  color: #536776;
+  color: #9db5bd;
   font-weight: 700;
 }
 
@@ -206,8 +237,8 @@
 }
 
 .card-tile:hover {
-  border-color: #176f65;
-  box-shadow: 0 4px 10px rgb(22 111 101 / 14%);
+  border-color: rgb(240 191 56 / 42%);
+  box-shadow: 0 4px 12px rgb(240 191 56 / 12%);
 }
 
 .card-tile__inspect {
@@ -273,15 +304,15 @@
 }
 
 .card-quantity-button:disabled {
-  border-color: #d6e0e3;
+  border-color: rgb(148 187 194 / 20%);
   color: #8ba0a8;
-  background: #eef3f4;
+  background: rgb(255 255 255 / 7%);
 }
 
 .card-quantity-value {
   min-width: 0;
   padding: 0 2px;
-  color: #344f5d;
+  color: #d9e9ee;
   font-size: 0.72rem;
   text-align: center;
   white-space: nowrap;
@@ -326,11 +357,11 @@
 .card-inspect__meta div {
   border-radius: 8px;
   padding: 8px;
-  background: #eef3f4;
+  background: rgb(255 255 255 / 6%);
 }
 
 .card-inspect__meta dt {
-  color: #637581;
+  color: #9db5bd;
   font-size: 0.78rem;
 }
 
@@ -342,14 +373,14 @@
 
 .card-inspect__text {
   margin: 0;
-  color: #344f5d;
+  color: #d9e9ee;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
 .deck-panel p {
   margin: 0;
-  color: #536776;
+  color: #9db5bd;
 }
 
 .deck-library {
@@ -383,15 +414,15 @@
 .deck-library__list li {
   display: grid;
   gap: 10px;
-  border: 1px solid #dce6e9;
+  border: 1px solid rgb(148 187 194 / 18%);
   border-radius: 8px;
   padding: 10px;
-  background: #ffffff;
+  background: rgb(255 255 255 / 5%);
 }
 
 .deck-library__list li.is-active {
-  border-color: #176f65;
-  box-shadow: inset 3px 0 0 #176f65;
+  border-color: rgb(240 191 56 / 54%);
+  box-shadow: inset 3px 0 0 #f0bf38;
 }
 
 .deck-library__deck {
@@ -406,7 +437,7 @@
 }
 
 .deck-library__deck span {
-  color: #637581;
+  color: #9db5bd;
   font-size: 0.86rem;
 }
 
@@ -419,11 +450,11 @@
 
 .deck-actions button {
   min-height: 44px;
-  border: 1px solid #cbd9dc;
+  border: 1px solid rgb(240 191 56 / 34%);
   border-radius: 8px;
-  color: #176f65;
-  background: #ffffff;
-  font-weight: 700;
+  color: #fff3c7;
+  background: rgb(240 191 56 / 9%);
+  font-weight: 800;
 }
 
 .deck-list li {
@@ -445,7 +476,7 @@
 }
 
 .deck-list__card span {
-  color: #637581;
+  color: #9db5bd;
   font-size: 0.82rem;
 }
 
@@ -459,10 +490,10 @@
 .deck-list__actions button {
   min-width: 44px;
   min-height: 44px;
-  border: 1px solid #cbd9dc;
+  border: 1px solid rgb(148 187 194 / 24%);
   border-radius: 8px;
-  color: #176f65;
-  background: #ffffff;
+  color: #d9e9ee;
+  background: rgb(255 255 255 / 6%);
   font-weight: 800;
 }
 
@@ -478,7 +509,7 @@
 
 .validation-progress {
   margin-bottom: 8px;
-  color: #536776;
+  color: #9db5bd;
   font-weight: 700;
 }
 
@@ -491,11 +522,11 @@
   max-height: 220px;
   margin: 0;
   overflow: auto;
-  border: 1px solid #dce6e9;
+  border: 1px solid rgb(148 187 194 / 18%);
   border-radius: 8px;
   padding: 10px;
-  background: #f8fafb;
-  color: #16222d;
+  background: rgb(3 10 16 / 64%);
+  color: #d9e9ee;
   white-space: pre-wrap;
 }
 

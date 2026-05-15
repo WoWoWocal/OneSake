@@ -17,7 +17,7 @@ export function Modal({ children, footer, onClose, open, title }: ModalProps) {
 
   return (
     <div className="ui-overlay" role="presentation">
-      <section aria-modal="true" className="ui-modal" role="dialog">
+      <section aria-label={title} aria-modal="true" className="ui-modal" role="dialog">
         <header className="ui-dialog-header">
           <h2>{title}</h2>
           <Button aria-label="Close modal" onClick={onClose} variant="ghost">
