@@ -8,18 +8,62 @@ import {
   GameStateDto,
   LogEventDto,
 } from '../../types/realtime';
+import { Button } from '../../components/ui/Button';
 import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
 import { validateDeck } from '../deckbuilder/utils/deckValidation';
 import { ChatPanel } from './ChatPanel';
 import { ChoiceSheet } from './ChoiceSheet';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
+import { FullscreenMatchView } from './FullscreenMatchView';
 import { LobbyPanel } from './LobbyPanel';
 import { LogPanel } from './LogPanel';
 import { toPlayerDeckSubmission } from './matchDeckMapper';
 import { MatchDeckSelect } from './MatchDeckSelect';
 import { MatchStatePanel } from './MatchStatePanel';
 
-export function MatchPage() {
+interface MatchPageProps {
+  onImmersiveModeChange?: (isImmersiveMode: boolean) => void;
+}
+
+async function requestBoardPresentation(): Promise<void> {
+  try {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch {
+    // CSS fullscreen mode remains available if the browser blocks real fullscreen.
+  }
+
+  try {
+    const orientation = screen.orientation as ScreenOrientation & {
+      lock?: (orientation: string) => Promise<void>;
+    };
+    await orientation.lock?.('landscape');
+  } catch {
+    // Orientation lock is not available on every browser/device.
+  }
+}
+
+async function exitBoardPresentation(): Promise<void> {
+  try {
+    if (document.fullscreenElement && document.exitFullscreen) {
+      await document.exitFullscreen();
+    }
+  } catch {
+    // Leaving CSS fullscreen is enough if browser fullscreen cannot be exited here.
+  }
+
+  try {
+    const orientation = screen.orientation as ScreenOrientation & {
+      unlock?: () => void;
+    };
+    orientation.unlock?.();
+  } catch {
+    // Orientation unlock is optional and unsupported in some browsers.
+  }
+}
+
+export function MatchPage({ onImmersiveModeChange }: MatchPageProps) {
   const signalRClient = useRef(
     new SignalRClient(`${import.meta.env.VITE_BACKEND_URL}/matchHub`),
   );
@@ -37,6 +81,7 @@ export function MatchPage() {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [savedDecks] = useState(() => loadStoredDecks());
   const [selectedDeckId, setSelectedDeckId] = useState('');
+  const [isBoardMode, setIsBoardMode] = useState(false);
 
   useEffect(() => {
     const client = signalRClient.current;
@@ -66,6 +111,14 @@ export function MatchPage() {
       setSelectedDeckId(savedDecks[0].id);
     }
   }, [savedDecks, selectedDeckId]);
+
+  useEffect(() => {
+    onImmersiveModeChange?.(isBoardMode);
+
+    return () => {
+      onImmersiveModeChange?.(false);
+    };
+  }, [isBoardMode, onImmersiveModeChange]);
 
   const isConnected = connectionStatus === 'connected';
   const selectedDeck = useMemo(
@@ -152,12 +205,25 @@ export function MatchPage() {
           toPlayerDeckSubmission(selectedDeck),
         );
       }
+
+      setIsBoardMode(true);
+      void requestBoardPresentation();
     } catch (joinError) {
       const message = joinError instanceof Error ? joinError.message : 'Join fehlgeschlagen.';
       setError(message);
     } finally {
       setPending(false);
     }
+  };
+
+  const openBoardMode = (): void => {
+    setIsBoardMode(true);
+    void requestBoardPresentation();
+  };
+
+  const exitBoardMode = (): void => {
+    setIsBoardMode(false);
+    void exitBoardPresentation();
   };
 
   const startMatch = async (): Promise<void> => {
@@ -224,6 +290,32 @@ export function MatchPage() {
     }
   };
 
+  if (isBoardMode) {
+    return (
+      <FullscreenMatchView
+        activePlayerDisplay={activePlayerDisplay}
+        canStart={canStart}
+        canSubmitChoice={isConnected}
+        chatInput={chatInput}
+        chatMessages={chatMessages}
+        connectionStatus={connectionStatus}
+        currentPrompt={currentPrompt}
+        error={error}
+        gameState={gameState}
+        joinedRoomCode={joinedRoomCode}
+        logEvents={logEvents}
+        onChatInputChange={setChatInput}
+        onExitBoard={exitBoardMode}
+        onSendChat={sendChat}
+        onStartMatch={() => void startMatch()}
+        onSubmitChoice={(option, selectedCardInstanceId) =>
+          void submitChoice(option, selectedCardInstanceId)
+        }
+        pending={pending}
+      />
+    );
+  }
+
   return (
     <section className="match-page">
       <header className="panel header-panel">
@@ -260,6 +352,16 @@ export function MatchPage() {
         onSelectDeck={setSelectedDeckId}
         selectedDeckId={selectedDeckId}
       />
+
+      {joinedRoomCode && (
+        <section className="panel match-open-board-panel">
+          <div>
+            <h2>Board Mode</h2>
+            <p>Room {joinedRoomCode} is joined. Open the fullscreen board without reconnecting.</p>
+          </div>
+          <Button onClick={openBoardMode}>Open Board</Button>
+        </section>
+      )}
 
       <main className="content-grid">
         <MatchStatePanel

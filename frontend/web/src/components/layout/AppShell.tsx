@@ -23,10 +23,11 @@ function PlaceholderPage({ title }: { title: string }) {
 
 export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps) {
   const [activeSection, setActiveSection] = useState<Page>(initialPage);
+  const [isImmersiveMode, setIsImmersiveMode] = useState(false);
 
   return (
-    <div className="app-shell">
-      {onBackToMenu && (
+    <div className={isImmersiveMode ? 'app-shell app-shell--immersive' : 'app-shell'}>
+      {onBackToMenu && !isImmersiveMode && (
         <div className="app-shell-menu">
           <button className="app-shell-menu-button" type="button" onClick={onBackToMenu}>
             Main Menu
@@ -34,12 +35,12 @@ export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps)
         </div>
       )}
       <main className="app-main">
-        {activeSection === 'match' && <MatchPage />}
+        {activeSection === 'match' && <MatchPage onImmersiveModeChange={setIsImmersiveMode} />}
         {activeSection === 'deckbuilder' && <DeckbuilderPage />}
         {activeSection === 'tools' && <ToolsPage />}
         {activeSection === 'profile' && <PlaceholderPage title="Profile" />}
       </main>
-      <BottomNav activeSection={activeSection} onChange={setActiveSection} />
+      {!isImmersiveMode && <BottomNav activeSection={activeSection} onChange={setActiveSection} />}
     </div>
   );
 }
