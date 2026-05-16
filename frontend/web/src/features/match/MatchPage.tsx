@@ -444,6 +444,15 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           canStart={canStart}
           connectionStatus={connectionStatus}
           copyStatus={copyStatus}
+          deckSlot={(
+            <MatchDeckSelect
+              decks={savedDecks}
+              embedded
+              onOpenDeckbuilder={onOpenDeckbuilder}
+              onSelectDeck={setSelectedDeckId}
+              selectedDeckId={selectedDeckId}
+            />
+          )}
           deckNotice={deckNotice}
           displayNameInput={displayNameInput}
           joinedRoomCode={joinedRoomCode}
@@ -458,14 +467,6 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           pending={pending}
           readinessItems={readinessItems}
           roomCodeInput={roomCodeInput}
-        />
-
-        <MatchDeckSelect
-          decks={savedDecks}
-          embedded
-          onOpenDeckbuilder={onOpenDeckbuilder}
-          onSelectDeck={setSelectedDeckId}
-          selectedDeckId={selectedDeckId}
         />
 
         {joinedRoomCode && (
@@ -496,31 +497,43 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           </div>
           <span>{joinedRoomCode || 'Not joined'}</span>
         </div>
-        <main className="content-grid">
-        <MatchStatePanel
-          activePlayerDisplay={activePlayerDisplay}
-          canSubmitChoice={isConnected}
-          currentPrompt={currentPrompt}
-          gameState={gameState}
-          joinedRoomCode={joinedRoomCode}
-          onSubmitChoice={(option, selectedCardInstanceId) =>
-            void submitChoice(option, selectedCardInstanceId)
-          }
-          pending={pending}
-          selectedDeck={selectedDeck}
-          selectedDeckValidation={selectedDeckValidation}
-        />
-        <LogPanel logEvents={logEvents} />
-        <ChatPanel
-          canSendChat={isConnected}
-          chatInput={chatInput}
-          chatMessages={chatMessages}
-          joinedRoomCode={joinedRoomCode}
-          onChatInputChange={setChatInput}
-          onSendChat={sendChat}
-          pending={pending}
-        />
-        </main>
+        {joinedRoomCode ? (
+          <main className="content-grid">
+            <MatchStatePanel
+              activePlayerDisplay={activePlayerDisplay}
+              canSubmitChoice={isConnected}
+              currentPrompt={currentPrompt}
+              gameState={gameState}
+              joinedRoomCode={joinedRoomCode}
+              onSubmitChoice={(option, selectedCardInstanceId) =>
+                void submitChoice(option, selectedCardInstanceId)
+              }
+              pending={pending}
+              selectedDeck={selectedDeck}
+              selectedDeckValidation={selectedDeckValidation}
+            />
+            <div className="match-activity-grid">
+              <LogPanel logEvents={logEvents} />
+              <ChatPanel
+                canSendChat={isConnected}
+                chatInput={chatInput}
+                chatMessages={chatMessages}
+                joinedRoomCode={joinedRoomCode}
+                onChatInputChange={setChatInput}
+                onSendChat={sendChat}
+                pending={pending}
+              />
+            </div>
+          </main>
+        ) : (
+          <div className="match-prejoin-preview">
+            <div>
+              <span className="match-setup-kicker">Next Step</span>
+              <strong>Join a room to load match status, chat and activity.</strong>
+            </div>
+            <p>Until then, the setup stays focused on name, room code and deck readiness.</p>
+          </div>
+        )}
       </section>
 
       <ChoiceSheet

@@ -102,11 +102,6 @@
   color: #ffd1cc !important;
 }
 
-.match-page .lobby-panel {
-  display: grid;
-  gap: 8px;
-}
-
 .match-flow-panel,
 .match-preview-panel {
   display: grid;
@@ -182,17 +177,36 @@
   text-transform: uppercase;
 }
 
-.match-setup-grid {
+.match-setup-panel {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
-.match-setup-card {
+.match-setup-main,
+.match-setup-aside {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.match-setup-section {
+  display: grid;
+  gap: 10px;
   align-content: start;
   min-width: 0;
+  border-top: 1px solid rgb(229 176 73 / 16%);
+  padding-top: 12px;
+}
+
+.match-setup-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.match-setup-aside {
   border: 1px solid rgb(229 176 73 / 18%);
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 14px;
+  padding: 12px;
   background:
     linear-gradient(180deg, rgb(255 221 137 / 6%), transparent 38%),
     rgb(5 17 29 / 70%);
@@ -366,12 +380,8 @@
 }
 
 .match-deck-select--embedded {
-  border: 1px solid rgb(229 176 73 / 18%);
-  border-radius: 12px;
-  padding: 10px;
-  background:
-    linear-gradient(180deg, rgb(255 221 137 / 5%), transparent 34%),
-    rgb(5 17 29 / 70%);
+  padding: 0;
+  background: transparent;
 }
 
 .match-deck-select .panel-title-row {
@@ -527,6 +537,33 @@
 
 .match-preview-panel .content-grid {
   gap: 12px;
+}
+
+.match-activity-grid {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.match-prejoin-preview {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgb(148 187 194 / 18%);
+  border-radius: 12px;
+  padding: 12px;
+  color: #9db5bd;
+  background: rgb(255 255 255 / 4%);
+}
+
+.match-prejoin-preview strong {
+  display: block;
+  color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.match-prejoin-preview p {
+  margin: 0;
+  font-weight: 700;
 }
 
 .match-page .list-entry {
