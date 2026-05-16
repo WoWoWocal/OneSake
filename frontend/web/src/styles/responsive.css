@@ -194,6 +194,14 @@
   }
 }
 
+@media (min-width: 900px) {
+  .match-fullscreen .match-board {
+    width: auto;
+    height: 100%;
+    min-height: 0;
+  }
+}
+
 @media (min-width: 1100px) {
   .board-zone-grid {
     grid-template-columns: 180px minmax(0, 1fr) 170px;
@@ -368,6 +376,7 @@
   .match-fullscreen .match-board {
     width: auto;
     height: 100%;
+    min-height: 0;
   }
 
   .match-fullscreen .match-hand-zone {

@@ -35,7 +35,19 @@ function createRoomCode(): string {
   );
 }
 
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.matchMedia('(pointer: coarse), (max-width: 900px)').matches;
+}
+
 async function requestBoardPresentation(): Promise<void> {
+  if (!isMobileViewport()) {
+    return;
+  }
+
   try {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen();
@@ -274,7 +286,9 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
       }
 
       setIsBoardMode(true);
-      void requestBoardPresentation();
+      if (isMobileViewport()) {
+        void requestBoardPresentation();
+      }
     } catch (joinError) {
       const message = joinError instanceof Error ? joinError.message : 'Join fehlgeschlagen.';
       setError(message);
@@ -307,7 +321,9 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
 
   const openBoardMode = (): void => {
     setIsBoardMode(true);
-    void requestBoardPresentation();
+    if (isMobileViewport()) {
+      void requestBoardPresentation();
+    }
   };
 
   const exitBoardMode = (): void => {

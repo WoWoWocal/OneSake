@@ -632,6 +632,7 @@ button.match-card-view {
   position: relative;
   min-width: 0;
   min-height: 0;
+  height: 100%;
 }
 
 .match-fullscreen__status-stack,
@@ -660,6 +661,7 @@ button.match-card-view {
 
 .match-fullscreen .match-board-frame {
   grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
   height: 100%;
   max-height: 100%;
   min-height: 0;
@@ -672,17 +674,20 @@ button.match-card-view {
 
 .match-fullscreen .match-board-scroll {
   display: grid;
+  width: 100%;
+  height: 100%;
   min-height: 0;
   place-items: center;
   overflow: hidden;
 }
 
 .match-fullscreen .match-board {
-  width: auto;
+  width: 100%;
   max-width: 100%;
-  height: 100%;
+  height: auto;
   max-height: 100%;
   min-width: 0;
+  min-height: min(280px, 48dvh);
   box-shadow: 0 14px 38px rgb(0 0 0 / 28%);
 }
 
