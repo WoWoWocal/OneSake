@@ -84,7 +84,6 @@ export function MulliganTrainer({ deck }: MulliganTrainerProps) {
       <section className="panel tools-panel tool-card mulligan-trainer">
         <span className="tools-kicker">Practice</span>
         <h2>Mulligan Trainer</h2>
-        <p>Select a saved deck to train opening hands.</p>
       </section>
     );
   }

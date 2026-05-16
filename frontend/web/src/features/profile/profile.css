@@ -37,7 +37,6 @@
 }
 
 .profile-hero h1,
-.profile-hero p,
 .profile-card h2,
 .profile-card p {
   margin: 0;
@@ -48,7 +47,6 @@
   font-size: clamp(1.55rem, 5vw, 2.4rem);
 }
 
-.profile-hero p,
 .profile-card p {
   color: #9db5bd;
   font-weight: 700;
@@ -210,9 +208,5 @@
   color: #ffffff;
   font-size: 1.45rem;
   line-height: 1;
-}
-
-.profile-coming-soon-card {
-  border-color: rgb(65 197 177 / 26%) !important;
 }
 

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 
-import { Button } from '../../components/ui/Button';
 import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
 import { getTotalCards, validateDeck } from '../deckbuilder/utils/deckValidation';
 import { MulliganTrainer } from './mulligan/MulliganTrainer';
@@ -30,7 +29,6 @@ export function ToolsPage({ onOpenDeckbuilder }: ToolsPageProps) {
         <div>
           <span className="tools-kicker">Game Analysis</span>
           <h1>Captain Tools</h1>
-          <p>Practice hands and calculate deck odds.</p>
         </div>
         {selectedDeck && selectedDeckValidation && (
           <div
@@ -50,7 +48,7 @@ export function ToolsPage({ onOpenDeckbuilder }: ToolsPageProps) {
         selectedDeckId={selectedDeckId}
       />
 
-      {selectedDeck && selectedDeckValidation ? (
+      {selectedDeck && selectedDeckValidation && (
         <section className="panel tools-panel tools-deck-context">
           <div>
             <span className="tools-kicker">Active Deck</span>
@@ -77,19 +75,6 @@ export function ToolsPage({ onOpenDeckbuilder }: ToolsPageProps) {
                 <li key={issue}>{issue}</li>
               ))}
             </ul>
-          )}
-        </section>
-      ) : (
-        <section className="panel tools-empty-state">
-          <span className="tools-kicker">No saved decks yet</span>
-          <h2>Build a deck before using tools.</h2>
-          <p>Create and save a deck in the Deckbuilder first.</p>
-          {onOpenDeckbuilder ? (
-            <Button onClick={onOpenDeckbuilder} variant="secondary">
-              Open Deckbuilder
-            </Button>
-          ) : (
-            <p>Use the Deckbuilder tab to create a deck.</p>
           )}
         </section>
       )}

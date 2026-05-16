@@ -123,7 +123,6 @@
 }
 
 .match-flow-panel__header h2,
-.match-flow-panel__header p,
 .match-preview-panel__header h2 {
   margin: 0;
 }
@@ -132,11 +131,6 @@
 .match-preview-panel__header h2 {
   color: #ffffff;
   font-size: 1.18rem;
-}
-
-.match-flow-panel__header p {
-  color: #9db5bd;
-  font-weight: 700;
 }
 
 .match-flow-steps {
@@ -321,9 +315,8 @@
 }
 
 .match-readiness-list small,
-.match-join-card p,
 .match-selected-deck-card small,
-.match-deck-select .panel-title-row p {
+.match-deck-option small {
   color: #9db5bd;
   font-weight: 700;
 }
@@ -331,11 +324,6 @@
 .match-readiness-card__deck-action {
   display: grid;
   gap: 8px;
-}
-
-.match-join-card p {
-  margin: 0;
-  font-size: 0.9rem;
 }
 
 .match-open-board-panel {
@@ -404,8 +392,7 @@
   align-items: start;
 }
 
-.match-deck-select .panel-title-row h2,
-.match-deck-select .panel-title-row p {
+.match-deck-select .panel-title-row h2 {
   margin: 0;
 }
 
@@ -414,8 +401,7 @@
   gap: 8px;
 }
 
-.match-deck-select__empty strong,
-.match-deck-select__empty p {
+.match-deck-select__empty strong {
   margin: 0;
 }
 
@@ -529,11 +515,6 @@
 .match-deck-option strong,
 .match-deck-option small {
   overflow-wrap: anywhere;
-}
-
-.match-deck-option small {
-  color: #9db5bd;
-  font-weight: 700;
 }
 
 .match-page .scroll-list {

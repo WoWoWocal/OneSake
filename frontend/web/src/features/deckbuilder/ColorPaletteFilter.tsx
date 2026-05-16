@@ -25,7 +25,7 @@ export function ColorPaletteFilter({ onChange, selectedColors }: ColorPaletteFil
       <div className="color-palette-filter__header">
         <div>
           <strong>Colors</strong>
-          <span>{selectedColors.length > 0 ? selectedColors.join(' / ') : 'Any color'}</span>
+          {selectedColors.length > 0 && <span>{selectedColors.join(' / ')}</span>}
         </div>
         {selectedColors.length > 0 && (
           <Button onClick={() => onChange([])} variant="ghost">

@@ -31,12 +31,6 @@
   font-size: clamp(1.55rem, 5vw, 2.35rem);
 }
 
-.deckbuilder-header p {
-  margin: 2px 0 0;
-  color: #9db5bd;
-  font-weight: 700;
-}
-
 .deck-toggle {
   min-height: 44px;
   border: 1px solid rgb(240 191 56 / 44%);

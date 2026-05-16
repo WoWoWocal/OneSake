@@ -42,9 +42,7 @@ export function DeckLibrary({
         </div>
       </div>
 
-      {decks.length === 0 ? (
-        <p>No saved decks yet.</p>
-      ) : (
+      {decks.length > 0 && (
         <ul className="deck-library__list">
           {decks.map((deck) => (
             <li key={deck.id} className={deck.id === activeDeckId ? 'is-active' : ''}>

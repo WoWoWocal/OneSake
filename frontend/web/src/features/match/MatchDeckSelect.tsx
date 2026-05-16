@@ -26,7 +26,6 @@ export function MatchDeckSelect({
       <div className="panel-title-row">
         <div>
           <h2>Deck</h2>
-          <p>Pick the deck that will be registered when you join.</p>
         </div>
         <span>{decks.length}</span>
       </div>
@@ -34,7 +33,6 @@ export function MatchDeckSelect({
       {decks.length === 0 ? (
         <div className="match-deck-select__empty">
           <strong>Create a deck in Deckbuilder first.</strong>
-          <p>Saved decks appear here once they have a leader and main deck cards.</p>
           {onOpenDeckbuilder && (
             <Button onClick={onOpenDeckbuilder} variant="secondary">
               Go to Deckbuilder

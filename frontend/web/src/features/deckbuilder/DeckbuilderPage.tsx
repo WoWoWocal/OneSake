@@ -506,7 +506,6 @@ export function DeckbuilderPage() {
       <header className="panel deckbuilder-header">
         <div>
           <h1>Deckbuilder</h1>
-          <p>Build, validate, and save your decks.</p>
         </div>
         <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
           Deck

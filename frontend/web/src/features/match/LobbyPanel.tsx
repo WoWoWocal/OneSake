@@ -173,9 +173,6 @@ export function LobbyPanel({
             Start Match
           </Button>
         </div>
-        <p>
-          Join opens the fullscreen board automatically. If you exit the board, use Open Board to return.
-        </p>
         </div>
       </aside>
     </section>

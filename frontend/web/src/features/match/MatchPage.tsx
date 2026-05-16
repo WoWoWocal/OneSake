@@ -202,7 +202,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     }
 
     if (!selectedDeck) {
-      return 'Select a saved deck before joining a room.';
+      return 'Choose a deck.';
     }
 
     if (!selectedDeckValidation?.isValid) {
@@ -467,8 +467,6 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
         <div className="match-header-row">
           <div>
             <span className="match-setup-kicker">Game Lobby</span>
-            <h1>Prepare Match</h1>
-            <p>Choose your deck, create or join a room, then enter the fullscreen board.</p>
           </div>
           <ConnectionStatusBadge status={connectionStatus} />
         </div>
@@ -485,7 +483,6 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           <div>
             <span className="match-setup-kicker">Setup Flow</span>
             <h2 id="match-flow-title">Player, Room and Deck</h2>
-            <p>Prepare the player details, choose a valid deck, then join and open the board.</p>
           </div>
           <div className="match-flow-steps" aria-label="Match setup steps">
             <span className={hasPlayerName ? 'is-complete' : ''}>1 Player</span>
