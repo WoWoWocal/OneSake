@@ -51,7 +51,7 @@ export function LobbyPanel({
 }: LobbyPanelProps) {
   return (
     <section className="match-setup-grid" aria-label="Match setup">
-      <div className="panel lobby-panel match-setup-card">
+      <div className="lobby-panel match-setup-card">
         <div className="match-setup-card__header">
           <span>Player</span>
           <ConnectionStatusBadge status={connectionStatus} />
@@ -69,7 +69,7 @@ export function LobbyPanel({
         </div>
       </div>
 
-      <div className="panel lobby-panel match-setup-card match-room-card">
+      <div className="lobby-panel match-setup-card match-room-card">
         <div className="match-setup-card__header">
           <span>Room</span>
           {joinedRoomCode ? <strong className="match-room-code-chip">{joinedRoomCode}</strong> : null}
@@ -106,7 +106,7 @@ export function LobbyPanel({
         )}
       </div>
 
-      <div className="panel lobby-panel match-setup-card match-readiness-card">
+      <div className="lobby-panel match-setup-card match-readiness-card">
         <div className="match-setup-card__header">
           <span>Ready Check</span>
           <strong>{readinessItems.filter((item) => item.ready).length}/{readinessItems.length}</strong>
@@ -134,7 +134,7 @@ export function LobbyPanel({
         )}
       </div>
 
-      <div className="panel lobby-panel match-setup-card match-join-card">
+      <div className="lobby-panel match-setup-card match-join-card">
         <div className="match-setup-card__header">
           <span>{joinedRoomCode ? 'Joined' : 'Launch'}</span>
           {joinedRoomCode && <strong className="match-room-code-chip">{joinedRoomCode}</strong>}

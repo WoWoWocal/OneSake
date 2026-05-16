@@ -424,54 +424,79 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
         {error && <p className="error-banner" role="alert">{error}</p>}
       </header>
 
-      <LobbyPanel
-        canJoin={canJoin}
-        canStart={canStart}
-        connectionStatus={connectionStatus}
-        copyStatus={copyStatus}
-        deckNotice={deckNotice}
-        displayNameInput={displayNameInput}
-        joinedRoomCode={joinedRoomCode}
-        onCopyRoomCode={() => void copyRoomCode()}
-        onDisplayNameChange={setDisplayNameInput}
-        onGenerateRoomCode={generateRoomCode}
-        onJoinRoom={() => void joinRoom()}
-        onOpenBoard={openBoardMode}
-        onOpenDeckbuilder={onOpenDeckbuilder}
-        onRoomCodeChange={updateRoomCodeInput}
-        onStartMatch={() => void startMatch()}
-        pending={pending}
-        readinessItems={readinessItems}
-        roomCodeInput={roomCodeInput}
-      />
-
-      <MatchDeckSelect
-        decks={savedDecks}
-        onOpenDeckbuilder={onOpenDeckbuilder}
-        onSelectDeck={setSelectedDeckId}
-        selectedDeckId={selectedDeckId}
-      />
-
-      {joinedRoomCode && (
-        <section className="panel match-open-board-panel match-joined-panel">
+      <section className="panel match-flow-panel" aria-labelledby="match-flow-title">
+        <div className="match-flow-panel__header">
           <div>
-            <span className="match-setup-kicker">Joined Room</span>
-            <h2>{joinedRoomCode}</h2>
-            <p>You are still in this room. Open the board again without reconnecting.</p>
+            <span className="match-setup-kicker">Setup Flow</span>
+            <h2 id="match-flow-title">Player, Room and Deck</h2>
+            <p>Prepare the player details, choose a valid deck, then join and open the board.</p>
           </div>
-          <div className="match-joined-panel__actions">
-            <Button onClick={() => void copyRoomCode()} variant="secondary">
-              {copyStatus === 'copied' ? 'Copied' : 'Copy Room Code'}
-            </Button>
-            <Button onClick={openBoardMode}>Open Board</Button>
-            <Button disabled={!canStart || pending} onClick={() => void startMatch()} variant="secondary">
-              Start Match
-            </Button>
+          <div className="match-flow-steps" aria-label="Match setup steps">
+            <span className={hasPlayerName ? 'is-complete' : ''}>1 Player</span>
+            <span className={hasRoomCode ? 'is-complete' : ''}>2 Room</span>
+            <span className={hasValidSelectedDeck ? 'is-complete' : ''}>3 Deck</span>
+            <span className={joinedRoomCode ? 'is-complete' : ''}>4 Board</span>
           </div>
-        </section>
-      )}
+        </div>
 
-      <main className="content-grid">
+        <LobbyPanel
+          canJoin={canJoin}
+          canStart={canStart}
+          connectionStatus={connectionStatus}
+          copyStatus={copyStatus}
+          deckNotice={deckNotice}
+          displayNameInput={displayNameInput}
+          joinedRoomCode={joinedRoomCode}
+          onCopyRoomCode={() => void copyRoomCode()}
+          onDisplayNameChange={setDisplayNameInput}
+          onGenerateRoomCode={generateRoomCode}
+          onJoinRoom={() => void joinRoom()}
+          onOpenBoard={openBoardMode}
+          onOpenDeckbuilder={onOpenDeckbuilder}
+          onRoomCodeChange={updateRoomCodeInput}
+          onStartMatch={() => void startMatch()}
+          pending={pending}
+          readinessItems={readinessItems}
+          roomCodeInput={roomCodeInput}
+        />
+
+        <MatchDeckSelect
+          decks={savedDecks}
+          embedded
+          onOpenDeckbuilder={onOpenDeckbuilder}
+          onSelectDeck={setSelectedDeckId}
+          selectedDeckId={selectedDeckId}
+        />
+
+        {joinedRoomCode && (
+          <section className="match-open-board-panel match-joined-panel">
+            <div>
+              <span className="match-setup-kicker">Joined Room</span>
+              <h2>{joinedRoomCode}</h2>
+              <p>You are still in this room. Open the board again without reconnecting.</p>
+            </div>
+            <div className="match-joined-panel__actions">
+              <Button onClick={() => void copyRoomCode()} variant="secondary">
+                {copyStatus === 'copied' ? 'Copied' : 'Copy Room Code'}
+              </Button>
+              <Button onClick={openBoardMode}>Open Board</Button>
+              <Button disabled={!canStart || pending} onClick={() => void startMatch()} variant="secondary">
+                Start Match
+              </Button>
+            </div>
+          </section>
+        )}
+      </section>
+
+      <section className="panel match-preview-panel" aria-labelledby="match-preview-title">
+        <div className="match-preview-panel__header">
+          <div>
+            <span className="match-setup-kicker">Compact Preview</span>
+            <h2 id="match-preview-title">Room Status</h2>
+          </div>
+          <span>{joinedRoomCode || 'Not joined'}</span>
+        </div>
+        <main className="content-grid">
         <MatchStatePanel
           activePlayerDisplay={activePlayerDisplay}
           canSubmitChoice={isConnected}
@@ -495,7 +520,8 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           onSendChat={sendChat}
           pending={pending}
         />
-      </main>
+        </main>
+      </section>
 
       <ChoiceSheet
         canSubmitChoice={isConnected}

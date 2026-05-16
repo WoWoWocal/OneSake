@@ -5,12 +5,14 @@ import { getTotalCards, validateDeck } from '../deckbuilder/utils/deckValidation
 interface MatchDeckSelectProps {
   decks: Deck[];
   selectedDeckId: string;
+  embedded?: boolean;
   onSelectDeck: (deckId: string) => void;
   onOpenDeckbuilder?: () => void;
 }
 
 export function MatchDeckSelect({
   decks,
+  embedded = false,
   onOpenDeckbuilder,
   onSelectDeck,
   selectedDeckId,
@@ -20,7 +22,7 @@ export function MatchDeckSelect({
   const selectedTotalCards = selectedDeck ? getTotalCards(selectedDeck.cards) : 0;
 
   return (
-    <section className="panel match-deck-select">
+    <section className={embedded ? 'match-deck-select match-deck-select--embedded' : 'panel match-deck-select'}>
       <div className="panel-title-row">
         <div>
           <h2>Deck</h2>
