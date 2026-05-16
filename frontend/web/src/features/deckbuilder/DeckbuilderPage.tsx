@@ -29,7 +29,7 @@ import {
 import {
   cardMatchesLeaderColors,
   getCardColors,
-  isLeaderCardType,
+  isLeaderCard,
   validateDeck,
 } from './utils/deckValidation';
 
@@ -151,8 +151,8 @@ function areStringArraysEqual(left: string[] | undefined, right: string[] | unde
 }
 
 function compareCardsForDeckbuilder(left: CardDto, right: CardDto): number {
-  const leftIsLeader = isLeaderCardType(left.card_type);
-  const rightIsLeader = isLeaderCardType(right.card_type);
+  const leftIsLeader = isLeaderCard(left);
+  const rightIsLeader = isLeaderCard(right);
 
   if (leftIsLeader !== rightIsLeader) {
     return leftIsLeader ? -1 : 1;
@@ -337,7 +337,7 @@ export function DeckbuilderPage() {
   };
 
   const addCardToDeck = (card: CardDto): void => {
-    if (isLeaderCardType(card.card_type)) {
+    if (isLeaderCard(card)) {
       updateDeck((currentDeck) => ({
         ...currentDeck,
         leaderCardId: card.card_set_id,

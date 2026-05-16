@@ -1,7 +1,7 @@
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import type { CardDto } from '../../types/cards';
-import { isLeaderCardType } from './utils/deckValidation';
+import { isLeaderCard } from './utils/deckValidation';
 
 interface CardInspectModalProps {
   card: CardDto | null;
@@ -10,7 +10,7 @@ interface CardInspectModalProps {
 }
 
 export function CardInspectModal({ card, onAddCard, onClose }: CardInspectModalProps) {
-  const actionLabel = isLeaderCardType(card?.card_type) ? 'Set leader' : 'Add card';
+  const actionLabel = isLeaderCard(card) ? 'Set leader' : 'Add card';
 
   const handleAction = (): void => {
     if (!card) {
@@ -23,6 +23,7 @@ export function CardInspectModal({ card, onAddCard, onClose }: CardInspectModalP
 
   return (
     <Modal
+      className="card-inspect-modal"
       footer={
         card && (
           <Button fullWidth onClick={handleAction} variant="secondary">
@@ -45,7 +46,10 @@ export function CardInspectModal({ card, onAddCard, onClose }: CardInspectModalP
           </div>
 
           <div className="card-inspect__details">
-            <span className="card-tile__id">{card.card_set_id}</span>
+            <div className="card-inspect__heading">
+              <span className="card-tile__id">{card.card_set_id}</span>
+              <h3>{card.card_name}</h3>
+            </div>
             <dl className="card-inspect__meta">
               <div>
                 <dt>Set</dt>
@@ -80,7 +84,10 @@ export function CardInspectModal({ card, onAddCard, onClose }: CardInspectModalP
                 <dd>{card.attribute || '-'}</dd>
               </div>
             </dl>
-            <p className="card-inspect__text">{card.card_text || 'No card text available.'}</p>
+            <section className="card-inspect__effect" aria-label="Card effect">
+              <span>Effect</span>
+              <p className="card-inspect__text">{card.card_text || 'No card text available.'}</p>
+            </section>
           </div>
         </div>
       )}

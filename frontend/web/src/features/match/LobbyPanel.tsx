@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { Button } from '../../components/ui/Button';
 import type { ConnectionStatus } from '../../api/signalrClient';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
@@ -19,6 +21,7 @@ interface LobbyPanelProps {
   joinedRoomCode: string;
   pending: boolean;
   readinessItems: ReadinessItem[];
+  deckSlot?: ReactNode;
   onRoomCodeChange: (value: string) => void;
   onDisplayNameChange: (value: string) => void;
   onGenerateRoomCode: () => void;
@@ -35,6 +38,7 @@ export function LobbyPanel({
   connectionStatus,
   copyStatus,
   deckNotice,
+  deckSlot,
   displayNameInput,
   joinedRoomCode,
   onCopyRoomCode,
@@ -50,8 +54,9 @@ export function LobbyPanel({
   roomCodeInput,
 }: LobbyPanelProps) {
   return (
-    <section className="match-setup-grid" aria-label="Match setup">
-      <div className="panel lobby-panel match-setup-card">
+    <section className="match-setup-panel" aria-label="Match setup">
+      <div className="match-setup-main">
+        <div className="match-setup-section match-setup-section--player">
         <div className="match-setup-card__header">
           <span>Player</span>
           <ConnectionStatusBadge status={connectionStatus} />
@@ -67,9 +72,9 @@ export function LobbyPanel({
             value={displayNameInput}
           />
         </div>
-      </div>
+        </div>
 
-      <div className="panel lobby-panel match-setup-card match-room-card">
+        <div className="match-setup-section match-room-card">
         <div className="match-setup-card__header">
           <span>Room</span>
           {joinedRoomCode ? <strong className="match-room-code-chip">{joinedRoomCode}</strong> : null}
@@ -104,9 +109,13 @@ export function LobbyPanel({
             Clipboard is not available in this browser context.
           </p>
         )}
+        </div>
+
+        {deckSlot && <div className="match-setup-section match-setup-section--deck">{deckSlot}</div>}
       </div>
 
-      <div className="panel lobby-panel match-setup-card match-readiness-card">
+      <aside className="match-setup-aside">
+        <div className="match-setup-section match-readiness-card">
         <div className="match-setup-card__header">
           <span>Ready Check</span>
           <strong>{readinessItems.filter((item) => item.ready).length}/{readinessItems.length}</strong>
@@ -132,9 +141,9 @@ export function LobbyPanel({
             )}
           </div>
         )}
-      </div>
+        </div>
 
-      <div className="panel lobby-panel match-setup-card match-join-card">
+        <div className="match-setup-section match-join-card">
         <div className="match-setup-card__header">
           <span>{joinedRoomCode ? 'Joined' : 'Launch'}</span>
           {joinedRoomCode && <strong className="match-room-code-chip">{joinedRoomCode}</strong>}
@@ -155,7 +164,8 @@ export function LobbyPanel({
         <p>
           Join opens the fullscreen board automatically. If you exit the board, use Open Board to return.
         </p>
-      </div>
+        </div>
+      </aside>
     </section>
   );
 }

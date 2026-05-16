@@ -35,7 +35,19 @@ function createRoomCode(): string {
   );
 }
 
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.matchMedia('(pointer: coarse), (max-width: 900px)').matches;
+}
+
 async function requestBoardPresentation(): Promise<void> {
+  if (!isMobileViewport()) {
+    return;
+  }
+
   try {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen();
@@ -274,7 +286,9 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
       }
 
       setIsBoardMode(true);
-      void requestBoardPresentation();
+      if (isMobileViewport()) {
+        void requestBoardPresentation();
+      }
     } catch (joinError) {
       const message = joinError instanceof Error ? joinError.message : 'Join fehlgeschlagen.';
       setError(message);
@@ -307,7 +321,9 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
 
   const openBoardMode = (): void => {
     setIsBoardMode(true);
-    void requestBoardPresentation();
+    if (isMobileViewport()) {
+      void requestBoardPresentation();
+    }
   };
 
   const exitBoardMode = (): void => {
@@ -424,78 +440,117 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
         {error && <p className="error-banner" role="alert">{error}</p>}
       </header>
 
-      <LobbyPanel
-        canJoin={canJoin}
-        canStart={canStart}
-        connectionStatus={connectionStatus}
-        copyStatus={copyStatus}
-        deckNotice={deckNotice}
-        displayNameInput={displayNameInput}
-        joinedRoomCode={joinedRoomCode}
-        onCopyRoomCode={() => void copyRoomCode()}
-        onDisplayNameChange={setDisplayNameInput}
-        onGenerateRoomCode={generateRoomCode}
-        onJoinRoom={() => void joinRoom()}
-        onOpenBoard={openBoardMode}
-        onOpenDeckbuilder={onOpenDeckbuilder}
-        onRoomCodeChange={updateRoomCodeInput}
-        onStartMatch={() => void startMatch()}
-        pending={pending}
-        readinessItems={readinessItems}
-        roomCodeInput={roomCodeInput}
-      />
-
-      <MatchDeckSelect
-        decks={savedDecks}
-        onOpenDeckbuilder={onOpenDeckbuilder}
-        onSelectDeck={setSelectedDeckId}
-        selectedDeckId={selectedDeckId}
-      />
-
-      {joinedRoomCode && (
-        <section className="panel match-open-board-panel match-joined-panel">
+      <section className="panel match-flow-panel" aria-labelledby="match-flow-title">
+        <div className="match-flow-panel__header">
           <div>
-            <span className="match-setup-kicker">Joined Room</span>
-            <h2>{joinedRoomCode}</h2>
-            <p>You are still in this room. Open the board again without reconnecting.</p>
+            <span className="match-setup-kicker">Setup Flow</span>
+            <h2 id="match-flow-title">Player, Room and Deck</h2>
+            <p>Prepare the player details, choose a valid deck, then join and open the board.</p>
           </div>
-          <div className="match-joined-panel__actions">
-            <Button onClick={() => void copyRoomCode()} variant="secondary">
-              {copyStatus === 'copied' ? 'Copied' : 'Copy Room Code'}
-            </Button>
-            <Button onClick={openBoardMode}>Open Board</Button>
-            <Button disabled={!canStart || pending} onClick={() => void startMatch()} variant="secondary">
-              Start Match
-            </Button>
+          <div className="match-flow-steps" aria-label="Match setup steps">
+            <span className={hasPlayerName ? 'is-complete' : ''}>1 Player</span>
+            <span className={hasRoomCode ? 'is-complete' : ''}>2 Room</span>
+            <span className={hasValidSelectedDeck ? 'is-complete' : ''}>3 Deck</span>
+            <span className={joinedRoomCode ? 'is-complete' : ''}>4 Board</span>
           </div>
-        </section>
-      )}
+        </div>
 
-      <main className="content-grid">
-        <MatchStatePanel
-          activePlayerDisplay={activePlayerDisplay}
-          canSubmitChoice={isConnected}
-          currentPrompt={currentPrompt}
-          gameState={gameState}
+        <LobbyPanel
+          canJoin={canJoin}
+          canStart={canStart}
+          connectionStatus={connectionStatus}
+          copyStatus={copyStatus}
+          deckSlot={(
+            <MatchDeckSelect
+              decks={savedDecks}
+              embedded
+              onOpenDeckbuilder={onOpenDeckbuilder}
+              onSelectDeck={setSelectedDeckId}
+              selectedDeckId={selectedDeckId}
+            />
+          )}
+          deckNotice={deckNotice}
+          displayNameInput={displayNameInput}
           joinedRoomCode={joinedRoomCode}
-          onSubmitChoice={(option, selectedCardInstanceId) =>
-            void submitChoice(option, selectedCardInstanceId)
-          }
+          onCopyRoomCode={() => void copyRoomCode()}
+          onDisplayNameChange={setDisplayNameInput}
+          onGenerateRoomCode={generateRoomCode}
+          onJoinRoom={() => void joinRoom()}
+          onOpenBoard={openBoardMode}
+          onOpenDeckbuilder={onOpenDeckbuilder}
+          onRoomCodeChange={updateRoomCodeInput}
+          onStartMatch={() => void startMatch()}
           pending={pending}
-          selectedDeck={selectedDeck}
-          selectedDeckValidation={selectedDeckValidation}
+          readinessItems={readinessItems}
+          roomCodeInput={roomCodeInput}
         />
-        <LogPanel logEvents={logEvents} />
-        <ChatPanel
-          canSendChat={isConnected}
-          chatInput={chatInput}
-          chatMessages={chatMessages}
-          joinedRoomCode={joinedRoomCode}
-          onChatInputChange={setChatInput}
-          onSendChat={sendChat}
-          pending={pending}
-        />
-      </main>
+
+        {joinedRoomCode && (
+          <section className="match-open-board-panel match-joined-panel">
+            <div>
+              <span className="match-setup-kicker">Joined Room</span>
+              <h2>{joinedRoomCode}</h2>
+              <p>You are still in this room. Open the board again without reconnecting.</p>
+            </div>
+            <div className="match-joined-panel__actions">
+              <Button onClick={() => void copyRoomCode()} variant="secondary">
+                {copyStatus === 'copied' ? 'Copied' : 'Copy Room Code'}
+              </Button>
+              <Button onClick={openBoardMode}>Open Board</Button>
+              <Button disabled={!canStart || pending} onClick={() => void startMatch()} variant="secondary">
+                Start Match
+              </Button>
+            </div>
+          </section>
+        )}
+      </section>
+
+      <section className="panel match-preview-panel" aria-labelledby="match-preview-title">
+        <div className="match-preview-panel__header">
+          <div>
+            <span className="match-setup-kicker">Compact Preview</span>
+            <h2 id="match-preview-title">Room Status</h2>
+          </div>
+          <span>{joinedRoomCode || 'Not joined'}</span>
+        </div>
+        {joinedRoomCode ? (
+          <main className="content-grid">
+            <MatchStatePanel
+              activePlayerDisplay={activePlayerDisplay}
+              canSubmitChoice={isConnected}
+              currentPrompt={currentPrompt}
+              gameState={gameState}
+              joinedRoomCode={joinedRoomCode}
+              onSubmitChoice={(option, selectedCardInstanceId) =>
+                void submitChoice(option, selectedCardInstanceId)
+              }
+              pending={pending}
+              selectedDeck={selectedDeck}
+              selectedDeckValidation={selectedDeckValidation}
+            />
+            <div className="match-activity-grid">
+              <LogPanel logEvents={logEvents} />
+              <ChatPanel
+                canSendChat={isConnected}
+                chatInput={chatInput}
+                chatMessages={chatMessages}
+                joinedRoomCode={joinedRoomCode}
+                onChatInputChange={setChatInput}
+                onSendChat={sendChat}
+                pending={pending}
+              />
+            </div>
+          </main>
+        ) : (
+          <div className="match-prejoin-preview">
+            <div>
+              <span className="match-setup-kicker">Next Step</span>
+              <strong>Join a room to load match status, chat and activity.</strong>
+            </div>
+            <p>Until then, the setup stays focused on name, room code and deck readiness.</p>
+          </div>
+        )}
+      </section>
 
       <ChoiceSheet
         canSubmitChoice={isConnected}

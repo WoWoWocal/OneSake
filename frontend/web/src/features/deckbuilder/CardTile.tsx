@@ -1,5 +1,5 @@
 import type { CardDto } from '../../types/cards';
-import { isLeaderCardType } from './utils/deckValidation';
+import { isLeaderCard } from './utils/deckValidation';
 
 interface CardTileProps {
   card: CardDto;
@@ -22,7 +22,7 @@ export function CardTile({
   onSetLeader,
   quantity,
 }: CardTileProps) {
-  const isLeader = isLeaderCardType(card.card_type);
+  const isLeader = isLeaderCard(card);
   const maxQuantity = isLeader ? 1 : 4;
   const currentQuantity = isLeader ? (isSelectedLeader ? 1 : 0) : quantity;
   const canDecrease = currentQuantity > 0;
@@ -55,8 +55,23 @@ export function CardTile({
   };
 
   return (
-    <article className="panel card-tile">
-      <button className="card-tile__inspect" onClick={() => onSelect(card)} type="button">
+    <article
+      className={[
+        'panel',
+        'card-tile',
+        isLeader ? 'card-tile--leader' : '',
+        isSelectedLeader ? 'card-tile--selected-leader' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {isLeader && <span className="card-tile__leader-badge">Leader</span>}
+      <button
+        aria-label={`View details for ${card.card_name}`}
+        className="card-tile__inspect"
+        onClick={() => onSelect(card)}
+        type="button"
+      >
         <div className="card-tile-image">
           {card.card_image ? (
             <img alt={`${card.card_name} card art`} loading="lazy" src={card.card_image} />
@@ -67,6 +82,7 @@ export function CardTile({
       </button>
       <div className="card-quantity-controls" aria-label={`${card.card_name} quantity`}>
         <button
+          aria-label={isLeader ? `Remove ${card.card_name} as leader` : `Remove one ${card.card_name}`}
           className="card-quantity-button card-quantity-button--minus"
           disabled={!canDecrease}
           onClick={decreaseQuantity}
@@ -78,6 +94,7 @@ export function CardTile({
           {currentQuantity}/{maxQuantity}
         </strong>
         <button
+          aria-label={isLeader ? `Set ${card.card_name} as leader` : `Add one ${card.card_name}`}
           className="card-quantity-button card-quantity-button--plus"
           disabled={!canIncrease}
           onClick={increaseQuantity}

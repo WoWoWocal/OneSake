@@ -18,34 +18,17 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .match-setup-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .match-room-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .match-join-card {
-    grid-column: 1 / -1;
   }
 
   .match-join-card__actions {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .match-page .lobby-panel {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
-    align-items: end;
-  }
-
-  .match-page .lobby-panel .button-row {
-    align-self: end;
-  }
-
-  .match-page .match-setup-card.lobby-panel {
-    grid-template-columns: 1fr;
-    align-items: stretch;
+  .match-flow-panel__header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
   }
 
   .match-header-row {
@@ -92,7 +75,7 @@
   }
 
   .card-inspect {
-    grid-template-columns: minmax(180px, 0.72fr) 1fr;
+    grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1fr);
     align-items: start;
   }
 }
@@ -122,7 +105,20 @@
   }
 
   .match-page .content-grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
+  }
+
+  .match-setup-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.45fr);
+    align-items: start;
+  }
+
+  .match-setup-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .match-setup-section--deck {
+    grid-column: 1 / -1;
   }
 
   .match-board-shell {
@@ -194,19 +190,11 @@
 
 @media (min-width: 980px) {
   .match-fullscreen__stage--side-open {
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    align-items: stretch;
   }
 }
 
 @media (min-width: 1100px) {
-  .match-setup-grid {
-    grid-template-columns: 1fr 1fr 1.2fr;
-  }
-
-  .match-join-card {
-    grid-column: auto;
-  }
-
   .board-zone-grid {
     grid-template-columns: 180px minmax(0, 1fr) 170px;
     align-items: stretch;
@@ -349,6 +337,19 @@
     align-items: stretch;
     flex-wrap: wrap;
   }
+
+  .card-inspect-modal {
+    width: min(96vw, 520px);
+    margin-top: 2vh;
+  }
+
+  .card-inspect__image {
+    min-height: 0;
+  }
+
+  .card-inspect__image img {
+    max-height: 58vh;
+  }
 }
 
 @media (max-width: 420px) {
@@ -367,6 +368,7 @@
   .match-fullscreen .match-board {
     width: auto;
     height: 100%;
+    min-height: 0;
   }
 
   .match-fullscreen .match-hand-zone {

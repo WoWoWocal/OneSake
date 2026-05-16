@@ -52,12 +52,17 @@ export function DeckSummary({
       </div>
       <div className="deck-actions">
         <button disabled={!deck.leaderCardId} onClick={onRemoveLeader} type="button">
-          Remove leader
+          Change leader
         </button>
         <button disabled={!deck.leaderCardId && deck.cards.length === 0} onClick={onClearDeck} type="button">
           Clear deck
         </button>
       </div>
+      {deck.leaderCardId && (
+        <p className="deck-leader-help">
+          Change leader removes the current leader so leader cards appear in the pool again.
+        </p>
+      )}
     </section>
   );
 }
