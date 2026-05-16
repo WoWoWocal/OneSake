@@ -67,7 +67,7 @@ function getSlotCount(slot: BoardSlotDefinition, player: PlayerStateDto | null):
   }
 
   if (slot.kind === 'trash') {
-    return player?.trashCount ?? player?.trashCards.length ?? 0;
+    return player?.trashCount ?? player?.trashCards?.length ?? 0;
   }
 
   return undefined;
@@ -81,7 +81,7 @@ function getSlotCard(
     return undefined;
   }
 
-  return player?.boardCards[getCharacterIndex(slot) - 1];
+  return player?.boardCards?.[getCharacterIndex(slot) - 1];
 }
 
 function isSlotFilled(slot: BoardSlotDefinition, player: PlayerStateDto | null): boolean {
@@ -155,6 +155,7 @@ export function MatchBoard({
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugBoard');
   const visiblePlayers = getVisiblePlayers(gameState);
   const localPlayer = visiblePlayers.player;
+  const localHandCards = localPlayer?.handCards ?? [];
   const roomCode = gameState?.roomCode || joinedRoomCode || '-';
   const isGameOver = gameState?.phase === 'GameOver';
   const canPlayHandCards =
@@ -230,8 +231,8 @@ export function MatchBoard({
         </div>
 
         <div className="match-hand-card-row">
-          {localPlayer?.handCards.length ? (
-            localPlayer.handCards.map((card) => (
+          {localHandCards.length ? (
+            localHandCards.map((card) => (
               <HandCardButton
                 key={card.instanceId}
                 canPlay={canPlayHandCards}

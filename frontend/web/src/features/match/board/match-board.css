@@ -36,6 +36,20 @@
   background: #050b10;
 }
 
+.match-board::before {
+  content: "Board loading...";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #e3bd68;
+  font-size: clamp(0.9rem, 2vw, 1.3rem);
+  font-weight: 900;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(240 191 56 / 12%), transparent 28rem),
+    #050b10;
+}
+
 .match-board-image {
   position: absolute;
   inset: 0;
@@ -44,6 +58,7 @@
   height: 100%;
   object-fit: contain;
   user-select: none;
+  z-index: 1;
 }
 
 .match-board-overlay {
@@ -492,10 +507,12 @@ button.match-card-view {
   position: fixed;
   inset: 0;
   z-index: 60;
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   width: 100vw;
   min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
   height: 100vh;
   height: 100dvh;
   padding:
@@ -620,9 +637,10 @@ button.match-card-view {
 
 .match-fullscreen__stage {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex: 1 1 auto;
   gap: 10px;
+  width: 100%;
   min-height: 0;
   padding-top: 8px;
 }
@@ -630,9 +648,9 @@ button.match-card-view {
 .match-fullscreen__board {
   display: grid;
   position: relative;
+  flex: 1 1 auto;
   min-width: 0;
-  min-height: 0;
-  height: 100%;
+  min-height: 320px;
 }
 
 .match-fullscreen__status-stack,
@@ -664,7 +682,7 @@ button.match-card-view {
   width: 100%;
   height: 100%;
   max-height: 100%;
-  min-height: 0;
+  min-height: 320px;
   border-radius: 14px;
   padding: 5px;
   background:
@@ -676,18 +694,18 @@ button.match-card-view {
   display: grid;
   width: 100%;
   height: 100%;
-  min-height: 0;
+  min-height: 260px;
   place-items: center;
   overflow: hidden;
 }
 
 .match-fullscreen .match-board {
-  width: 100%;
+  width: min(100%, calc((100dvh - 210px) * 1672 / 941));
   max-width: 100%;
   height: auto;
   max-height: 100%;
   min-width: 0;
-  min-height: min(280px, 48dvh);
+  min-height: 260px;
   box-shadow: 0 14px 38px rgb(0 0 0 / 28%);
 }
 
@@ -718,6 +736,7 @@ button.match-card-view {
 
 .match-fullscreen__side-panel.is-open {
   display: grid;
+  flex: 0 0 min(360px, 32vw);
   grid-template-rows: auto minmax(0, 1fr);
 }
 
