@@ -21,6 +21,7 @@ import { LogPanel } from './LogPanel';
 import { toPlayerDeckSubmission } from './matchDeckMapper';
 import { MatchDeckSelect } from './MatchDeckSelect';
 import { MatchStatePanel } from './MatchStatePanel';
+import { generatePirateName } from './pirateNameGenerator';
 
 interface MatchPageProps {
   onImmersiveModeChange?: (isImmersiveMode: boolean) => void;
@@ -334,6 +335,10 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     setCopyStatus('');
   };
 
+  const randomizeDisplayName = (): void => {
+    setDisplayNameInput(generatePirateName());
+  };
+
   const updateRoomCodeInput = (value: string): void => {
     setRoomCodeInput(value.toUpperCase());
   };
@@ -513,6 +518,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           onJoinRoom={() => void joinRoom()}
           onOpenBoard={openBoardMode}
           onOpenDeckbuilder={onOpenDeckbuilder}
+          onRandomizeDisplayName={randomizeDisplayName}
           onRoomCodeChange={updateRoomCodeInput}
           onStartMatch={() => void startMatch()}
           pending={pending}

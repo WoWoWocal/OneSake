@@ -243,6 +243,22 @@
   text-transform: uppercase;
 }
 
+.match-display-name-row {
+  display: grid;
+  gap: 8px;
+}
+
+.match-display-name-row .field {
+  margin-bottom: 0;
+}
+
+.match-display-name-randomizer {
+  width: 100%;
+  min-height: 46px;
+  border-color: rgb(240 191 56 / 58%);
+  font-size: 0.78rem;
+}
+
 .match-room-actions,
 .match-join-card__actions,
 .match-joined-panel__actions {
