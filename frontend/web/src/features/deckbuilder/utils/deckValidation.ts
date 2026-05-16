@@ -13,8 +13,37 @@ export function isLeaderCardType(cardType: string | undefined): boolean {
   return Boolean(cardType?.toLowerCase().includes('leader'));
 }
 
-export function getCardColors(color: string | undefined): string[] {
-  if (!color?.trim()) {
+interface CardTypeLike {
+  card_type?: string;
+  type?: string;
+  category?: string;
+  cardType?: string;
+  family?: string;
+}
+
+export function isLeaderCard(card: CardTypeLike | null | undefined): boolean {
+  if (!card) {
+    return false;
+  }
+
+  return [card.card_type, card.type, card.category, card.cardType, card.family].some(
+    (value) => typeof value === 'string' && isLeaderCardType(value),
+  );
+}
+
+function formatUnknownColor(color: string): string {
+  const normalizedColor = color.trim().toLowerCase();
+  return normalizedColor
+    ? `${normalizedColor.charAt(0).toUpperCase()}${normalizedColor.slice(1)}`
+    : '';
+}
+
+export function getCardColors(color: unknown): string[] {
+  if (Array.isArray(color)) {
+    return color.flatMap((colorValue) => getCardColors(colorValue));
+  }
+
+  if (typeof color !== 'string' || !color.trim()) {
     return [];
   }
 
@@ -29,7 +58,7 @@ export function getCardColors(color: string | undefined): string[] {
 
   return color
     .split(/[/,+&|]/)
-    .map((part) => part.trim())
+    .map(formatUnknownColor)
     .filter(Boolean);
 }
 
@@ -37,7 +66,7 @@ export function formatCardColors(colors: string[]): string {
   return colors.length > 0 ? colors.join(' / ') : '-';
 }
 
-export function cardMatchesLeaderColors(cardColor: string | undefined, leaderColors: string[]): boolean {
+export function cardMatchesLeaderColors(cardColor: unknown, leaderColors: string[]): boolean {
   if (leaderColors.length === 0) {
     return true;
   }
@@ -50,7 +79,7 @@ export function cardMatchesLeaderColors(cardColor: string | undefined, leaderCol
   );
 }
 
-export function cardMatchesSelectedColors(cardColor: string | undefined, selectedColors: string[]): boolean {
+export function cardMatchesSelectedColors(cardColor: unknown, selectedColors: string[]): boolean {
   if (selectedColors.length === 0) {
     return true;
   }

@@ -5,7 +5,7 @@ import { CardTile } from './CardTile';
 import {
   cardMatchesLeaderColors,
   cardMatchesSelectedColors,
-  isLeaderCardType,
+  isLeaderCard,
 } from './utils/deckValidation';
 
 interface CardGridProps {
@@ -50,11 +50,12 @@ export function CardGrid({
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
   const deckQuantities = new Map(deckCards.map((deckCard) => [deckCard.cardId, deckCard.quantity]));
   const normalizedSearch = normalize(filters.searchText);
+  const hasActiveLeader = Boolean(leaderCardId);
   const visibleCards = cards.filter((card) => {
+    const isLeader = isLeaderCard(card);
     const matchesLeaderColors =
-      leaderColors.length === 0 ||
-      isLeaderCardType(card.card_type) ||
-      cardMatchesLeaderColors(card.card_color, leaderColors);
+      !hasActiveLeader ||
+      (!isLeader && (leaderColors.length === 0 || cardMatchesLeaderColors(card.card_color, leaderColors)));
     const matchesText =
       !normalizedSearch ||
       normalize(card.card_name).includes(normalizedSearch) ||
@@ -77,7 +78,9 @@ export function CardGrid({
 
   return (
     <>
-      <div className="card-grid-count">{visibleCards.length} cards</div>
+      <div className="card-grid-count">
+        {visibleCards.length} {hasActiveLeader ? 'playable cards' : 'cards'}
+      </div>
       <section
         className="card-grid"
         aria-label="Cards"
@@ -97,7 +100,9 @@ export function CardGrid({
           />
         ))}
         {visibleCards.length === 0 && (
-          <div className="panel empty-state">No cards match these filters.</div>
+          <div className="panel empty-state">
+            No cards match these filters. Remove the leader or reset filters to see more cards.
+          </div>
         )}
       </section>
     </>
