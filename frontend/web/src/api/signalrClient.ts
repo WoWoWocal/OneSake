@@ -41,6 +41,20 @@ export class SignalRClient {
     this.hubUrl = hubUrl;
   }
 
+  private toConnectionError(error: unknown): Error {
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (message.includes('404')) {
+      return new Error('Match server not found. Check backend URL or deployment.');
+    }
+
+    if (message.includes('Failed to fetch') || message.includes('ERR_CONNECTION')) {
+      return new Error('Match server is unreachable. Check backend URL, CORS or network access.');
+    }
+
+    return error instanceof Error ? error : new Error(message);
+  }
+
   private notifyConnectionStatus(status: ConnectionStatus): void {
     if (this.connectionStatus === status) {
       return;
@@ -104,8 +118,12 @@ export class SignalRClient {
           this.notifyConnectionStatus('connected');
         })
         .catch((error) => {
+          console.error('[OneSake] SignalR connection failed', {
+            hubUrl: this.hubUrl,
+            error,
+          });
           this.notifyConnectionStatus('error');
-          throw error;
+          throw this.toConnectionError(error);
         })
         .finally(() => {
           this.connectPromise = null;

@@ -25,6 +25,7 @@ interface LobbyPanelProps {
   onRoomCodeChange: (value: string) => void;
   onDisplayNameChange: (value: string) => void;
   onGenerateRoomCode: () => void;
+  onRandomizeDisplayName: () => void;
   onJoinRoom: () => void;
   onCopyRoomCode: () => void;
   onOpenBoard: () => void;
@@ -47,6 +48,7 @@ export function LobbyPanel({
   onJoinRoom,
   onOpenBoard,
   onOpenDeckbuilder,
+  onRandomizeDisplayName,
   onRoomCodeChange,
   onStartMatch,
   pending,
@@ -61,16 +63,26 @@ export function LobbyPanel({
           <span>Player</span>
           <ConnectionStatusBadge status={connectionStatus} />
         </div>
-        <div className="field">
-          <label htmlFor="displayName">Display Name</label>
-          <input
-            autoComplete="nickname"
-            id="displayName"
-            maxLength={24}
-            onChange={(event) => onDisplayNameChange(event.target.value)}
-            placeholder="Captain Calvin"
-            value={displayNameInput}
-          />
+        <div className="match-display-name-row">
+          <div className="field">
+            <label htmlFor="displayName">Display Name</label>
+            <input
+              autoComplete="nickname"
+              id="displayName"
+              maxLength={24}
+              onChange={(event) => onDisplayNameChange(event.target.value)}
+              placeholder="Captain Calvin"
+              value={displayNameInput}
+            />
+          </div>
+          <Button
+            aria-label="Generate random pirate display name"
+            className="match-display-name-randomizer"
+            onClick={onRandomizeDisplayName}
+            variant="secondary"
+          >
+            RANDOMIZER
+          </Button>
         </div>
         </div>
 
@@ -161,9 +173,6 @@ export function LobbyPanel({
             Start Match
           </Button>
         </div>
-        <p>
-          Join opens the fullscreen board automatically. If you exit the board, use Open Board to return.
-        </p>
         </div>
       </aside>
     </section>

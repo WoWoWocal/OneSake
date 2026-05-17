@@ -20,7 +20,7 @@ export function CardSearch({
     <section className="panel card-search">
       <div>
         <h2>Filters</h2>
-        <p>{activeFilterCount > 0 ? `${activeFilterCount} active` : 'Search and narrow cards'}</p>
+        {activeFilterCount > 0 && <p>{activeFilterCount} active</p>}
         {autoFilterActive ? (
           <p className="auto-filter-note">
             Leader active: {formatCardColors(leaderColors)}

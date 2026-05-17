@@ -289,7 +289,6 @@ export function ProbabilityCalculator({ deck }: ProbabilityCalculatorProps) {
       <section className="panel tools-panel tool-card probability-calculator">
         <span className="tools-kicker">Odds</span>
         <h2>Probability Calculator</h2>
-        <p>Select a saved deck to calculate opening-hand odds.</p>
       </section>
     );
   }

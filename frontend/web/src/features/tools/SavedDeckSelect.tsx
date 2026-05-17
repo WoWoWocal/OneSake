@@ -1,4 +1,3 @@
-import { Button } from '../../components/ui/Button';
 import type { Deck } from '../../types/decks';
 import { getTotalCards, validateDeck } from '../deckbuilder/utils/deckValidation';
 
@@ -11,23 +10,11 @@ interface SavedDeckSelectProps {
 
 export function SavedDeckSelect({
   decks,
-  onOpenDeckbuilder,
   onSelectDeck,
   selectedDeckId,
 }: SavedDeckSelectProps) {
   if (decks.length === 0) {
-    return (
-      <section className="panel tools-panel saved-deck-select saved-deck-select--empty">
-        <span className="tools-kicker">Deck Library</span>
-        <h2>No saved decks yet</h2>
-        <p>Create and save a deck in the Deckbuilder first.</p>
-        {onOpenDeckbuilder && (
-          <Button onClick={onOpenDeckbuilder} variant="secondary">
-            Open Deckbuilder
-          </Button>
-        )}
-      </section>
-    );
+    return null;
   }
 
   return (

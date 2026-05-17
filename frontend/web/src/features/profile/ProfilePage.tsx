@@ -63,7 +63,6 @@ export function ProfilePage() {
         <div>
           <span className="profile-kicker">OneSake Account</span>
           <h1>Captain Profile</h1>
-          <p>Login and profile features are coming soon.</p>
         </div>
         <div className="profile-hero__badge" aria-label="Profile status">
           {isGuestActive ? 'Guest Active' : 'Guest Ready'}
@@ -71,15 +70,11 @@ export function ProfilePage() {
       </header>
 
       <div className="profile-layout">
-        <section className="panel profile-card profile-login-card" aria-labelledby="profile-login-title">
+        <section className="panel profile-card profile-login-card" aria-label="Guest profile">
           <div className="profile-card__header">
             <span>Login</span>
             <strong>Local demo only</strong>
           </div>
-          <h2 id="profile-login-title">Enter as a Captain</h2>
-          <p>
-            Use a local guest profile for demos. Accounts, progression and cosmetics will be added later.
-          </p>
 
           {(!isGuestActive || isEditingName) && (
             <div className="field">
@@ -149,11 +144,6 @@ export function ProfilePage() {
               </div>
             ))}
           </div>
-        </section>
-
-        <section className="panel profile-card profile-coming-soon-card">
-          <span className="profile-kicker">Roadmap</span>
-          <p>Accounts, progression and cosmetics will be added later.</p>
         </section>
       </div>
     </section>

@@ -1,5 +1,6 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 
+import { getMatchHubUrl } from '../../api/backendUrl';
 import { SignalRClient, type ConnectionStatus } from '../../api/signalrClient';
 import {
   ChatMessageDto,
@@ -20,6 +21,7 @@ import { LogPanel } from './LogPanel';
 import { toPlayerDeckSubmission } from './matchDeckMapper';
 import { MatchDeckSelect } from './MatchDeckSelect';
 import { MatchStatePanel } from './MatchStatePanel';
+import { generatePirateName } from './pirateNameGenerator';
 
 interface MatchPageProps {
   onImmersiveModeChange?: (isImmersiveMode: boolean) => void;
@@ -86,9 +88,23 @@ async function exitBoardPresentation(): Promise<void> {
 }
 
 export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPageProps) {
-  const signalRClient = useRef(
-    new SignalRClient(`${import.meta.env.VITE_BACKEND_URL}/matchHub`),
-  );
+  const [{ signalRClient, signalRConfigError }] = useState(() => {
+    try {
+      return {
+        signalRClient: new SignalRClient(getMatchHubUrl()),
+        signalRConfigError: '',
+      };
+    } catch (configError) {
+      console.error('[OneSake] Match hub configuration failed', configError);
+      return {
+        signalRClient: null,
+        signalRConfigError:
+          configError instanceof Error
+            ? configError.message
+            : 'Match server URL could not be configured.',
+      };
+    }
+  });
 
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [displayNameInput, setDisplayNameInput] = useState('');
@@ -107,7 +123,11 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('');
 
   useEffect(() => {
-    const client = signalRClient.current;
+    if (!signalRClient) {
+      return undefined;
+    }
+
+    const client = signalRClient;
     client.onStateSnapshot((snapshot) => {
       setGameState(snapshot);
     });
@@ -127,7 +147,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     client.onConnectionStatus((status) => {
       setConnectionStatus(status);
     });
-  }, []);
+  }, [signalRClient]);
 
   useEffect(() => {
     if (!selectedDeckId && savedDecks[0]) {
@@ -169,16 +189,20 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     hasRoomCode &&
     hasPlayerName &&
     hasValidSelectedDeck &&
-    connectionStatus !== 'connecting';
+    connectionStatus !== 'connecting' &&
+    !signalRConfigError;
   const canStart =
-    joinedRoomCode.length > 0 && connectionStatus === 'connected' && hasValidSelectedDeck;
+    joinedRoomCode.length > 0 &&
+    connectionStatus === 'connected' &&
+    hasValidSelectedDeck &&
+    !signalRConfigError;
   const deckNotice = useMemo(() => {
     if (!hasSavedDecks) {
       return 'Create and save a deck in the Deckbuilder first.';
     }
 
     if (!selectedDeck) {
-      return 'Select a saved deck before joining a room.';
+      return 'Choose a deck.';
     }
 
     if (!selectedDeckValidation?.isValid) {
@@ -188,6 +212,10 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     return '';
   }, [hasSavedDecks, selectedDeck, selectedDeckValidation]);
   const connectionNotice = useMemo(() => {
+    if (signalRConfigError) {
+      return 'Match server configuration is missing. Check VITE_BACKEND_URL for this build.';
+    }
+
     if (connectionStatus === 'reconnecting') {
       return 'Connection lost. Reconnecting to the match server...';
     }
@@ -205,7 +233,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     }
 
     return '';
-  }, [connectionStatus]);
+  }, [connectionStatus, signalRConfigError]);
 
   const readinessItems = useMemo(
     () => [
@@ -264,6 +292,11 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   }, [gameState]);
 
   const joinRoom = async (): Promise<void> => {
+    if (!signalRClient) {
+      setError(signalRConfigError || 'Match server is not configured.');
+      return;
+    }
+
     const normalizedRoomCode = roomCodeInput.trim().toUpperCase();
     const normalizedDisplayName = displayNameInput.trim();
     if (!normalizedRoomCode || !normalizedDisplayName) {
@@ -274,12 +307,12 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     setPending(true);
     setError('');
     try {
-      await signalRClient.current.joinRoom(normalizedRoomCode, normalizedDisplayName);
+      await signalRClient.joinRoom(normalizedRoomCode, normalizedDisplayName);
       setJoinedRoomCode(normalizedRoomCode);
       setRoomCodeInput(normalizedRoomCode);
 
       if (selectedDeck && selectedDeckValidation?.isValid) {
-        await signalRClient.current.setPlayerDeck(
+        await signalRClient.setPlayerDeck(
           normalizedRoomCode,
           toPlayerDeckSubmission(selectedDeck),
         );
@@ -300,6 +333,10 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   const generateRoomCode = (): void => {
     setRoomCodeInput(createRoomCode());
     setCopyStatus('');
+  };
+
+  const randomizeDisplayName = (): void => {
+    setDisplayNameInput(generatePirateName());
   };
 
   const updateRoomCodeInput = (value: string): void => {
@@ -332,14 +369,17 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   };
 
   const startMatch = async (): Promise<void> => {
-    if (!joinedRoomCode) {
+    if (!joinedRoomCode || !signalRClient) {
+      if (!signalRClient) {
+        setError(signalRConfigError || 'Match server is not configured.');
+      }
       return;
     }
 
     setPending(true);
     setError('');
     try {
-      await signalRClient.current.startMatch(joinedRoomCode);
+      await signalRClient.startMatch(joinedRoomCode);
     } catch (startError) {
       const message = startError instanceof Error ? startError.message : 'StartMatch fehlgeschlagen.';
       setError(message);
@@ -349,7 +389,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   };
 
   const submitChoice = async (option: string, selectedCardInstanceId?: string): Promise<void> => {
-    if (!currentPrompt || !joinedRoomCode || !isConnected) {
+    if (!currentPrompt || !joinedRoomCode || !isConnected || !signalRClient) {
       return;
     }
 
@@ -363,7 +403,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     setPending(true);
     setError('');
     try {
-      await signalRClient.current.submitChoice(joinedRoomCode, submission);
+      await signalRClient.submitChoice(joinedRoomCode, submission);
       setCurrentPrompt(null);
     } catch (submitError) {
       const message =
@@ -378,14 +418,14 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     event.preventDefault();
 
     const normalizedText = chatInput.trim();
-    if (!joinedRoomCode || !normalizedText || !isConnected) {
+    if (!joinedRoomCode || !normalizedText || !isConnected || !signalRClient) {
       return;
     }
 
     setPending(true);
     setError('');
     try {
-      await signalRClient.current.sendChat(joinedRoomCode, normalizedText);
+      await signalRClient.sendChat(joinedRoomCode, normalizedText);
       setChatInput('');
     } catch (chatError) {
       const message = chatError instanceof Error ? chatError.message : 'SendChat fehlgeschlagen.';
@@ -427,8 +467,6 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
         <div className="match-header-row">
           <div>
             <span className="match-setup-kicker">Game Lobby</span>
-            <h1>Prepare Match</h1>
-            <p>Choose your deck, create or join a room, then enter the fullscreen board.</p>
           </div>
           <ConnectionStatusBadge status={connectionStatus} />
         </div>
@@ -445,7 +483,6 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           <div>
             <span className="match-setup-kicker">Setup Flow</span>
             <h2 id="match-flow-title">Player, Room and Deck</h2>
-            <p>Prepare the player details, choose a valid deck, then join and open the board.</p>
           </div>
           <div className="match-flow-steps" aria-label="Match setup steps">
             <span className={hasPlayerName ? 'is-complete' : ''}>1 Player</span>
@@ -478,6 +515,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           onJoinRoom={() => void joinRoom()}
           onOpenBoard={openBoardMode}
           onOpenDeckbuilder={onOpenDeckbuilder}
+          onRandomizeDisplayName={randomizeDisplayName}
           onRoomCodeChange={updateRoomCodeInput}
           onStartMatch={() => void startMatch()}
           pending={pending}

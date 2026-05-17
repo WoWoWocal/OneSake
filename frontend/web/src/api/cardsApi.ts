@@ -1,14 +1,8 @@
 import type { CardDto } from '../types/cards';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { getBackendBaseUrl } from './backendUrl';
 
 function buildCardsUrl(path: string): string {
-  const baseUrl = String(BACKEND_URL ?? '').replace(/\/$/, '');
-  if (!baseUrl) {
-    throw new Error('VITE_BACKEND_URL is not configured.');
-  }
-
-  return `${baseUrl}/Cards/${path}`;
+  return `${getBackendBaseUrl()}/Cards/${path}`;
 }
 
 async function fetchCards(path: string): Promise<CardDto[]> {

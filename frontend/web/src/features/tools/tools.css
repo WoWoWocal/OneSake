@@ -54,7 +54,6 @@
 }
 
 .tools-panel p,
-.tools-hero p,
 .tools-deck-context p {
   margin: 0;
   color: #9db5bd;
@@ -152,26 +151,6 @@
 }
 
 .saved-deck-option small {
-  color: #9db5bd;
-  font-weight: 700;
-}
-
-.tools-empty-state {
-  display: grid;
-  gap: 10px;
-  border-color: rgb(240 191 56 / 32%) !important;
-}
-
-.tools-empty-state h2,
-.tools-empty-state p {
-  margin: 0;
-}
-
-.tools-empty-state h2 {
-  color: #ffffff;
-}
-
-.tools-empty-state p {
   color: #9db5bd;
   font-weight: 700;
 }
