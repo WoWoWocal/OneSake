@@ -668,7 +668,6 @@ export function DeckbuilderPage() {
                   leaderColors={activeLeaderColors}
                   onAddCard={addCardToDeck}
                   onPreviewCard={setPreviewCard}
-                  onSelectCard={openCardDetails}
                   onSetLeader={addCardToDeck}
                 />
               </div>

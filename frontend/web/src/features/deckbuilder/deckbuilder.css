@@ -282,12 +282,13 @@
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 4px;
   width: 100%;
-  border-radius: 6px;
-  padding: 3px;
+  border-radius: 10px;
+  padding: 0;
   color: inherit;
   text-align: left;
+  background: transparent !important;
+  overflow: hidden;
 }
 
 .deckbuilder-topline {
@@ -422,17 +423,19 @@
 
 .card-tile__count-badge {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  right: 7px;
+  bottom: 7px;
   z-index: 2;
-  border: 1px solid rgb(31 196 159 / 46%);
+  min-width: 34px;
+  border: 1px solid rgb(77 184 255 / 58%);
   border-radius: 999px;
   padding: 4px 7px;
-  color: #b9f3df;
-  background: rgb(7 21 34 / 88%);
+  color: #dff5ff;
+  background: rgb(30 104 180 / 88%);
   font-size: 0.68rem;
   font-weight: 900;
   line-height: 1;
+  text-align: center;
   box-shadow: 0 4px 12px rgb(0 0 0 / 28%);
 }
 
@@ -457,30 +460,9 @@
 }
 
 .card-tile__add:focus-visible,
-.card-tile__details:focus-visible,
 .deckbuilder-hover-preview__details:focus-visible {
   outline: 3px solid #f2c94c;
   outline-offset: 2px;
-}
-
-.card-tile__details {
-  position: absolute;
-  right: 7px;
-  bottom: 7px;
-  z-index: 2;
-  min-height: 36px;
-  border: 1px solid rgb(148 187 194 / 24%);
-  border-radius: 6px;
-  padding: 6px 8px;
-  color: #d9e9ee;
-  background: rgb(7 21 34 / 86%);
-  font-size: 0.74rem;
-  font-weight: 900;
-}
-
-.card-tile__details:hover {
-  border-color: rgb(240 191 56 / 44%);
-  color: #fff3c7;
 }
 
 .card-tile-image,
@@ -489,9 +471,9 @@
   width: 100%;
   aspect-ratio: 5 / 7;
   place-items: center;
-  border-radius: 4px;
+  border-radius: 10px;
   color: #ffffff;
-  background: #314b57;
+  background: #071522;
   text-align: center;
   font-weight: 700;
   overflow: hidden;
@@ -502,16 +484,20 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  border-radius: 4px;
-  background: #eef3f4;
+  object-fit: cover;
+  border-radius: 10px;
+  background: transparent;
+  transform: scale(1.018);
 }
 
 .deckbuilder-hover-preview {
   position: sticky;
-  top: 14px;
+  top: clamp(80px, 10vh, 140px);
+  align-self: start;
   display: grid;
   gap: 12px;
+  max-height: calc(100dvh - 120px);
+  overflow: auto;
 }
 
 .deckbuilder-hover-preview--empty {
@@ -547,9 +533,9 @@
   place-items: center;
   width: 100%;
   aspect-ratio: 5 / 7;
-  border-radius: 10px;
+  border-radius: 14px;
   color: #ffffff;
-  background: #314b57;
+  background: transparent;
   overflow: hidden;
 }
 
@@ -557,9 +543,10 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  border-radius: 10px;
-  background: #eef3f4;
+  object-fit: cover;
+  border-radius: 14px;
+  background: transparent;
+  transform: scale(1.014);
 }
 
 .deckbuilder-hover-preview__body,

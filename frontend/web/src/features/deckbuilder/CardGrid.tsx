@@ -17,7 +17,6 @@ interface CardGridProps {
   cardsPerRow?: number;
   deckCards: DeckCard[];
   leaderCardId: string;
-  onSelectCard: (card: CardDto) => void;
   onAddCard: (card: CardDto) => void;
   onSetLeader: (card: CardDto) => void;
   onPreviewCard: (card: CardDto) => void;
@@ -48,7 +47,6 @@ export function CardGrid({
   leaderColors,
   onAddCard,
   onPreviewCard,
-  onSelectCard,
   onSetLeader,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
@@ -100,7 +98,6 @@ export function CardGrid({
             isSelectedLeader={leaderCardId === card.card_set_id}
             onAddCard={onAddCard}
             onPreviewCard={onPreviewCard}
-            onSelect={onSelectCard}
             onSetLeader={onSetLeader}
             quantity={deckQuantities.get(card.card_set_id) ?? 0}
           />
