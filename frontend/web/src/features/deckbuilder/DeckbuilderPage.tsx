@@ -8,7 +8,6 @@ import type { Deck, DeckCard } from '../../types/decks';
 import { CardFilterSheet, type CardFilters } from './CardFilterSheet';
 import { CardGrid } from './CardGrid';
 import { CardHoverPreview } from './CardHoverPreview';
-import { CardInspectModal } from './CardInspectModal';
 import { CardSearch } from './CardSearch';
 import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
@@ -229,7 +228,6 @@ export function DeckbuilderPage() {
   const [cards, setCards] = useState<CardDto[]>([]);
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
-  const [selectedCard, setSelectedCard] = useState<CardDto | null>(null);
   const [previewCard, setPreviewCard] = useState<CardDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -510,11 +508,6 @@ export function DeckbuilderPage() {
     showDeckNotice('Deck deleted.');
   };
 
-  const openCardDetails = (card: CardDto): void => {
-    setPreviewCard(card);
-    setSelectedCard(card);
-  };
-
   return (
     <section className="deckbuilder-page">
       <header className="panel deckbuilder-header">
@@ -671,7 +664,7 @@ export function DeckbuilderPage() {
                   onSetLeader={addCardToDeck}
                 />
               </div>
-              <CardHoverPreview card={previewCard} onOpenDetails={openCardDetails} />
+              <CardHoverPreview card={previewCard} />
             </section>
           )}
         </main>
@@ -714,11 +707,6 @@ export function DeckbuilderPage() {
         options={filterOptions}
       />
 
-      <CardInspectModal
-        card={selectedCard}
-        onAddCard={addCardToDeck}
-        onClose={() => setSelectedCard(null)}
-      />
     </section>
   );
 }

@@ -423,7 +423,7 @@
 
 .card-tile__count-badge {
   position: absolute;
-  right: 7px;
+  left: 7px;
   bottom: 7px;
   z-index: 2;
   min-width: 34px;
@@ -459,8 +459,7 @@
   cursor: not-allowed;
 }
 
-.card-tile__add:focus-visible,
-.deckbuilder-hover-preview__details:focus-visible {
+.card-tile__add:focus-visible {
   outline: 3px solid #f2c94c;
   outline-offset: 2px;
 }
@@ -492,26 +491,22 @@
 
 .deckbuilder-hover-preview {
   position: sticky;
-  top: clamp(80px, 10vh, 140px);
+  top: clamp(12px, 3vh, 32px);
   align-self: start;
   display: grid;
-  gap: 12px;
-  max-height: calc(100dvh - 120px);
-  overflow: auto;
+  height: fit-content;
+  max-height: calc(100dvh - 140px);
+  overflow: visible;
+  border: 0 !important;
+  padding: 0;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .deckbuilder-hover-preview--empty {
-  min-height: 420px;
+  min-height: min(56dvh, 420px);
   align-content: center;
   justify-items: center;
-  color: #9db5bd;
-  text-align: center;
-}
-
-.deckbuilder-hover-preview--empty h2 {
-  margin: 0;
-  color: #d9e9ee;
-  font-size: 1rem;
 }
 
 .deckbuilder-hover-preview__placeholder {
@@ -537,6 +532,7 @@
   color: #ffffff;
   background: transparent;
   overflow: hidden;
+  filter: drop-shadow(0 18px 30px rgb(0 0 0 / 32%));
 }
 
 .deckbuilder-hover-preview__image img {
@@ -547,91 +543,6 @@
   border-radius: 14px;
   background: transparent;
   transform: scale(1.014);
-}
-
-.deckbuilder-hover-preview__body,
-.deckbuilder-hover-preview__heading {
-  display: grid;
-  gap: 8px;
-}
-
-.deckbuilder-hover-preview__heading span {
-  color: #e3bd68;
-  font-size: 0.76rem;
-  font-weight: 900;
-}
-
-.deckbuilder-hover-preview__heading h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(1.05rem, 2vw, 1.35rem);
-  line-height: 1.12;
-  overflow-wrap: anywhere;
-}
-
-.deckbuilder-hover-preview__meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-  margin: 0;
-}
-
-.deckbuilder-hover-preview__meta div {
-  min-width: 0;
-  border: 1px solid rgb(148 187 194 / 18%);
-  border-radius: 8px;
-  padding: 8px;
-  background: rgb(255 255 255 / 5%);
-}
-
-.deckbuilder-hover-preview__meta dt {
-  color: #8ea9b3;
-  font-size: 0.7rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.deckbuilder-hover-preview__meta dd {
-  margin: 0;
-  color: #ffffff;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-}
-
-.deckbuilder-hover-preview__effect {
-  display: grid;
-  gap: 6px;
-  border: 1px solid rgb(229 176 73 / 24%);
-  border-radius: 10px;
-  padding: 10px;
-  background: #f1e6cc;
-}
-
-.deckbuilder-hover-preview__effect span {
-  color: #6d4a10;
-  font-size: 0.72rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.deckbuilder-hover-preview__effect p {
-  margin: 0;
-  max-height: 170px;
-  overflow-y: auto;
-  color: #1d2730;
-  font-size: 0.92rem;
-  line-height: 1.45;
-  white-space: pre-wrap;
-}
-
-.deckbuilder-hover-preview__details {
-  min-height: 44px;
-  border: 1px solid rgb(240 191 56 / 34%);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: #fff3c7;
-  background: rgb(240 191 56 / 10%);
-  font-weight: 900;
 }
 
 .card-inspect-modal {

@@ -37,6 +37,10 @@
   overflow-x: hidden;
 }
 
+.app-shell:has(.app-main--deckbuilder) {
+  overflow-x: clip;
+}
+
 .app-shell--immersive {
   padding: 0;
 }
@@ -48,6 +52,7 @@
 
 .app-main--deckbuilder {
   max-width: none;
+  overflow: visible;
 }
 
 .app-shell--immersive .app-main {
