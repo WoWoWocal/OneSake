@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
-import { getTotalCards, validateDeck } from '../deckbuilder/utils/deckValidation';
+import { validateDeck } from '../deckbuilder/utils/deckValidation';
 import { MulliganTrainer } from './mulligan/MulliganTrainer';
 import { ProbabilityCalculator } from './probability/ProbabilityCalculator';
 import { SavedDeckSelect } from './SavedDeckSelect';
@@ -21,7 +21,6 @@ export function ToolsPage({ onOpenDeckbuilder }: ToolsPageProps) {
     () => (selectedDeck ? validateDeck(selectedDeck) : null),
     [selectedDeck],
   );
-  const selectedDeckTotal = selectedDeck ? getTotalCards(selectedDeck.cards) : 0;
 
   return (
     <section className="tools-page">
@@ -47,37 +46,6 @@ export function ToolsPage({ onOpenDeckbuilder }: ToolsPageProps) {
         onSelectDeck={setSelectedDeckId}
         selectedDeckId={selectedDeckId}
       />
-
-      {selectedDeck && selectedDeckValidation && (
-        <section className="panel tools-panel tools-deck-context">
-          <div>
-            <span className="tools-kicker">Active Deck</span>
-            <h2>{selectedDeck.name}</h2>
-            <p>{selectedDeck.leaderName || selectedDeck.leaderCardId || 'No leader selected'}</p>
-          </div>
-          <dl className="tools-deck-context__stats">
-            <div>
-              <dt>Leader</dt>
-              <dd>{selectedDeck.leaderCardId || '-'}</dd>
-            </div>
-            <div>
-              <dt>Main Deck</dt>
-              <dd>{selectedDeckTotal}/50</dd>
-            </div>
-            <div>
-              <dt>Status</dt>
-              <dd>{selectedDeckValidation.isValid ? 'Valid' : 'Invalid'}</dd>
-            </div>
-          </dl>
-          {!selectedDeckValidation.isValid && (
-            <ul className="tools-deck-context__issues">
-              {selectedDeckValidation.errors.slice(0, 2).map((issue) => (
-                <li key={issue}>{issue}</li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
 
       <div className="tools-grid">
         <MulliganTrainer deck={selectedDeck} />

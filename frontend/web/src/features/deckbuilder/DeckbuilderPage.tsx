@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { getCardsBySetId } from '../../api/cardsApi';
 import { Drawer } from '../../components/ui/Drawer';
+import { Button } from '../../components/ui/Button';
 import type { CardDto } from '../../types/cards';
 import type { Deck, DeckCard } from '../../types/decks';
 import { CardFilterSheet, type CardFilters } from './CardFilterSheet';
@@ -28,7 +29,9 @@ import {
 } from './utils/deckStorage';
 import {
   cardMatchesLeaderColors,
+  formatCardColors,
   getCardColors,
+  getTotalCards,
   isLeaderCard,
   validateDeck,
 } from './utils/deckValidation';
@@ -79,7 +82,7 @@ const availableSets = [
   'ST-28',
 ];
 const cardsPerRowStorageKey = 'onesake.deckbuilder.cardsPerRow';
-const defaultCardsPerRow = 3;
+const defaultCardsPerRow = 7;
 
 function clampCardsPerRow(value: number): number {
   if (!Number.isFinite(value)) {
@@ -236,6 +239,10 @@ export function DeckbuilderPage() {
   const validation = useMemo(() => validateDeck(deck), [deck]);
   const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
   const activeLeaderColors = deck.leaderColors ?? [];
+  const totalDeckCards = getTotalCards(deck.cards);
+  const validationSummary = validation.isValid
+    ? 'Deck is valid.'
+    : validation.errors[0] ?? validation.warnings[0] ?? 'Deck needs review.';
   const isDeckSaved = savedDecks.some(
     (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
   );
@@ -507,47 +514,138 @@ export function DeckbuilderPage() {
         <div>
           <h1>Deckbuilder</h1>
         </div>
-        <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
-          Deck
-        </button>
+        <div className="deckbuilder-header__actions">
+          <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
+            Deck / Export
+          </button>
+          <Button onClick={saveDeck}>Save Deck</Button>
+        </div>
       </header>
 
       <div className="deckbuilder-layout">
         <main className="deckbuilder-main">
-          <section className="panel set-picker">
-            <label htmlFor="setPicker">Set</label>
-            <select
-              id="setPicker"
-              onChange={(event) => {
-                setSelectedSetId(event.target.value);
-                resetFilters();
-              }}
-              value={selectedSetId}
+          <div className="deckbuilder-toolbar">
+            <section className="panel set-picker">
+              <label htmlFor="setPicker">Set</label>
+              <select
+                id="setPicker"
+                onChange={(event) => {
+                  setSelectedSetId(event.target.value);
+                  resetFilters();
+                }}
+                value={selectedSetId}
+              >
+                {availableSets.map((setId) => (
+                  <option key={setId} value={setId}>
+                    {setId}
+                  </option>
+                ))}
+              </select>
+            </section>
+
+            <CardSearch
+              activeFilterCount={activeFilterCount}
+              leaderColors={activeLeaderColors}
+              leaderName={deck.leaderName}
+              onOpenFilters={() => setFiltersOpen(true)}
+              onSearchChange={(searchText) => setFilters((currentFilters) => ({
+                ...currentFilters,
+                searchText,
+              }))}
+              searchText={filters.searchText}
+            />
+
+            <div className="panel deckbuilder-filter-panel">
+              <ColorPaletteFilter
+                onChange={(selectedColors) => setFilters((currentFilters) => ({
+                  ...currentFilters,
+                  selectedColors,
+                }))}
+                selectedColors={filters.selectedColors}
+              />
+              <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
+            </div>
+          </div>
+
+          <section className="deckbuilder-topline" aria-label="Deck overview">
+            <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
+              <div className="deckbuilder-compact-card__header">
+                <h2>Deck List</h2>
+                <strong>{totalDeckCards}/50</strong>
+              </div>
+              <label className="field" htmlFor="deckNameCompact">
+                Deck name
+                <input
+                  id="deckNameCompact"
+                  maxLength={40}
+                  onChange={(event) => renameDeck(event.target.value)}
+                  value={deck.name}
+                />
+              </label>
+              <dl className="deckbuilder-compact-stats">
+                <div>
+                  <dt>Leader</dt>
+                  <dd>{deck.leaderName || deck.leaderCardId || '-'}</dd>
+                </div>
+                <div>
+                  <dt>Colors</dt>
+                  <dd>{formatCardColors(activeLeaderColors)}</dd>
+                </div>
+                <div>
+                  <dt>Unique</dt>
+                  <dd>{deck.cards.length}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{isDeckSaved ? 'Saved' : 'Unsaved'}</dd>
+                </div>
+              </dl>
+              <div className="deckbuilder-compact-actions">
+                <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
+                  Change leader
+                </Button>
+                <Button
+                  disabled={!deck.leaderCardId && deck.cards.length === 0}
+                  onClick={clearDeck}
+                  variant="ghost"
+                >
+                  Clear deck
+                </Button>
+              </div>
+            </section>
+
+            <section
+              className={`panel deckbuilder-compact-card deckbuilder-validation-compact ${
+                validation.isValid ? 'is-valid' : 'is-pending'
+              }`}
             >
-              {availableSets.map((setId) => (
-                <option key={setId} value={setId}>
-                  {setId}
-                </option>
-              ))}
-            </select>
+              <div className="deckbuilder-compact-card__header">
+                <h2>Validation</h2>
+                <strong>{validation.isValid ? 'Valid' : 'Needs Work'}</strong>
+              </div>
+              <p>{validationSummary}</p>
+              {validation.warnings[0] && <p>{validation.warnings[0]}</p>}
+            </section>
+
+            <section className="panel deckbuilder-compact-card deckbuilder-export-compact">
+              <div className="deckbuilder-compact-card__header">
+                <h2>Export</h2>
+                <strong>{validation.isValid ? 'Ready' : 'Locked'}</strong>
+              </div>
+              <p>
+                {validation.isValid
+                  ? 'Export is ready in the deck drawer.'
+                  : 'Fix validation before copying the export.'}
+              </p>
+              <div className="deckbuilder-compact-actions">
+                <Button onClick={saveDeck}>Save Deck</Button>
+                <Button onClick={() => setDeckOpen(true)} variant="ghost">
+                  Deck List / Export
+                </Button>
+              </div>
+            </section>
           </section>
 
-          <CardSearch
-            activeFilterCount={activeFilterCount}
-            leaderColors={activeLeaderColors}
-            leaderName={deck.leaderName}
-            onOpenFilters={() => setFiltersOpen(true)}
-          />
-          <div className="panel">
-            <ColorPaletteFilter
-              onChange={(selectedColors) => setFilters((currentFilters) => ({
-                ...currentFilters,
-                selectedColors,
-              }))}
-              selectedColors={filters.selectedColors}
-            />
-            <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
-          </div>
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
           {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}
           {error && <div className="panel status-panel status-panel--error">{error}</div>}
@@ -567,33 +665,6 @@ export function DeckbuilderPage() {
             />
           )}
         </main>
-
-        <aside className="deck-sidebar">
-          <DeckLibrary
-            activeDeckId={deck.id}
-            decks={savedDecks}
-            onCreateDeck={createDeck}
-            onDeleteDeck={deleteDeck}
-            onDuplicateDeck={duplicateDeck}
-            onLoadDeck={loadDeck}
-            onSaveDeck={saveDeck}
-          />
-          <DeckSummary
-            deck={deck}
-            isSaved={isDeckSaved}
-            onClearDeck={clearDeck}
-            onDeckNameChange={renameDeck}
-            onRemoveLeader={removeLeader}
-          />
-          <DeckValidation validation={validation} />
-          <DeckDrawer
-            deck={deck}
-            onDecreaseCard={decreaseDeckCard}
-            onIncreaseCard={increaseDeckCard}
-            onRemoveCard={removeDeckCard}
-          />
-          <DeckExport deck={deck} validation={validation} />
-        </aside>
       </div>
 
       <Drawer onClose={() => setDeckOpen(false)} open={deckOpen} title="Deck">

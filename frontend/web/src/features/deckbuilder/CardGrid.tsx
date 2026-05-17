@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 import type { CardDto } from '../../types/cards';
 import type { DeckCard } from '../../types/decks';
 import type { CardFilters } from './CardFilterSheet';
@@ -34,6 +36,10 @@ function clampCardsPerRow(value: number | undefined): number {
   return Math.min(10, Math.max(1, Math.round(value)));
 }
 
+function getCardMinWidth(cardsPerRow: number): number {
+  return Math.min(210, Math.max(116, Math.round(1180 / cardsPerRow)));
+}
+
 export function CardGrid({
   cards,
   cardsPerRow,
@@ -48,6 +54,9 @@ export function CardGrid({
   onSetLeader,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
+  const gridStyle = {
+    '--card-grid-min': `${getCardMinWidth(safeCardsPerRow)}px`,
+  } as CSSProperties;
   const deckQuantities = new Map(deckCards.map((deckCard) => [deckCard.cardId, deckCard.quantity]));
   const normalizedSearch = normalize(filters.searchText);
   const hasActiveLeader = Boolean(leaderCardId);
@@ -84,7 +93,7 @@ export function CardGrid({
       <section
         className="card-grid"
         aria-label="Cards"
-        style={{ gridTemplateColumns: `repeat(${safeCardsPerRow}, minmax(0, 1fr))` }}
+        style={gridStyle}
       >
         {visibleCards.map((card) => (
           <CardTile

@@ -46,6 +46,10 @@
   margin: 0 auto;
 }
 
+.app-main--deckbuilder {
+  max-width: none;
+}
+
 .app-shell--immersive .app-main {
   max-width: none;
   margin: 0;

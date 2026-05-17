@@ -3,16 +3,20 @@ import { formatCardColors } from './utils/deckValidation';
 
 interface CardSearchProps {
   onOpenFilters: () => void;
+  onSearchChange: (searchText: string) => void;
   activeFilterCount: number;
   leaderColors: string[];
   leaderName?: string;
+  searchText: string;
 }
 
 export function CardSearch({
   activeFilterCount,
   leaderColors,
   leaderName,
+  onSearchChange,
   onOpenFilters,
+  searchText,
 }: CardSearchProps) {
   const autoFilterActive = leaderColors.length > 0;
 
@@ -33,9 +37,20 @@ export function CardSearch({
           </p>
         )}
       </div>
-      <Button onClick={onOpenFilters} variant="ghost">
-        Open filters
-      </Button>
+      <div className="card-search__controls">
+        <label className="field" htmlFor="deckbuilderSearch">
+          Search
+          <input
+            id="deckbuilderSearch"
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Name or card ID"
+            value={searchText}
+          />
+        </label>
+        <Button onClick={onOpenFilters} variant="ghost">
+          Open filters
+        </Button>
+      </div>
     </section>
   );
 }
