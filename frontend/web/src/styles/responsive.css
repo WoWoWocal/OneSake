@@ -203,6 +203,12 @@
 
 }
 
+@media (min-width: 1600px) {
+  .deckbuilder-card-browser {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  }
+}
+
 @media (max-width: 1180px) {
   .deckbuilder-toolbar,
   .deckbuilder-topline {
@@ -212,6 +218,16 @@
   .deckbuilder-filter-panel,
   .deckbuilder-compact-card--deck {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 980px) {
+  .deckbuilder-card-browser {
+    grid-template-columns: 1fr;
+  }
+
+  .deckbuilder-hover-preview {
+    display: none;
   }
 }
 

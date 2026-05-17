@@ -7,6 +7,7 @@ import type { CardDto } from '../../types/cards';
 import type { Deck, DeckCard } from '../../types/decks';
 import { CardFilterSheet, type CardFilters } from './CardFilterSheet';
 import { CardGrid } from './CardGrid';
+import { CardHoverPreview } from './CardHoverPreview';
 import { CardInspectModal } from './CardInspectModal';
 import { CardSearch } from './CardSearch';
 import { CardSizeSlider } from './CardSizeSlider';
@@ -229,6 +230,7 @@ export function DeckbuilderPage() {
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
   const [selectedCard, setSelectedCard] = useState<CardDto | null>(null);
+  const [previewCard, setPreviewCard] = useState<CardDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deckNotice, setDeckNotice] = useState('');
@@ -508,6 +510,11 @@ export function DeckbuilderPage() {
     showDeckNotice('Deck deleted.');
   };
 
+  const openCardDetails = (card: CardDto): void => {
+    setPreviewCard(card);
+    setSelectedCard(card);
+  };
+
   return (
     <section className="deckbuilder-page">
       <header className="panel deckbuilder-header">
@@ -650,19 +657,23 @@ export function DeckbuilderPage() {
           {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}
           {error && <div className="panel status-panel status-panel--error">{error}</div>}
           {!loading && !error && (
-            <CardGrid
-              cards={sortedCards}
-              cardsPerRow={cardsPerRow}
-              deckCards={deck.cards}
-              filters={filters}
-              leaderCardId={deck.leaderCardId}
-              leaderColors={activeLeaderColors}
-              onAddCard={addCardToDeck}
-              onRemoveCard={decreaseDeckCard}
-              onRemoveLeader={removeLeader}
-              onSelectCard={setSelectedCard}
-              onSetLeader={addCardToDeck}
-            />
+            <section className="deckbuilder-card-browser">
+              <div className="deckbuilder-card-grid-area">
+                <CardGrid
+                  cards={sortedCards}
+                  cardsPerRow={cardsPerRow}
+                  deckCards={deck.cards}
+                  filters={filters}
+                  leaderCardId={deck.leaderCardId}
+                  leaderColors={activeLeaderColors}
+                  onAddCard={addCardToDeck}
+                  onPreviewCard={setPreviewCard}
+                  onSelectCard={openCardDetails}
+                  onSetLeader={addCardToDeck}
+                />
+              </div>
+              <CardHoverPreview card={previewCard} onOpenDetails={openCardDetails} />
+            </section>
           )}
         </main>
       </div>

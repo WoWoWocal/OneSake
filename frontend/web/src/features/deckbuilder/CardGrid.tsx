@@ -19,9 +19,8 @@ interface CardGridProps {
   leaderCardId: string;
   onSelectCard: (card: CardDto) => void;
   onAddCard: (card: CardDto) => void;
-  onRemoveCard: (cardId: string) => void;
   onSetLeader: (card: CardDto) => void;
-  onRemoveLeader: () => void;
+  onPreviewCard: (card: CardDto) => void;
 }
 
 function normalize(value: string): string {
@@ -48,8 +47,7 @@ export function CardGrid({
   leaderCardId,
   leaderColors,
   onAddCard,
-  onRemoveCard,
-  onRemoveLeader,
+  onPreviewCard,
   onSelectCard,
   onSetLeader,
 }: CardGridProps) {
@@ -101,8 +99,7 @@ export function CardGrid({
             card={card}
             isSelectedLeader={leaderCardId === card.card_set_id}
             onAddCard={onAddCard}
-            onRemoveCard={onRemoveCard}
-            onRemoveLeader={onRemoveLeader}
+            onPreviewCard={onPreviewCard}
             onSelect={onSelectCard}
             onSetLeader={onSetLeader}
             quantity={deckQuantities.get(card.card_set_id) ?? 0}
