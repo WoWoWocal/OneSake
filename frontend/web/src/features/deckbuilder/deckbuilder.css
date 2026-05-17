@@ -99,15 +99,6 @@
   margin: 0;
 }
 
-.card-search .auto-filter-note {
-  color: #b9f3df;
-  font-weight: 800;
-}
-
-.card-search .auto-filter-note--empty {
-  color: #e3bd68;
-}
-
 .set-picker {
   display: grid;
   gap: 6px;
@@ -358,6 +349,125 @@
   color: #ffffff;
   font-weight: 900;
   overflow-wrap: anywhere;
+}
+
+.deckbuilder-compact-stat--leader {
+  align-content: start;
+}
+
+.deckbuilder-compact-stat--leader dd {
+  display: grid;
+  justify-items: start;
+}
+
+.deckbuilder-leader-preview {
+  width: min(100%, 76px);
+  aspect-ratio: 5 / 7;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 18%, rgb(240 191 56 / 18%), transparent 42%),
+    #071522;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 24%);
+}
+
+.deckbuilder-leader-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.015);
+}
+
+.deckbuilder-leader-preview--empty {
+  border: 1px dashed rgb(148 187 194 / 26%);
+  box-shadow: none;
+}
+
+.deckbuilder-leader-preview__placeholder {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  min-height: 100%;
+  padding: 8px;
+  color: #d9e9ee;
+  text-align: center;
+}
+
+.deckbuilder-leader-preview__placeholder span {
+  color: #e3bd68;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.deckbuilder-leader-preview__placeholder strong,
+.deckbuilder-leader-preview__placeholder small {
+  overflow-wrap: anywhere;
+}
+
+.deckbuilder-leader-preview__placeholder strong {
+  color: #ffffff;
+  font-size: 0.72rem;
+  line-height: 1.12;
+}
+
+.deckbuilder-leader-preview__placeholder small {
+  color: #9db5bd;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.deckbuilder-compact-stat--colors dd {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+.deckbuilder-color-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.deckbuilder-color-dot {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 16%),
+    0 4px 10px rgb(0 0 0 / 18%);
+}
+
+.deckbuilder-color-dot--red {
+  background: #d73a31;
+}
+
+.deckbuilder-color-dot--green {
+  background: #24965b;
+}
+
+.deckbuilder-color-dot--blue {
+  background: #2878c8;
+}
+
+.deckbuilder-color-dot--purple {
+  background: #7c4dcc;
+}
+
+.deckbuilder-color-dot--black {
+  border-color: rgb(255 255 255 / 36%);
+  background: #111820;
+}
+
+.deckbuilder-color-dot--yellow {
+  background: #f3c74f;
+}
+
+.deckbuilder-color-dots__empty {
+  color: #8ea9b3;
+  font-weight: 900;
 }
 
 .deckbuilder-compact-actions {

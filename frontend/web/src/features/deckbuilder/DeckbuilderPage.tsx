@@ -29,7 +29,6 @@ import {
 } from './utils/deckStorage';
 import {
   cardMatchesLeaderColors,
-  formatCardColors,
   getCardColors,
   getTotalCards,
   isLeaderCard,
@@ -108,6 +107,17 @@ function uniqueValues(cards: CardDto[], readValue: (card: CardDto) => string): s
 
 function optionalCardText(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function getColorClassName(color: string): string {
+  return color.trim().toLowerCase();
+}
+
+function normalizeLeaderColors(colors: string[]): string[] {
+  return colors
+    .flatMap((color) => color.split(/[/,]/))
+    .map((color) => color.trim())
+    .filter(Boolean);
 }
 
 function loadCardsPerRow(): number {
@@ -238,7 +248,15 @@ export function DeckbuilderPage() {
 
   const validation = useMemo(() => validateDeck(deck), [deck]);
   const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
-  const activeLeaderColors = deck.leaderColors ?? [];
+  const activeLeaderColors = useMemo(() => deck.leaderColors ?? [], [deck.leaderColors]);
+  const leaderPreviewCard = useMemo(
+    () => sortedCards.find((card) => card.card_set_id === deck.leaderCardId) ?? null,
+    [deck.leaderCardId, sortedCards],
+  );
+  const leaderColorDots = useMemo(
+    () => normalizeLeaderColors(activeLeaderColors),
+    [activeLeaderColors],
+  );
   const totalDeckCards = getTotalCards(deck.cards);
   const validationSummary = validation.isValid
     ? 'Deck is valid.'
@@ -545,8 +563,6 @@ export function DeckbuilderPage() {
 
             <CardSearch
               activeFilterCount={activeFilterCount}
-              leaderColors={activeLeaderColors}
-              leaderName={deck.leaderName}
               onOpenFilters={() => setFiltersOpen(true)}
               onSearchChange={(searchText) => setFilters((currentFilters) => ({
                 ...currentFilters,
@@ -583,19 +599,56 @@ export function DeckbuilderPage() {
                 />
               </label>
               <dl className="deckbuilder-compact-stats">
-                <div>
+                <div className="deckbuilder-compact-stat deckbuilder-compact-stat--leader">
                   <dt>Leader</dt>
-                  <dd>{deck.leaderName || deck.leaderCardId || '-'}</dd>
+                  <dd>
+                    {deck.leaderCardId ? (
+                      <div className="deckbuilder-leader-preview">
+                        {leaderPreviewCard?.card_image ? (
+                          <img
+                            alt={`${leaderPreviewCard.card_name} leader card`}
+                            src={leaderPreviewCard.card_image}
+                          />
+                        ) : (
+                          <div className="deckbuilder-leader-preview__placeholder">
+                            <span>Leader</span>
+                            <strong>{deck.leaderName || deck.leaderCardId}</strong>
+                            <small>{deck.leaderCardId}</small>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="deckbuilder-leader-preview deckbuilder-leader-preview--empty" />
+                    )}
+                  </dd>
                 </div>
-                <div>
+                <div className="deckbuilder-compact-stat deckbuilder-compact-stat--colors">
                   <dt>Colors</dt>
-                  <dd>{formatCardColors(activeLeaderColors)}</dd>
+                  <dd>
+                    {leaderColorDots.length > 0 ? (
+                      <span className="deckbuilder-color-dots" aria-label="Leader colors">
+                        {leaderColorDots.map((color, index) => (
+                          <span
+                            aria-label={`${color} leader color`}
+                            className={`deckbuilder-color-dot deckbuilder-color-dot--${getColorClassName(color)}`}
+                            key={`${color}-${index}`}
+                            role="img"
+                            title={color}
+                          />
+                        ))}
+                      </span>
+                    ) : (
+                      <span className="deckbuilder-color-dots__empty" aria-label="No leader colors">
+                        -
+                      </span>
+                    )}
+                  </dd>
                 </div>
-                <div>
+                <div className="deckbuilder-compact-stat">
                   <dt>Unique</dt>
                   <dd>{deck.cards.length}</dd>
                 </div>
-                <div>
+                <div className="deckbuilder-compact-stat">
                   <dt>Status</dt>
                   <dd>{isDeckSaved ? 'Saved' : 'Unsaved'}</dd>
                 </div>
