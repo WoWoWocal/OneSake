@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 import type { CardDto } from '../../types/cards';
 import type { DeckCard } from '../../types/decks';
 import type { CardFilters } from './CardFilterSheet';
@@ -15,11 +17,9 @@ interface CardGridProps {
   cardsPerRow?: number;
   deckCards: DeckCard[];
   leaderCardId: string;
-  onSelectCard: (card: CardDto) => void;
   onAddCard: (card: CardDto) => void;
-  onRemoveCard: (cardId: string) => void;
   onSetLeader: (card: CardDto) => void;
-  onRemoveLeader: () => void;
+  onPreviewCard: (card: CardDto) => void;
 }
 
 function normalize(value: string): string {
@@ -34,6 +34,10 @@ function clampCardsPerRow(value: number | undefined): number {
   return Math.min(10, Math.max(1, Math.round(value)));
 }
 
+function getCardMinWidth(cardsPerRow: number): number {
+  return Math.min(210, Math.max(116, Math.round(1180 / cardsPerRow)));
+}
+
 export function CardGrid({
   cards,
   cardsPerRow,
@@ -42,12 +46,13 @@ export function CardGrid({
   leaderCardId,
   leaderColors,
   onAddCard,
-  onRemoveCard,
-  onRemoveLeader,
-  onSelectCard,
+  onPreviewCard,
   onSetLeader,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
+  const gridStyle = {
+    '--card-grid-min': `${getCardMinWidth(safeCardsPerRow)}px`,
+  } as CSSProperties;
   const deckQuantities = new Map(deckCards.map((deckCard) => [deckCard.cardId, deckCard.quantity]));
   const normalizedSearch = normalize(filters.searchText);
   const hasActiveLeader = Boolean(leaderCardId);
@@ -84,7 +89,7 @@ export function CardGrid({
       <section
         className="card-grid"
         aria-label="Cards"
-        style={{ gridTemplateColumns: `repeat(${safeCardsPerRow}, minmax(0, 1fr))` }}
+        style={gridStyle}
       >
         {visibleCards.map((card) => (
           <CardTile
@@ -92,9 +97,7 @@ export function CardGrid({
             card={card}
             isSelectedLeader={leaderCardId === card.card_set_id}
             onAddCard={onAddCard}
-            onRemoveCard={onRemoveCard}
-            onRemoveLeader={onRemoveLeader}
-            onSelect={onSelectCard}
+            onPreviewCard={onPreviewCard}
             onSetLeader={onSetLeader}
             quantity={deckQuantities.get(card.card_set_id) ?? 0}
           />

@@ -5,44 +5,34 @@ interface CardTileProps {
   card: CardDto;
   quantity: number;
   isSelectedLeader: boolean;
-  onSelect: (card: CardDto) => void;
   onAddCard: (card: CardDto) => void;
-  onRemoveCard: (cardId: string) => void;
   onSetLeader: (card: CardDto) => void;
-  onRemoveLeader: () => void;
+  onPreviewCard: (card: CardDto) => void;
 }
 
 export function CardTile({
   card,
   isSelectedLeader,
   onAddCard,
-  onRemoveCard,
-  onRemoveLeader,
-  onSelect,
+  onPreviewCard,
   onSetLeader,
   quantity,
 }: CardTileProps) {
   const isLeader = isLeaderCard(card);
   const maxQuantity = isLeader ? 1 : 4;
   const currentQuantity = isLeader ? (isSelectedLeader ? 1 : 0) : quantity;
-  const canDecrease = currentQuantity > 0;
-  const canIncrease = currentQuantity < maxQuantity;
+  const canAdd = currentQuantity < maxQuantity;
+  const actionLabel = isLeader ? `Set ${card.card_name} as leader` : `Add ${card.card_name} to deck`;
+  const disabledLabel = isLeader
+    ? `${card.card_name} is already selected as leader`
+    : `Maximum copies reached for ${card.card_name}`;
+  const counterLabel = isLeader ? 'Leader' : `${currentQuantity}/${maxQuantity}`;
+  const tileTitle = canAdd ? actionLabel : disabledLabel;
 
-  const decreaseQuantity = (): void => {
-    if (!canDecrease) {
-      return;
-    }
+  const addCard = (): void => {
+    onPreviewCard(card);
 
-    if (isLeader) {
-      onRemoveLeader();
-      return;
-    }
-
-    onRemoveCard(card.card_set_id);
-  };
-
-  const increaseQuantity = (): void => {
-    if (!canIncrease) {
+    if (!canAdd) {
       return;
     }
 
@@ -61,15 +51,21 @@ export function CardTile({
         'card-tile',
         isLeader ? 'card-tile--leader' : '',
         isSelectedLeader ? 'card-tile--selected-leader' : '',
+        !canAdd ? 'card-tile--maxed' : '',
       ]
         .filter(Boolean)
         .join(' ')}
+      onMouseEnter={() => onPreviewCard(card)}
+      title={tileTitle}
     >
       {isLeader && <span className="card-tile__leader-badge">Leader</span>}
+      <span className="card-tile__count-badge">{counterLabel}</span>
       <button
-        aria-label={`View details for ${card.card_name}`}
-        className="card-tile__inspect"
-        onClick={() => onSelect(card)}
+        aria-label={canAdd ? actionLabel : `Cannot add ${card.card_name}`}
+        className="card-tile__add"
+        disabled={!canAdd}
+        onClick={addCard}
+        onFocus={() => onPreviewCard(card)}
         type="button"
       >
         <div className="card-tile-image">
@@ -80,29 +76,6 @@ export function CardTile({
           )}
         </div>
       </button>
-      <div className="card-quantity-controls" aria-label={`${card.card_name} quantity`}>
-        <button
-          aria-label={isLeader ? `Remove ${card.card_name} as leader` : `Remove one ${card.card_name}`}
-          className="card-quantity-button card-quantity-button--minus"
-          disabled={!canDecrease}
-          onClick={decreaseQuantity}
-          type="button"
-        >
-          -
-        </button>
-        <strong className="card-quantity-value">
-          {currentQuantity}/{maxQuantity}
-        </strong>
-        <button
-          aria-label={isLeader ? `Set ${card.card_name} as leader` : `Add one ${card.card_name}`}
-          className="card-quantity-button card-quantity-button--plus"
-          disabled={!canIncrease}
-          onClick={increaseQuantity}
-          type="button"
-        >
-          +
-        </button>
-      </div>
     </article>
   );
 }

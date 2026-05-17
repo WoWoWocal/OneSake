@@ -16,6 +16,8 @@ type AppShellProps = {
 export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps) {
   const [activeSection, setActiveSection] = useState<Page>(initialPage);
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+  const appMainClassName =
+    activeSection === 'deckbuilder' ? 'app-main app-main--deckbuilder' : 'app-main';
 
   return (
     <div className={isImmersiveMode ? 'app-shell app-shell--immersive' : 'app-shell'}>
@@ -26,7 +28,7 @@ export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps)
           </button>
         </div>
       )}
-      <main className="app-main">
+      <main className={appMainClassName}>
         {activeSection === 'match' && (
           <MatchPage
             onImmersiveModeChange={setIsImmersiveMode}
