@@ -13,24 +13,28 @@ export function CardSearch({
   onOpenFilters,
   searchText,
 }: CardSearchProps) {
+  const filterButtonLabel =
+    activeFilterCount > 0 ? `Filters (${activeFilterCount} active)` : 'Filters';
+
   return (
-    <section className="panel card-search">
-      <div>
-        <h2>Filters</h2>
-        {activeFilterCount > 0 && <p>{activeFilterCount} active</p>}
-      </div>
+    <section className="card-search">
       <div className="card-search__controls">
-        <label className="field" htmlFor="deckbuilderSearch">
-          Search
+        <div className="field">
           <input
+            aria-label="Search cards"
             id="deckbuilderSearch"
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Name or card ID"
+            placeholder="Search anything"
             value={searchText}
           />
-        </label>
-        <Button onClick={onOpenFilters} variant="ghost">
-          Open filters
+        </div>
+        <Button
+          aria-label={filterButtonLabel}
+          className="deckbuilder-filter-open-button"
+          onClick={onOpenFilters}
+          variant="ghost"
+        >
+          FILTERS
         </Button>
       </div>
     </section>

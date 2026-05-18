@@ -121,6 +121,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   const [selectedDeckId, setSelectedDeckId] = useState('');
   const [isBoardMode, setIsBoardMode] = useState(false);
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('');
+  const [displayNamePlaceholder] = useState(() => generatePirateName());
 
   useEffect(() => {
     if (!signalRClient) {
@@ -463,33 +464,28 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
 
   return (
     <section className="match-page">
-      <header className="panel header-panel">
-        <div className="match-header-row">
-          <div>
-            <span className="match-setup-kicker">Game Lobby</span>
-          </div>
-          <ConnectionStatusBadge status={connectionStatus} />
-        </div>
-        {connectionNotice && (
-          <p className={`connection-notice connection-notice--${connectionStatus}`} role="status">
-            {connectionNotice}
-          </p>
-        )}
-        {error && <p className="error-banner" role="alert">{error}</p>}
-      </header>
-
       <section className="panel match-flow-panel" aria-labelledby="match-flow-title">
         <div className="match-flow-panel__header">
           <div>
-            <span className="match-setup-kicker">Setup Flow</span>
-            <h2 id="match-flow-title">Player, Room and Deck</h2>
+            <h2 id="match-flow-title">GAME LOBBY</h2>
           </div>
-          <div className="match-flow-steps" aria-label="Match setup steps">
-            <span className={hasPlayerName ? 'is-complete' : ''}>1 Player</span>
-            <span className={hasRoomCode ? 'is-complete' : ''}>2 Room</span>
-            <span className={hasValidSelectedDeck ? 'is-complete' : ''}>3 Deck</span>
-            <span className={joinedRoomCode ? 'is-complete' : ''}>4 Board</span>
+          <ConnectionStatusBadge status={connectionStatus} />
+        </div>
+        {(connectionNotice || error) && (
+          <div className="match-lobby-alerts">
+            {connectionNotice && (
+              <p className={`connection-notice connection-notice--${connectionStatus}`} role="status">
+                {connectionNotice}
+              </p>
+            )}
+            {error && <p className="error-banner" role="alert">{error}</p>}
           </div>
+        )}
+        <div className="match-flow-steps" aria-label="Match setup steps">
+          <span className={hasPlayerName ? 'is-complete' : ''}>1 Player</span>
+          <span className={hasRoomCode ? 'is-complete' : ''}>2 Room</span>
+          <span className={hasValidSelectedDeck ? 'is-complete' : ''}>3 Deck</span>
+          <span className={joinedRoomCode ? 'is-complete' : ''}>4 Board</span>
         </div>
 
         <LobbyPanel
@@ -507,6 +503,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
             />
           )}
           deckNotice={deckNotice}
+          displayNamePlaceholder={displayNamePlaceholder}
           displayNameInput={displayNameInput}
           joinedRoomCode={joinedRoomCode}
           onCopyRoomCode={() => void copyRoomCode()}

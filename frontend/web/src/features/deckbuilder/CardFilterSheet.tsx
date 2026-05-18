@@ -4,6 +4,7 @@ import { ColorPaletteFilter } from './ColorPaletteFilter';
 
 export interface CardFilters {
   searchText: string;
+  archetype: string;
   selectedColors: string[];
   cardType: string;
   cost: string;
@@ -60,13 +61,23 @@ export function CardFilterSheet({
       title="Card filters"
     >
       <div className="filter-grid">
-        <label className="field" htmlFor="cardSearch">
-          Search
+        <div className="field">
           <input
+            aria-label="Search cards"
             id="cardSearch"
             onChange={(event) => onChange({ ...filters, searchText: event.target.value })}
-            placeholder="Name or card ID"
+            placeholder="Search anything"
             value={filters.searchText}
+          />
+        </div>
+
+        <label className="field" htmlFor="cardArchetype">
+          Archetype
+          <input
+            id="cardArchetype"
+            onChange={(event) => onChange({ ...filters, archetype: event.target.value })}
+            placeholder="Trait, family or attribute"
+            value={filters.archetype}
           />
         </label>
 

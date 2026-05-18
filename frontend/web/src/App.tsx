@@ -21,7 +21,7 @@ function App() {
     );
   }
 
-  return <AppShell initialPage={initialPage} onBackToMenu={() => setHasStarted(false)} />;
+  return <AppShell initialPage={initialPage} />;
 }
 
 export default App;

@@ -10,10 +10,9 @@ export type Page = AppSection;
 
 type AppShellProps = {
   initialPage?: Page;
-  onBackToMenu?: () => void;
 };
 
-export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps) {
+export function AppShell({ initialPage = 'match' }: AppShellProps) {
   const [activeSection, setActiveSection] = useState<Page>(initialPage);
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
   const appMainClassName =
@@ -21,13 +20,6 @@ export function AppShell({ initialPage = 'match', onBackToMenu }: AppShellProps)
 
   return (
     <div className={isImmersiveMode ? 'app-shell app-shell--immersive' : 'app-shell'}>
-      {onBackToMenu && !isImmersiveMode && (
-        <div className="app-shell-menu">
-          <button className="app-shell-menu-button" type="button" onClick={onBackToMenu}>
-            Main Menu
-          </button>
-        </div>
-      )}
       <main className={appMainClassName}>
         {activeSection === 'match' && (
           <MatchPage

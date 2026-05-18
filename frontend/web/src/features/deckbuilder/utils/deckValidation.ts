@@ -48,9 +48,14 @@ export function getCardColors(color: unknown): string[] {
   }
 
   const normalizedColor = color.toLowerCase();
-  const matchedKnownColors = playableColors.filter((knownColor) =>
-    normalizedColor.includes(knownColor.toLowerCase()),
-  );
+  const matchedKnownColors = playableColors
+    .map((knownColor) => ({
+      color: knownColor,
+      index: normalizedColor.indexOf(knownColor.toLowerCase()),
+    }))
+    .filter((match) => match.index >= 0)
+    .sort((left, right) => left.index - right.index)
+    .map((match) => match.color);
 
   if (matchedKnownColors.length > 0) {
     return matchedKnownColors;

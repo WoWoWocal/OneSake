@@ -12,10 +12,9 @@ import { CardSearch } from './CardSearch';
 import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
 import { DeckDrawer } from './DeckDrawer';
-import { DeckExport } from './DeckExport';
 import { DeckLibrary } from './DeckLibrary';
+import { DeckStackCard } from './DeckStackCard';
 import { DeckSummary } from './DeckSummary';
-import { DeckValidation } from './DeckValidation';
 import {
   createNewDeck,
   deleteStoredDeck,
@@ -32,7 +31,6 @@ import {
   getCardColors,
   getTotalCards,
   isLeaderCard,
-  validateDeck,
 } from './utils/deckValidation';
 
 
@@ -81,18 +79,20 @@ const availableSets = [
   'ST-28',
 ];
 const cardsPerRowStorageKey = 'onesake.deckbuilder.cardsPerRow';
-const defaultCardsPerRow = 7;
+const defaultCardsPerRow = 8;
+const allSetsOption = 'ALL_SETS';
 
 function clampCardsPerRow(value: number): number {
   if (!Number.isFinite(value)) {
     return defaultCardsPerRow;
   }
 
-  return Math.min(10, Math.max(1, Math.round(value)));
+  return Math.min(10, Math.max(7, Math.round(value)));
 }
 
 const emptyFilters: CardFilters = {
   searchText: '',
+  archetype: '',
   selectedColors: [],
   cardType: '',
   cost: '',
@@ -107,17 +107,6 @@ function uniqueValues(cards: CardDto[], readValue: (card: CardDto) => string): s
 
 function optionalCardText(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
-}
-
-function getColorClassName(color: string): string {
-  return color.trim().toLowerCase();
-}
-
-function normalizeLeaderColors(colors: string[]): string[] {
-  return colors
-    .flatMap((color) => color.split(/[/,]/))
-    .map((color) => color.trim())
-    .filter(Boolean);
 }
 
 function loadCardsPerRow(): number {
@@ -232,10 +221,23 @@ function hydrateDeckWithCards(deckToHydrate: Deck, loadedCards: CardDto[]): Deck
   return changed ? { ...deckToHydrate, leaderName, leaderColors, cards: hydratedCards } : deckToHydrate;
 }
 
+function dedupeCards(cardsToDedupe: CardDto[]): CardDto[] {
+  const cardsById = new Map<string, CardDto>();
+
+  cardsToDedupe.forEach((card) => {
+    if (!cardsById.has(card.card_set_id)) {
+      cardsById.set(card.card_set_id, card);
+    }
+  });
+
+  return [...cardsById.values()];
+}
+
 export function DeckbuilderPage() {
-  const [selectedSetId, setSelectedSetId] = useState(availableSets[0]);
+  const [selectedSetId, setSelectedSetId] = useState(allSetsOption);
   const [filters, setFilters] = useState<CardFilters>(emptyFilters);
-  const [cards, setCards] = useState<CardDto[]>([]);
+  const [setCards, setSetCards] = useState<CardDto[]>([]);
+  const [allSetCards, setAllSetCards] = useState<CardDto[]>([]);
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
   const [previewCard, setPreviewCard] = useState<CardDto | null>(null);
@@ -246,26 +248,26 @@ export function DeckbuilderPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
 
-  const validation = useMemo(() => validateDeck(deck), [deck]);
-  const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
+  const hasActiveLeader = Boolean(deck.leaderCardId);
+  const shouldUseAllSetCards = selectedSetId === allSetsOption || hasActiveLeader;
+  const cardPool = shouldUseAllSetCards && allSetCards.length > 0 ? allSetCards : setCards;
+  const sortedCards = useMemo(() => [...cardPool].sort(compareCardsForDeckbuilder), [cardPool]);
+  const loadedCardsById = useMemo(
+    () => new Map([...setCards, ...allSetCards].map((card) => [card.card_set_id, card])),
+    [allSetCards, setCards],
+  );
   const activeLeaderColors = useMemo(() => deck.leaderColors ?? [], [deck.leaderColors]);
   const leaderPreviewCard = useMemo(
-    () => sortedCards.find((card) => card.card_set_id === deck.leaderCardId) ?? null,
-    [deck.leaderCardId, sortedCards],
-  );
-  const leaderColorDots = useMemo(
-    () => normalizeLeaderColors(activeLeaderColors),
-    [activeLeaderColors],
+    () => loadedCardsById.get(deck.leaderCardId) ?? null,
+    [deck.leaderCardId, loadedCardsById],
   );
   const totalDeckCards = getTotalCards(deck.cards);
-  const validationSummary = validation.isValid
-    ? 'Deck is valid.'
-    : validation.errors[0] ?? validation.warnings[0] ?? 'Deck needs review.';
   const isDeckSaved = savedDecks.some(
     (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
   );
   const activeFilterCount =
     (filters.searchText ? 1 : 0) +
+    (filters.archetype ? 1 : 0) +
     filters.selectedColors.length +
     (filters.cardType ? 1 : 0) +
     (filters.cost ? 1 : 0) +
@@ -274,7 +276,9 @@ export function DeckbuilderPage() {
     () => ({
       cardTypes: uniqueValues(sortedCards, (card) => card.card_type),
       costs: uniqueValues(sortedCards, (card) => String(card.card_cost ?? '')),
-      counters: uniqueValues(sortedCards, (card) => String(card.counter_amount ?? '')),
+      counters: uniqueValues(sortedCards, (card) => String(card.counter_amount ?? '')).filter(
+        (counter) => counter !== '4000' && counter !== '5000',
+      ),
     }),
     [sortedCards],
   );
@@ -288,16 +292,17 @@ export function DeckbuilderPage() {
   }, [cardsPerRow]);
 
   useEffect(() => {
-    if (cards.length === 0) {
+    const cardsForHydration = dedupeCards([...setCards, ...allSetCards]);
+    if (cardsForHydration.length === 0) {
       return;
     }
 
-    setDeck((currentDeck) => hydrateDeckWithCards(currentDeck, cards));
+    setDeck((currentDeck) => hydrateDeckWithCards(currentDeck, cardsForHydration));
 
     const storedDecks = loadStoredDecks();
     let changed = false;
     const hydratedDecks = storedDecks.map((storedDeck) => {
-      const hydratedDeck = hydrateDeckWithCards(storedDeck, cards);
+      const hydratedDeck = hydrateDeckWithCards(storedDeck, cardsForHydration);
       if (hydratedDeck !== storedDeck) {
         changed = true;
       }
@@ -309,7 +314,7 @@ export function DeckbuilderPage() {
       saveStoredDecks(hydratedDecks);
       setSavedDecks(hydratedDecks);
     }
-  }, [cards]);
+  }, [allSetCards, setCards]);
 
   useEffect(() => {
     if (!deckNotice) {
@@ -321,6 +326,11 @@ export function DeckbuilderPage() {
   }, [deckNotice]);
 
   useEffect(() => {
+    if (selectedSetId === allSetsOption) {
+      setSetCards([]);
+      return undefined;
+    }
+
     let ignoreResult = false;
 
     const loadCards = async (): Promise<void> => {
@@ -330,13 +340,13 @@ export function DeckbuilderPage() {
       try {
         const loadedCards = await getCardsBySetId(selectedSetId);
         if (!ignoreResult) {
-          setCards(loadedCards);
+          setSetCards(loadedCards);
         }
       } catch (loadError) {
         if (!ignoreResult) {
           const message =
             loadError instanceof Error ? loadError.message : 'Cards could not be loaded.';
-          setCards([]);
+          setSetCards([]);
           setError(message);
         }
       } finally {
@@ -352,6 +362,44 @@ export function DeckbuilderPage() {
       ignoreResult = true;
     };
   }, [selectedSetId]);
+
+  useEffect(() => {
+    if (!shouldUseAllSetCards || allSetCards.length > 0) {
+      return undefined;
+    }
+
+    let ignoreResult = false;
+
+    const loadAllSetCards = async (): Promise<void> => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const loadedSetCards = await Promise.all(
+          availableSets.map((setId) => getCardsBySetId(setId)),
+        );
+        if (!ignoreResult) {
+          setAllSetCards(dedupeCards(loadedSetCards.flat()));
+        }
+      } catch (loadError) {
+        if (!ignoreResult) {
+          const message =
+            loadError instanceof Error ? loadError.message : 'Playable cards could not be loaded.';
+          setError(message);
+        }
+      } finally {
+        if (!ignoreResult) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadAllSetCards();
+
+    return () => {
+      ignoreResult = true;
+    };
+  }, [allSetCards.length, shouldUseAllSetCards]);
 
   const showDeckNotice = (message: string): void => {
     setDeckNotice(message);
@@ -369,6 +417,7 @@ export function DeckbuilderPage() {
         leaderName: card.card_name,
         leaderColors: getCardColors(card.card_color),
       }));
+      setSelectedSetId(allSetsOption);
       showDeckNotice(`${card.card_name} set as leader.`);
       return;
     }
@@ -386,11 +435,9 @@ export function DeckbuilderPage() {
 
       if (existingCard) {
         if (existingCard.quantity >= 4) {
-          showDeckNotice(`${existingCard.name} already has 4 copies.`);
           return currentDeck;
         }
 
-        showDeckNotice(`${existingCard.name} increased to ${existingCard.quantity + 1}.`);
         return {
           ...currentDeck,
           cards: currentDeck.cards.map((deckCard) =>
@@ -401,7 +448,6 @@ export function DeckbuilderPage() {
         };
       }
 
-      showDeckNotice(`${card.card_name} added.`);
       return {
         ...currentDeck,
         cards: [
@@ -422,7 +468,6 @@ export function DeckbuilderPage() {
       }
 
       if (card.quantity >= 4) {
-        showDeckNotice(`${card.name} already has 4 copies.`);
         return currentDeck;
       }
 
@@ -528,24 +573,78 @@ export function DeckbuilderPage() {
 
   return (
     <section className="deckbuilder-page">
-      <header className="panel deckbuilder-header">
-        <div>
-          <h1>Deckbuilder</h1>
-        </div>
-        <div className="deckbuilder-header__actions">
-          <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
-            Deck / Export
-          </button>
-          <Button onClick={saveDeck}>Save Deck</Button>
-        </div>
-      </header>
-
       <div className="deckbuilder-layout">
         <main className="deckbuilder-main">
-          <div className="deckbuilder-toolbar">
-            <section className="panel set-picker">
-              <label htmlFor="setPicker">Set</label>
+          <section className="deckbuilder-topline" aria-label="Deck overview">
+            <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
+              <div className="deckbuilder-compact-card__header">
+                <div className="deckbuilder-deck-title-row">
+                  <h2>Deck List</h2>
+                  <strong>{totalDeckCards}/50</strong>
+                </div>
+                <div className="deckbuilder-deck-header-actions">
+                  <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
+                    Change leader
+                  </Button>
+                  <Button
+                    disabled={!deck.leaderCardId && deck.cards.length === 0}
+                    onClick={clearDeck}
+                    variant="ghost"
+                  >
+                    Clear deck
+                  </Button>
+                  <Button className="deckbuilder-save-button" onClick={saveDeck}>
+                    Save Deck
+                  </Button>
+                  <Button onClick={() => setDeckOpen(true)} variant="ghost">
+                    Deck Library
+                  </Button>
+                </div>
+              </div>
+              <label className="field" htmlFor="deckNameCompact">
+                Deck name
+                <input
+                  id="deckNameCompact"
+                  maxLength={40}
+                  onChange={(event) => renameDeck(event.target.value)}
+                  value={deck.name}
+                />
+              </label>
+
+              <div className="deckbuilder-deck-stacks" aria-label="Cards in current deck">
+                {deck.leaderCardId ? (
+                  <DeckStackCard
+                    cardId={deck.leaderCardId}
+                    image={leaderPreviewCard?.card_image}
+                    isLeader
+                    name={deck.leaderName || deck.leaderCardId}
+                    quantity={1}
+                  />
+                ) : (
+                  <DeckStackCard cardId="" isEmpty name="Leader" />
+                )}
+                {deck.cards.map((deckCard) => {
+                  const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
+
+                  return (
+                    <DeckStackCard
+                      cardId={deckCard.cardId}
+                      image={cardImage}
+                      key={deckCard.cardId}
+                      name={deckCard.name}
+                      onRemove={() => decreaseDeckCard(deckCard.cardId)}
+                      quantity={deckCard.quantity}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          </section>
+
+          <div className="deckbuilder-toolbar" aria-label="Deckbuilder filters">
+            <section className="set-picker">
               <select
+                aria-label={hasActiveLeader ? 'Card pool' : 'Leader set'}
                 id="setPicker"
                 onChange={(event) => {
                   setSelectedSetId(event.target.value);
@@ -553,6 +652,7 @@ export function DeckbuilderPage() {
                 }}
                 value={selectedSetId}
               >
+                <option value={allSetsOption}>All sets</option>
                 {availableSets.map((setId) => (
                   <option key={setId} value={setId}>
                     {setId}
@@ -571,8 +671,9 @@ export function DeckbuilderPage() {
               searchText={filters.searchText}
             />
 
-            <div className="panel deckbuilder-filter-panel">
+            <div className="deckbuilder-filter-panel">
               <ColorPaletteFilter
+                compact
                 onChange={(selectedColors) => setFilters((currentFilters) => ({
                   ...currentFilters,
                   selectedColors,
@@ -583,124 +684,8 @@ export function DeckbuilderPage() {
             </div>
           </div>
 
-          <section className="deckbuilder-topline" aria-label="Deck overview">
-            <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
-              <div className="deckbuilder-compact-card__header">
-                <h2>Deck List</h2>
-                <strong>{totalDeckCards}/50</strong>
-              </div>
-              <label className="field" htmlFor="deckNameCompact">
-                Deck name
-                <input
-                  id="deckNameCompact"
-                  maxLength={40}
-                  onChange={(event) => renameDeck(event.target.value)}
-                  value={deck.name}
-                />
-              </label>
-              <dl className="deckbuilder-compact-stats">
-                <div className="deckbuilder-compact-stat deckbuilder-compact-stat--leader">
-                  <dt>Leader</dt>
-                  <dd>
-                    {deck.leaderCardId ? (
-                      <div className="deckbuilder-leader-preview">
-                        {leaderPreviewCard?.card_image ? (
-                          <img
-                            alt={`${leaderPreviewCard.card_name} leader card`}
-                            src={leaderPreviewCard.card_image}
-                          />
-                        ) : (
-                          <div className="deckbuilder-leader-preview__placeholder">
-                            <span>Leader</span>
-                            <strong>{deck.leaderName || deck.leaderCardId}</strong>
-                            <small>{deck.leaderCardId}</small>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="deckbuilder-leader-preview deckbuilder-leader-preview--empty" />
-                    )}
-                  </dd>
-                </div>
-                <div className="deckbuilder-compact-stat deckbuilder-compact-stat--colors">
-                  <dt>Colors</dt>
-                  <dd>
-                    {leaderColorDots.length > 0 ? (
-                      <span className="deckbuilder-color-dots" aria-label="Leader colors">
-                        {leaderColorDots.map((color, index) => (
-                          <span
-                            aria-label={`${color} leader color`}
-                            className={`deckbuilder-color-dot deckbuilder-color-dot--${getColorClassName(color)}`}
-                            key={`${color}-${index}`}
-                            role="img"
-                            title={color}
-                          />
-                        ))}
-                      </span>
-                    ) : (
-                      <span className="deckbuilder-color-dots__empty" aria-label="No leader colors">
-                        -
-                      </span>
-                    )}
-                  </dd>
-                </div>
-                <div className="deckbuilder-compact-stat">
-                  <dt>Unique</dt>
-                  <dd>{deck.cards.length}</dd>
-                </div>
-                <div className="deckbuilder-compact-stat">
-                  <dt>Status</dt>
-                  <dd>{isDeckSaved ? 'Saved' : 'Unsaved'}</dd>
-                </div>
-              </dl>
-              <div className="deckbuilder-compact-actions">
-                <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
-                  Change leader
-                </Button>
-                <Button
-                  disabled={!deck.leaderCardId && deck.cards.length === 0}
-                  onClick={clearDeck}
-                  variant="ghost"
-                >
-                  Clear deck
-                </Button>
-              </div>
-            </section>
-
-            <section
-              className={`panel deckbuilder-compact-card deckbuilder-validation-compact ${
-                validation.isValid ? 'is-valid' : 'is-pending'
-              }`}
-            >
-              <div className="deckbuilder-compact-card__header">
-                <h2>Validation</h2>
-                <strong>{validation.isValid ? 'Valid' : 'Needs Work'}</strong>
-              </div>
-              <p>{validationSummary}</p>
-              {validation.warnings[0] && <p>{validation.warnings[0]}</p>}
-            </section>
-
-            <section className="panel deckbuilder-compact-card deckbuilder-export-compact">
-              <div className="deckbuilder-compact-card__header">
-                <h2>Export</h2>
-                <strong>{validation.isValid ? 'Ready' : 'Locked'}</strong>
-              </div>
-              <p>
-                {validation.isValid
-                  ? 'Export is ready in the deck drawer.'
-                  : 'Fix validation before copying the export.'}
-              </p>
-              <div className="deckbuilder-compact-actions">
-                <Button onClick={saveDeck}>Save Deck</Button>
-                <Button onClick={() => setDeckOpen(true)} variant="ghost">
-                  Deck List / Export
-                </Button>
-              </div>
-            </section>
-          </section>
-
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
-          {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}
+          {loading && <div className="panel status-panel">Loading cards...</div>}
           {error && <div className="panel status-panel status-panel--error">{error}</div>}
           {!loading && !error && (
             <section className="deckbuilder-card-browser">
@@ -712,6 +697,8 @@ export function DeckbuilderPage() {
                   filters={filters}
                   leaderCardId={deck.leaderCardId}
                   leaderColors={activeLeaderColors}
+                  selectedSetId={selectedSetId}
+                  allSetsOption={allSetsOption}
                   onAddCard={addCardToDeck}
                   onPreviewCard={setPreviewCard}
                   onSetLeader={addCardToDeck}
@@ -731,7 +718,6 @@ export function DeckbuilderPage() {
           onDeleteDeck={deleteDeck}
           onDuplicateDeck={duplicateDeck}
           onLoadDeck={loadDeck}
-          onSaveDeck={saveDeck}
         />
         <DeckSummary
           deck={deck}
@@ -740,14 +726,12 @@ export function DeckbuilderPage() {
           onDeckNameChange={renameDeck}
           onRemoveLeader={removeLeader}
         />
-        <DeckValidation validation={validation} />
         <DeckDrawer
           deck={deck}
           onDecreaseCard={decreaseDeckCard}
           onIncreaseCard={increaseDeckCard}
           onRemoveCard={removeDeckCard}
         />
-        <DeckExport deck={deck} validation={validation} />
       </Drawer>
 
       <CardFilterSheet
