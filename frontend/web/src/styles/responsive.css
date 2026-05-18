@@ -214,6 +214,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .deckbuilder-toolbar {
+    flex-wrap: wrap;
+  }
+
   .deckbuilder-compact-card--deck {
     grid-column: 1 / -1;
   }
@@ -238,11 +242,39 @@
     grid-template-columns: 1fr;
   }
 
+  .deckbuilder-toolbar {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .set-picker {
+    flex: 0 1 160px;
+  }
+
+  .card-search {
+    flex: 1 1 280px;
+  }
+
   .card-search__controls {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    width: 100%;
+  }
+
+  .card-search__controls .field {
+    flex: 1 1 220px;
+    width: auto;
+  }
+
+  .deckbuilder-filter-panel {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+  }
+
+  .color-palette-filter--compact .color-palette-filter__buttons {
+    flex-wrap: wrap;
   }
 
   .card-size-slider {
+    flex: 1 1 180px;
     max-width: none;
   }
 }
@@ -384,12 +416,21 @@
     grid-template-columns: 1fr;
   }
 
-  .deckbuilder-sort-chip {
-    width: 100%;
+  .set-picker,
+  .card-search,
+  .deckbuilder-filter-panel {
+    flex: 1 1 100%;
+  }
+
+  .card-search__controls {
+    flex-wrap: wrap;
+  }
+
+  .deckbuilder-filter-open-button {
+    flex: 0 0 auto;
   }
 
   .deckbuilder-filter-open-button,
-  .deckbuilder-sort-chip,
   .card-size-slider-control {
     min-height: 44px;
   }

@@ -639,8 +639,8 @@ export function DeckbuilderPage() {
 
           <div className="deckbuilder-toolbar" aria-label="Deckbuilder filters">
             <section className="set-picker">
-              <label htmlFor="setPicker">{hasActiveLeader ? 'Card pool' : 'Leader set'}</label>
               <select
+                aria-label={hasActiveLeader ? 'Card pool' : 'Leader set'}
                 id="setPicker"
                 onChange={(event) => {
                   setSelectedSetId(event.target.value);
@@ -669,6 +669,7 @@ export function DeckbuilderPage() {
 
             <div className="deckbuilder-filter-panel">
               <ColorPaletteFilter
+                compact
                 onChange={(selectedColors) => setFilters((currentFilters) => ({
                   ...currentFilters,
                   selectedColors,

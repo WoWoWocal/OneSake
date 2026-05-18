@@ -4,13 +4,18 @@ import { playableColors } from './utils/deckValidation';
 interface ColorPaletteFilterProps {
   selectedColors: string[];
   onChange: (colors: string[]) => void;
+  compact?: boolean;
 }
 
 function getColorClass(color: string): string {
   return color.toLowerCase();
 }
 
-export function ColorPaletteFilter({ onChange, selectedColors }: ColorPaletteFilterProps) {
+export function ColorPaletteFilter({
+  compact = false,
+  onChange,
+  selectedColors,
+}: ColorPaletteFilterProps) {
   const toggleColor = (color: string): void => {
     if (selectedColors.includes(color)) {
       onChange(selectedColors.filter((selectedColor) => selectedColor !== color));
@@ -21,18 +26,23 @@ export function ColorPaletteFilter({ onChange, selectedColors }: ColorPaletteFil
   };
 
   return (
-    <section className="color-palette-filter" aria-label="Color filter">
-      <div className="color-palette-filter__header">
-        <div>
-          <strong>Colors</strong>
-          {selectedColors.length > 0 && <span>{selectedColors.join(' / ')}</span>}
+    <section
+      className={`color-palette-filter${compact ? ' color-palette-filter--compact' : ''}`}
+      aria-label="Color filter"
+    >
+      {!compact && (
+        <div className="color-palette-filter__header">
+          <div>
+            <strong>Colors</strong>
+            {selectedColors.length > 0 && <span>{selectedColors.join(' / ')}</span>}
+          </div>
+          {selectedColors.length > 0 && (
+            <Button onClick={() => onChange([])} variant="ghost">
+              Clear colors
+            </Button>
+          )}
         </div>
-        {selectedColors.length > 0 && (
-          <Button onClick={() => onChange([])} variant="ghost">
-            Clear colors
-          </Button>
-        )}
-      </div>
+      )}
       <div className="color-palette-filter__buttons">
         {playableColors.map((color) => {
           const isActive = selectedColors.includes(color);

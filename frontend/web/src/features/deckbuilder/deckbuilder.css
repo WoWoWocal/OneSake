@@ -24,7 +24,7 @@
 .deckbuilder-main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-height: 0;
 }
 
@@ -43,46 +43,40 @@
 
 .deckbuilder-toolbar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 6px 10px;
+  gap: 8px;
   border: 0;
+  margin-top: -2px;
   padding: 0;
   background: transparent;
 }
 
 .card-search {
   display: flex;
-  flex: 0 1 430px;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 6px 8px;
-  min-width: min(100%, 260px);
+  min-width: 0;
 }
 
 .card-search__controls {
-  display: grid;
-  flex: 0 1 430px;
-  grid-template-columns: minmax(220px, 320px) auto auto;
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .card-search__controls .field {
+  width: clamp(220px, 20vw, 280px);
   margin: 0;
 }
 
 .set-picker {
-  display: grid;
-  flex: 0 1 150px;
-  gap: 4px;
-  align-content: center;
-  min-width: 136px;
-}
-
-.set-picker label {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  flex: 0 0 140px;
+  align-items: center;
+  min-width: 132px;
 }
 
 .filter-grid {
@@ -100,6 +94,11 @@
 .color-palette-filter {
   display: grid;
   gap: 6px;
+}
+
+.color-palette-filter--compact {
+  display: flex;
+  align-items: center;
 }
 
 .color-palette-filter__header {
@@ -126,14 +125,18 @@
   gap: 5px;
 }
 
+.color-palette-filter--compact .color-palette-filter__buttons {
+  flex-wrap: nowrap;
+}
+
 .color-filter-button {
   min-height: 38px;
   border: 1px solid rgb(148 187 194 / 28%);
   border-radius: 8px;
-  padding: 7px 10px;
+  padding: 7px 8px;
   color: #d9e9ee;
   background: rgb(255 255 255 / 5%);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 800;
 }
 
@@ -180,18 +183,26 @@
 
 .deckbuilder-filter-panel {
   display: flex;
-  flex: 1 1 460px;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 6px 10px;
-  min-width: min(100%, 280px);
+  gap: 8px;
+  min-width: 0;
 }
 
 .card-size-slider {
   display: grid;
-  flex: 0 1 180px;
-  max-width: 190px;
-  min-width: 144px;
+  flex: 0 0 154px;
+  max-width: 154px;
+  min-width: 148px;
+}
+
+.deckbuilder-toolbar input,
+.deckbuilder-toolbar select {
+  min-height: 38px;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.9rem;
 }
 
 .deckbuilder-page input,
@@ -277,23 +288,12 @@
   box-shadow: 0 3px 10px rgb(0 0 0 / 32%);
 }
 
-.deckbuilder-sort-chip {
-  min-height: 38px;
-  border: 1px solid rgb(31 196 159 / 44%);
-  border-radius: 999px;
-  padding: 7px 11px;
-  color: #b9f3df;
-  background: rgb(31 196 159 / 12%);
-  font-size: 0.78rem;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
 .deckbuilder-filter-open-button {
   min-height: 38px;
   border-radius: 8px;
-  padding: 7px 10px;
+  padding: 7px 12px;
   font-size: 0.82rem;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 

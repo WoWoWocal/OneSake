@@ -61,15 +61,15 @@ export function CardFilterSheet({
       title="Card filters"
     >
       <div className="filter-grid">
-        <label className="field" htmlFor="cardSearch">
-          Search
+        <div className="field">
           <input
+            aria-label="Search cards"
             id="cardSearch"
             onChange={(event) => onChange({ ...filters, searchText: event.target.value })}
             placeholder="Name or card ID"
             value={filters.searchText}
           />
-        </label>
+        </div>
 
         <label className="field" htmlFor="cardArchetype">
           Archetype
