@@ -61,7 +61,17 @@ export function DeckStackCard({
       <span className="deckbuilder-deck-stack__card">
         <CardFace cardId={cardId} image={image} name={name} />
       </span>
-      {!isEmpty && <strong className="deckbuilder-deck-stack__quantity">{safeQuantity}</strong>}
+      {!isEmpty && (
+        <strong
+          className={`deckbuilder-deck-stack__quantity ${
+            safeQuantity === 4
+              ? 'deckbuilder-deck-stack__quantity--max'
+              : 'deckbuilder-deck-stack__quantity--partial'
+          }`}
+        >
+          {safeQuantity}
+        </strong>
+      )}
     </>
   );
 

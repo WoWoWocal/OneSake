@@ -578,8 +578,28 @@ export function DeckbuilderPage() {
           <section className="deckbuilder-topline" aria-label="Deck overview">
             <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
               <div className="deckbuilder-compact-card__header">
-                <h2>Deck List</h2>
-                <strong>{totalDeckCards}/50</strong>
+                <div className="deckbuilder-deck-title-row">
+                  <h2>Deck List</h2>
+                  <strong>{totalDeckCards}/50</strong>
+                </div>
+                <div className="deckbuilder-deck-header-actions">
+                  <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
+                    Change leader
+                  </Button>
+                  <Button
+                    disabled={!deck.leaderCardId && deck.cards.length === 0}
+                    onClick={clearDeck}
+                    variant="ghost"
+                  >
+                    Clear deck
+                  </Button>
+                  <Button className="deckbuilder-save-button" onClick={saveDeck}>
+                    Save Deck
+                  </Button>
+                  <Button onClick={() => setDeckOpen(true)} variant="ghost">
+                    Deck Library
+                  </Button>
+                </div>
               </div>
               <label className="field" htmlFor="deckNameCompact">
                 Deck name
@@ -590,22 +610,6 @@ export function DeckbuilderPage() {
                   value={deck.name}
                 />
               </label>
-              <div className="deckbuilder-compact-actions">
-                <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
-                  Change leader
-                </Button>
-                <Button
-                  disabled={!deck.leaderCardId && deck.cards.length === 0}
-                  onClick={clearDeck}
-                  variant="ghost"
-                >
-                  Clear deck
-                </Button>
-                <Button onClick={saveDeck}>Save Deck</Button>
-                <Button onClick={() => setDeckOpen(true)} variant="ghost">
-                  Deck Library
-                </Button>
-              </div>
 
               <div className="deckbuilder-deck-stacks" aria-label="Cards in current deck">
                 {deck.leaderCardId ? (
