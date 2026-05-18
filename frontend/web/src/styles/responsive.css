@@ -204,8 +204,8 @@
 }
 
 @media (min-width: 1600px) {
-  .deckbuilder-card-browser {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  .deckbuilder-main-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(440px, 25vw, 620px);
   }
 }
 
@@ -224,8 +224,11 @@
 }
 
 @media (max-width: 980px) {
-  .deckbuilder-card-browser {
+  .deckbuilder-main-layout {
     grid-template-columns: 1fr;
+  }
+
+  .deckbuilder-card-browser {
     min-height: 0;
   }
 
@@ -367,7 +370,20 @@
 
 @media (max-width: 560px) {
   .deckbuilder-page {
-    height: calc(100dvh - 84px);
+    min-height: calc(100dvh - 84px);
+  }
+
+  .match-deck-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+  }
+
+  .match-deck-option {
+    flex: 0 0 108px;
+    scroll-snap-align: start;
   }
 
   .deckbuilder-deck-stacks {
@@ -383,13 +399,18 @@
     --deck-stack-layer-step: 5px;
   }
 
-  .deckbuilder-deck-header-actions {
+  .deckbuilder-toolbar-actions {
     justify-content: flex-start;
   }
 
-  .deckbuilder-deck-header-actions .ui-button {
+  .deckbuilder-toolbar-actions .ui-button {
     min-height: 40px;
     padding: 7px 9px;
+  }
+
+  .deckbuilder-deck-name-input {
+    min-height: 40px;
+    padding: 8px 10px;
   }
 
   .bottom-nav {

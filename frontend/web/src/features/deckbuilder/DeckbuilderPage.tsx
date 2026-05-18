@@ -575,6 +575,8 @@ export function DeckbuilderPage() {
     <section className="deckbuilder-page">
       <div className="deckbuilder-layout">
         <main className="deckbuilder-main">
+          <div className="deckbuilder-main-layout">
+            <div className="deckbuilder-main-column">
           <section className="deckbuilder-topline" aria-label="Deck overview">
             <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
               <div className="deckbuilder-compact-card__header">
@@ -582,28 +584,11 @@ export function DeckbuilderPage() {
                   <h2>Deck List</h2>
                   <strong>{totalDeckCards}/50</strong>
                 </div>
-                <div className="deckbuilder-deck-header-actions">
-                  <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
-                    Change leader
-                  </Button>
-                  <Button
-                    disabled={!deck.leaderCardId && deck.cards.length === 0}
-                    onClick={clearDeck}
-                    variant="ghost"
-                  >
-                    Clear deck
-                  </Button>
-                  <Button className="deckbuilder-save-button" onClick={saveDeck}>
-                    Save Deck
-                  </Button>
-                  <Button onClick={() => setDeckOpen(true)} variant="ghost">
-                    Deck Library
-                  </Button>
-                </div>
               </div>
-              <label className="field" htmlFor="deckNameCompact">
+              <label className="field deckbuilder-deck-name-field" htmlFor="deckNameCompact">
                 Deck name
                 <input
+                  className="deckbuilder-deck-name-input"
                   id="deckNameCompact"
                   maxLength={40}
                   onChange={(event) => renameDeck(event.target.value)}
@@ -681,6 +666,34 @@ export function DeckbuilderPage() {
                 selectedColors={filters.selectedColors}
               />
               <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
+              <div className="deckbuilder-toolbar-actions">
+                <Button
+                  className="deckbuilder-toolbar-action"
+                  disabled={!deck.leaderCardId}
+                  onClick={removeLeader}
+                  variant="ghost"
+                >
+                  Change leader
+                </Button>
+                <Button
+                  className="deckbuilder-toolbar-action"
+                  disabled={!deck.leaderCardId && deck.cards.length === 0}
+                  onClick={clearDeck}
+                  variant="ghost"
+                >
+                  Clear deck
+                </Button>
+                <Button className="deckbuilder-toolbar-action deckbuilder-save-button" onClick={saveDeck}>
+                  Save Deck
+                </Button>
+                <Button
+                  className="deckbuilder-toolbar-action deckbuilder-library-button"
+                  onClick={() => setDeckOpen(true)}
+                  variant="ghost"
+                >
+                  Deck Library
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -704,9 +717,11 @@ export function DeckbuilderPage() {
                   onSetLeader={addCardToDeck}
                 />
               </div>
-              <CardHoverPreview card={previewCard} />
             </section>
           )}
+            </div>
+            <CardHoverPreview card={previewCard} />
+          </div>
         </main>
       </div>
 
