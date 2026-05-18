@@ -1,3 +1,6 @@
+import { useEffect, useMemo, useState } from 'react';
+
+import { getCardsById } from '../../api/cardsApi';
 import type { Deck } from '../../types/decks';
 import { Button } from '../../components/ui/Button';
 import { validateDeck } from '../deckbuilder/utils/deckValidation';
@@ -40,6 +43,44 @@ export function MatchDeckSelect({
   onSelectDeck,
   selectedDeckId,
 }: MatchDeckSelectProps) {
+  const [leaderImagesById, setLeaderImagesById] = useState<Record<string, string>>({});
+  const leaderCardIds = useMemo(
+    () => [...new Set(decks.map((deck) => deck.leaderCardId).filter(Boolean))],
+    [decks],
+  );
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadLeaderImages(): Promise<void> {
+      const imageEntries = await Promise.all(
+        leaderCardIds.map(async (leaderCardId) => {
+          try {
+            const cards = await getCardsById(leaderCardId);
+            const leaderCard =
+              cards.find((card) => card.card_set_id === leaderCardId) ?? cards[0] ?? null;
+
+            return [leaderCardId, leaderCard?.card_image ?? ''] as const;
+          } catch {
+            return [leaderCardId, ''] as const;
+          }
+        }),
+      );
+
+      if (isCancelled) {
+        return;
+      }
+
+      setLeaderImagesById(Object.fromEntries(imageEntries));
+    }
+
+    void loadLeaderImages();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [leaderCardIds]);
+
   return (
     <section className={embedded ? 'match-deck-select match-deck-select--embedded' : 'panel match-deck-select'}>
       <div className="panel-title-row">
@@ -62,7 +103,7 @@ export function MatchDeckSelect({
           {decks.map((deck) => {
             const validation = validateDeck(deck);
             const isSelected = deck.id === selectedDeckId;
-            const leaderImage = getLeaderImage(deck);
+            const leaderImage = leaderImagesById[deck.leaderCardId] || getLeaderImage(deck);
 
             return (
               <button
