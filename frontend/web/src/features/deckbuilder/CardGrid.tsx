@@ -17,6 +17,8 @@ interface CardGridProps {
   cardsPerRow?: number;
   deckCards: DeckCard[];
   leaderCardId: string;
+  selectedSetId: string;
+  allSetsOption: string;
   onAddCard: (card: CardDto) => void;
   onSetLeader: (card: CardDto) => void;
   onPreviewCard: (card: CardDto) => void;
@@ -38,7 +40,16 @@ function getCardMinWidth(cardsPerRow: number): number {
   return Math.min(210, Math.max(116, Math.round(1180 / cardsPerRow)));
 }
 
+function normalizeArchetypeText(card: CardDto): string {
+  return normalize(
+    [card.sub_types, card.attribute, card.card_type, card.card_text]
+      .filter(Boolean)
+      .join(' '),
+  );
+}
+
 export function CardGrid({
+  allSetsOption,
   cards,
   cardsPerRow,
   deckCards,
@@ -48,6 +59,7 @@ export function CardGrid({
   onAddCard,
   onPreviewCard,
   onSetLeader,
+  selectedSetId,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
   const gridStyle = {
@@ -55,16 +67,22 @@ export function CardGrid({
   } as CSSProperties;
   const deckQuantities = new Map(deckCards.map((deckCard) => [deckCard.cardId, deckCard.quantity]));
   const normalizedSearch = normalize(filters.searchText);
+  const normalizedArchetype = normalize(filters.archetype);
   const hasActiveLeader = Boolean(leaderCardId);
   const visibleCards = cards.filter((card) => {
     const isLeader = isLeaderCard(card);
+    const matchesSet = selectedSetId === allSetsOption || card.set_id === selectedSetId;
     const matchesLeaderColors =
-      !hasActiveLeader ||
-      (!isLeader && (leaderColors.length === 0 || cardMatchesLeaderColors(card.card_color, leaderColors)));
+      hasActiveLeader
+        ? !isLeader &&
+          (leaderColors.length === 0 || cardMatchesLeaderColors(card.card_color, leaderColors))
+        : isLeader;
     const matchesText =
       !normalizedSearch ||
       normalize(card.card_name).includes(normalizedSearch) ||
       normalize(card.card_set_id).includes(normalizedSearch);
+    const matchesArchetype =
+      !normalizedArchetype || normalizeArchetypeText(card).includes(normalizedArchetype);
     const matchesColor = cardMatchesSelectedColors(card.card_color, filters.selectedColors);
     const matchesType = !filters.cardType || card.card_type === filters.cardType;
     const matchesCost = !filters.cost || String(card.card_cost ?? '') === filters.cost;
@@ -72,8 +90,10 @@ export function CardGrid({
       !filters.counter || String(card.counter_amount ?? '') === filters.counter;
 
     return (
+      matchesSet &&
       matchesLeaderColors &&
       matchesText &&
+      matchesArchetype &&
       matchesColor &&
       matchesType &&
       matchesCost &&
@@ -84,7 +104,7 @@ export function CardGrid({
   return (
     <>
       <div className="card-grid-count">
-        {visibleCards.length} {hasActiveLeader ? 'playable cards' : 'cards'}
+        {visibleCards.length} {hasActiveLeader ? 'playable cards' : 'leaders'}
       </div>
       <section
         className="card-grid"

@@ -58,7 +58,6 @@ export function CardTile({
       onMouseEnter={() => onPreviewCard(card)}
       title={tileTitle}
     >
-      {isLeader && <span className="card-tile__leader-badge">Leader</span>}
       {!isLeader && <span className="card-tile__count-badge">{counterLabel}</span>}
       <button
         aria-label={canAdd ? actionLabel : `Cannot add ${card.card_name}`}

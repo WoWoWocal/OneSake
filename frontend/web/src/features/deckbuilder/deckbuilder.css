@@ -33,6 +33,10 @@
   width: 100%;
 }
 
+.deckbuilder-main {
+  flex: 1;
+}
+
 .deck-sidebar {
   display: none;
 }
@@ -230,10 +234,10 @@
 .deckbuilder-card-browser {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  align-items: start;
-  flex: 1;
+  align-items: stretch;
+  flex: 1 1 auto;
   gap: 12px;
-  min-height: 0;
+  min-height: clamp(520px, 58dvh, 880px);
   overflow: hidden;
 }
 
@@ -252,6 +256,7 @@
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-grid-min, 168px)), 1fr));
+  align-content: start;
   gap: 8px;
   width: 100%;
 }
@@ -326,14 +331,14 @@
 .deckbuilder-deck-stacks {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
+  gap: 28px 32px;
   align-items: start;
-  max-height: min(34dvh, 348px);
-  min-height: 170px;
+  max-height: min(30dvh, 330px);
+  min-height: 190px;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-top: 1px solid rgb(148 187 194 / 16%);
-  padding: 16px 8px 6px 0;
+  padding: 28px 36px 12px 0;
 }
 
 .deckbuilder-deck-stacks__empty {
@@ -350,7 +355,7 @@
 
 .deckbuilder-deck-stack {
   position: relative;
-  width: clamp(112px, 8.8vw, 158px);
+  width: clamp(136px, 9.8vw, 188px);
   aspect-ratio: 5 / 7;
   border: 0;
   padding: 0;
@@ -373,23 +378,32 @@
 .deckbuilder-deck-stack__ghost {
   z-index: 0;
   opacity: 0;
+  overflow: hidden;
 }
 
 .deckbuilder-deck-stack--2 .deckbuilder-deck-stack__ghost:first-child,
 .deckbuilder-deck-stack--3 .deckbuilder-deck-stack__ghost:first-child,
 .deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:first-child {
-  opacity: 1;
-  transform: translate(7px, -7px);
+  z-index: 0;
+  opacity: 0.98;
+  transform: translate(8px, -7px);
 }
 
 .deckbuilder-deck-stack--3 .deckbuilder-deck-stack__ghost:nth-child(2),
 .deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:nth-child(2) {
-  opacity: 1;
-  transform: translate(14px, -14px);
+  z-index: 1;
+  opacity: 0.92;
+  transform: translate(16px, -14px);
+}
+
+.deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:nth-child(3) {
+  z-index: 2;
+  opacity: 0.86;
+  transform: translate(24px, -21px);
 }
 
 .deckbuilder-deck-stack__card {
-  z-index: 1;
+  z-index: 3;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -412,6 +426,7 @@
   outline-offset: 6px;
 }
 
+.deckbuilder-deck-stack__ghost img,
 .deckbuilder-deck-stack__card img {
   display: block;
   width: 100%;
@@ -451,24 +466,20 @@
 
 .deckbuilder-deck-stack__quantity {
   position: absolute;
-  right: 8px;
-  bottom: 7px;
-  z-index: 2;
-  display: grid;
-  min-width: 42px;
-  min-height: 42px;
-  place-items: center;
-  border: 2px solid rgb(255 235 255 / 92%);
-  border-radius: 12px;
-  color: #fff7ff;
-  background: linear-gradient(180deg, #ff4ed8, #a71991);
-  font-size: 1.55rem;
+  right: -16px;
+  bottom: -4px;
+  z-index: 4;
+  color: #ff19b9;
+  font-size: clamp(2.15rem, 3vw, 3.45rem);
   font-weight: 950;
   line-height: 1;
-  text-shadow: 0 2px 0 rgb(74 10 68 / 80%);
-  box-shadow:
-    0 7px 16px rgb(0 0 0 / 38%),
-    0 0 18px rgb(255 78 216 / 20%);
+  -webkit-text-stroke: 2px #fff7ff;
+  text-shadow:
+    2px 0 0 #fff7ff,
+    -2px 0 0 #fff7ff,
+    0 2px 0 #fff7ff,
+    0 -2px 0 #fff7ff,
+    0 6px 10px rgb(0 0 0 / 48%);
 }
 
 .deckbuilder-deck-stack__label {
@@ -521,23 +532,6 @@
 
 .card-tile--maxed {
   opacity: 0.78;
-}
-
-.card-tile__leader-badge {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  z-index: 2;
-  border: 1px solid rgb(240 191 56 / 56%);
-  border-radius: 999px;
-  padding: 4px 7px;
-  color: #171006;
-  background: linear-gradient(180deg, #ffe39b, #c48b28);
-  font-size: 0.66rem;
-  font-weight: 900;
-  line-height: 1;
-  text-transform: uppercase;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 28%);
 }
 
 .card-tile__count-badge {
@@ -609,11 +603,14 @@
 }
 
 .deckbuilder-hover-preview {
-  align-self: start;
-  display: grid;
-  height: fit-content;
-  max-height: 100%;
-  overflow: visible;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
   border: 0 !important;
   padding: 0;
   background: transparent !important;
@@ -621,9 +618,8 @@
 }
 
 .deckbuilder-hover-preview--empty {
-  min-height: min(56dvh, 420px);
-  align-content: center;
-  justify-items: center;
+  min-height: 0;
+  align-items: center;
 }
 
 .deckbuilder-hover-preview__placeholder {
@@ -643,7 +639,8 @@
 .deckbuilder-hover-preview__image {
   display: grid;
   place-items: center;
-  width: 100%;
+  width: min(132%, 500px);
+  flex: 0 0 auto;
   aspect-ratio: 5 / 7;
   border-radius: 14px;
   color: #ffffff;

@@ -222,6 +222,7 @@
 @media (max-width: 980px) {
   .deckbuilder-card-browser {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .deckbuilder-hover-preview {
@@ -329,6 +330,21 @@
 }
 
 @media (max-width: 560px) {
+  .deckbuilder-page {
+    height: calc(100dvh - 84px);
+  }
+
+  .deckbuilder-deck-stacks {
+    gap: 22px 26px;
+    min-height: 150px;
+    max-height: 28dvh;
+    padding-top: 22px;
+  }
+
+  .deckbuilder-deck-stack {
+    width: clamp(112px, 34vw, 142px);
+  }
+
   .bottom-nav {
     gap: 3px;
     padding: 6px;

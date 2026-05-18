@@ -91,6 +91,7 @@ function clampCardsPerRow(value: number): number {
 
 const emptyFilters: CardFilters = {
   searchText: '',
+  archetype: '',
   selectedColors: [],
   cardType: '',
   cost: '',
@@ -232,7 +233,7 @@ function dedupeCards(cardsToDedupe: CardDto[]): CardDto[] {
 }
 
 export function DeckbuilderPage() {
-  const [selectedSetId, setSelectedSetId] = useState(availableSets[0]);
+  const [selectedSetId, setSelectedSetId] = useState(allSetsOption);
   const [filters, setFilters] = useState<CardFilters>(emptyFilters);
   const [setCards, setSetCards] = useState<CardDto[]>([]);
   const [allSetCards, setAllSetCards] = useState<CardDto[]>([]);
@@ -247,7 +248,8 @@ export function DeckbuilderPage() {
   const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
 
   const hasActiveLeader = Boolean(deck.leaderCardId);
-  const cardPool = hasActiveLeader && allSetCards.length > 0 ? allSetCards : setCards;
+  const shouldUseAllSetCards = selectedSetId === allSetsOption || hasActiveLeader;
+  const cardPool = shouldUseAllSetCards && allSetCards.length > 0 ? allSetCards : setCards;
   const sortedCards = useMemo(() => [...cardPool].sort(compareCardsForDeckbuilder), [cardPool]);
   const loadedCardsById = useMemo(
     () => new Map([...setCards, ...allSetCards].map((card) => [card.card_set_id, card])),
@@ -264,6 +266,7 @@ export function DeckbuilderPage() {
   );
   const activeFilterCount =
     (filters.searchText ? 1 : 0) +
+    (filters.archetype ? 1 : 0) +
     filters.selectedColors.length +
     (filters.cardType ? 1 : 0) +
     (filters.cost ? 1 : 0) +
@@ -272,7 +275,9 @@ export function DeckbuilderPage() {
     () => ({
       cardTypes: uniqueValues(sortedCards, (card) => card.card_type),
       costs: uniqueValues(sortedCards, (card) => String(card.card_cost ?? '')),
-      counters: uniqueValues(sortedCards, (card) => String(card.counter_amount ?? '')),
+      counters: uniqueValues(sortedCards, (card) => String(card.counter_amount ?? '')).filter(
+        (counter) => counter !== '4000' && counter !== '5000',
+      ),
     }),
     [sortedCards],
   );
@@ -320,6 +325,11 @@ export function DeckbuilderPage() {
   }, [deckNotice]);
 
   useEffect(() => {
+    if (selectedSetId === allSetsOption) {
+      setSetCards([]);
+      return undefined;
+    }
+
     let ignoreResult = false;
 
     const loadCards = async (): Promise<void> => {
@@ -353,7 +363,7 @@ export function DeckbuilderPage() {
   }, [selectedSetId]);
 
   useEffect(() => {
-    if (!hasActiveLeader || allSetCards.length > 0) {
+    if (!shouldUseAllSetCards || allSetCards.length > 0) {
       return undefined;
     }
 
@@ -388,7 +398,7 @@ export function DeckbuilderPage() {
     return () => {
       ignoreResult = true;
     };
-  }, [allSetCards.length, hasActiveLeader]);
+  }, [allSetCards.length, shouldUseAllSetCards]);
 
   const showDeckNotice = (message: string): void => {
     setDeckNotice(message);
@@ -406,6 +416,7 @@ export function DeckbuilderPage() {
         leaderName: card.card_name,
         leaderColors: getCardColors(card.card_color),
       }));
+      setSelectedSetId(allSetsOption);
       showDeckNotice(`${card.card_name} set as leader.`);
       return;
     }
@@ -641,8 +652,15 @@ export function DeckbuilderPage() {
                       title={`Remove one ${deckCard.name}`}
                       type="button"
                     >
-                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
-                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
+                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true">
+                        {cardImage && <img alt="" loading="lazy" src={cardImage} />}
+                      </span>
+                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true">
+                        {cardImage && <img alt="" loading="lazy" src={cardImage} />}
+                      </span>
+                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true">
+                        {cardImage && <img alt="" loading="lazy" src={cardImage} />}
+                      </span>
                       <span className="deckbuilder-deck-stack__card">
                         {cardImage ? (
                           <img alt={`${deckCard.name} card`} loading="lazy" src={cardImage} />
@@ -667,15 +685,14 @@ export function DeckbuilderPage() {
             <section className="set-picker">
               <label htmlFor="setPicker">{hasActiveLeader ? 'Card pool' : 'Leader set'}</label>
               <select
-                disabled={hasActiveLeader}
                 id="setPicker"
                 onChange={(event) => {
                   setSelectedSetId(event.target.value);
                   resetFilters();
                 }}
-                value={hasActiveLeader ? allSetsOption : selectedSetId}
+                value={selectedSetId}
               >
-                {hasActiveLeader && <option value={allSetsOption}>All sets</option>}
+                <option value={allSetsOption}>All sets</option>
                 {availableSets.map((setId) => (
                   <option key={setId} value={setId}>
                     {setId}
@@ -719,6 +736,8 @@ export function DeckbuilderPage() {
                   filters={filters}
                   leaderCardId={deck.leaderCardId}
                   leaderColors={activeLeaderColors}
+                  selectedSetId={selectedSetId}
+                  allSetsOption={allSetsOption}
                   onAddCard={addCardToDeck}
                   onPreviewCard={setPreviewCard}
                   onSetLeader={addCardToDeck}
