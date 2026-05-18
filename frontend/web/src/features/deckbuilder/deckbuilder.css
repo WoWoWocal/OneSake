@@ -284,7 +284,7 @@
 
 .deckbuilder-topline {
   display: grid;
-  grid-template-columns: minmax(320px, 1.2fr) minmax(260px, 0.8fr) minmax(260px, 0.8fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -478,21 +478,6 @@
 
 .deckbuilder-compact-actions .ui-button {
   flex: 1 1 130px;
-}
-
-.deckbuilder-validation-compact {
-  border-color: rgb(234 111 99 / 34%) !important;
-}
-
-.deckbuilder-validation-compact.is-valid {
-  border-color: rgb(31 196 159 / 34%) !important;
-}
-
-.deckbuilder-validation-compact p,
-.deckbuilder-export-compact p {
-  margin: 0;
-  color: #9db5bd;
-  font-weight: 800;
 }
 
 .card-tile--leader {
@@ -906,53 +891,5 @@
   grid-column: 1 / -1;
   width: 100%;
   color: #a83232 !important;
-}
-
-.validation-progress {
-  margin-bottom: 8px;
-  color: #9db5bd;
-  font-weight: 700;
-}
-
-.deck-export {
-  display: grid;
-  gap: 10px;
-}
-
-.deck-export pre {
-  max-height: 220px;
-  margin: 0;
-  overflow: auto;
-  border: 1px solid rgb(148 187 194 / 18%);
-  border-radius: 8px;
-  padding: 10px;
-  background: rgb(3 10 16 / 64%);
-  color: #d9e9ee;
-  white-space: pre-wrap;
-}
-
-.copy-message {
-  font-weight: 700;
-}
-
-.validation-list li {
-  border-radius: 8px;
-  padding: 10px;
-  font-weight: 700;
-}
-
-.validation-list .is-valid {
-  color: #125143;
-  background: #ddf3eb;
-}
-
-.validation-list .is-pending {
-  color: #6c4b00;
-  background: #fff2c8;
-}
-
-.validation-list .is-warning {
-  color: #7a4f00;
-  background: #fff8df;
 }
 

@@ -9,7 +9,6 @@ interface DeckLibraryProps {
   onDeleteDeck: (deckId: string) => void;
   onDuplicateDeck: (deckId: string) => void;
   onLoadDeck: (deck: Deck) => void;
-  onSaveDeck: () => void;
 }
 
 function formatUpdatedAt(updatedAt: string): string {
@@ -28,7 +27,6 @@ export function DeckLibrary({
   onDeleteDeck,
   onDuplicateDeck,
   onLoadDeck,
-  onSaveDeck,
 }: DeckLibraryProps) {
   return (
     <section className="panel deck-panel deck-library">
@@ -38,7 +36,6 @@ export function DeckLibrary({
           <Button onClick={onCreateDeck} variant="ghost">
             New Deck
           </Button>
-          <Button onClick={onSaveDeck}>Save Deck</Button>
         </div>
       </div>
 

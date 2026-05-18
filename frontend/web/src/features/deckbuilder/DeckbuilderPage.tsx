@@ -12,10 +12,8 @@ import { CardSearch } from './CardSearch';
 import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
 import { DeckDrawer } from './DeckDrawer';
-import { DeckExport } from './DeckExport';
 import { DeckLibrary } from './DeckLibrary';
 import { DeckSummary } from './DeckSummary';
-import { DeckValidation } from './DeckValidation';
 import {
   createNewDeck,
   deleteStoredDeck,
@@ -32,7 +30,6 @@ import {
   getCardColors,
   getTotalCards,
   isLeaderCard,
-  validateDeck,
 } from './utils/deckValidation';
 
 
@@ -246,7 +243,6 @@ export function DeckbuilderPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
 
-  const validation = useMemo(() => validateDeck(deck), [deck]);
   const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
   const activeLeaderColors = useMemo(() => deck.leaderColors ?? [], [deck.leaderColors]);
   const leaderPreviewCard = useMemo(
@@ -258,9 +254,6 @@ export function DeckbuilderPage() {
     [activeLeaderColors],
   );
   const totalDeckCards = getTotalCards(deck.cards);
-  const validationSummary = validation.isValid
-    ? 'Deck is valid.'
-    : validation.errors[0] ?? validation.warnings[0] ?? 'Deck needs review.';
   const isDeckSaved = savedDecks.some(
     (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
   );
@@ -534,9 +527,8 @@ export function DeckbuilderPage() {
         </div>
         <div className="deckbuilder-header__actions">
           <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
-            Deck / Export
+            Deck List
           </button>
-          <Button onClick={saveDeck}>Save Deck</Button>
         </div>
       </header>
 
@@ -664,37 +656,7 @@ export function DeckbuilderPage() {
                 >
                   Clear deck
                 </Button>
-              </div>
-            </section>
-
-            <section
-              className={`panel deckbuilder-compact-card deckbuilder-validation-compact ${
-                validation.isValid ? 'is-valid' : 'is-pending'
-              }`}
-            >
-              <div className="deckbuilder-compact-card__header">
-                <h2>Validation</h2>
-                <strong>{validation.isValid ? 'Valid' : 'Needs Work'}</strong>
-              </div>
-              <p>{validationSummary}</p>
-              {validation.warnings[0] && <p>{validation.warnings[0]}</p>}
-            </section>
-
-            <section className="panel deckbuilder-compact-card deckbuilder-export-compact">
-              <div className="deckbuilder-compact-card__header">
-                <h2>Export</h2>
-                <strong>{validation.isValid ? 'Ready' : 'Locked'}</strong>
-              </div>
-              <p>
-                {validation.isValid
-                  ? 'Export is ready in the deck drawer.'
-                  : 'Fix validation before copying the export.'}
-              </p>
-              <div className="deckbuilder-compact-actions">
                 <Button onClick={saveDeck}>Save Deck</Button>
-                <Button onClick={() => setDeckOpen(true)} variant="ghost">
-                  Deck List / Export
-                </Button>
               </div>
             </section>
           </section>
@@ -731,7 +693,6 @@ export function DeckbuilderPage() {
           onDeleteDeck={deleteDeck}
           onDuplicateDeck={duplicateDeck}
           onLoadDeck={loadDeck}
-          onSaveDeck={saveDeck}
         />
         <DeckSummary
           deck={deck}
@@ -740,14 +701,12 @@ export function DeckbuilderPage() {
           onDeckNameChange={renameDeck}
           onRemoveLeader={removeLeader}
         />
-        <DeckValidation validation={validation} />
         <DeckDrawer
           deck={deck}
           onDecreaseCard={decreaseDeckCard}
           onIncreaseCard={increaseDeckCard}
           onRemoveCard={removeDeckCard}
         />
-        <DeckExport deck={deck} validation={validation} />
       </Drawer>
 
       <CardFilterSheet
