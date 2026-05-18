@@ -339,14 +339,15 @@
   }
 
   .deckbuilder-deck-stacks {
-    gap: 22px 26px;
-    min-height: 150px;
-    max-height: 28dvh;
-    padding-top: 22px;
+    gap: 18px 22px;
+    min-height: 130px;
+    max-height: 24dvh;
+    padding-top: 14px;
   }
 
   .deckbuilder-deck-stack {
-    --deck-stack-card-width: clamp(112px, 34vw, 142px);
+    --deck-stack-card-width: clamp(96px, 30vw, 124px);
+    --deck-stack-offset: 14px;
   }
 
   .bottom-nav {

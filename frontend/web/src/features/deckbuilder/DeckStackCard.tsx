@@ -49,7 +49,6 @@ export function DeckStackCard({
     .join(' ');
   const content = (
     <>
-      {isLeader && <span className="deckbuilder-deck-stack__label">Leader</span>}
       {Array.from({ length: ghostCount }, (_, index) => (
         <span
           aria-hidden="true"

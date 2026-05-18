@@ -248,9 +248,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   align-items: stretch;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   gap: 12px;
-  min-height: clamp(520px, 58dvh, 880px);
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -344,14 +345,14 @@
 .deckbuilder-deck-stacks {
   display: flex;
   flex-wrap: wrap;
-  gap: 26px 32px;
+  gap: 20px 26px;
   align-items: start;
-  max-height: min(30dvh, 330px);
-  min-height: 210px;
+  max-height: min(24dvh, 260px);
+  min-height: 170px;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-top: 1px solid rgb(148 187 194 / 16%);
-  padding: 18px 12px 12px 0;
+  padding: 14px 10px 10px 0;
 }
 
 .deckbuilder-deck-stacks__empty {
@@ -367,8 +368,8 @@
 }
 
 .deckbuilder-deck-stack {
-  --deck-stack-card-width: clamp(136px, 9.8vw, 188px);
-  --deck-stack-offset: 18px;
+  --deck-stack-card-width: clamp(112px, 8.2vw, 158px);
+  --deck-stack-offset: 15px;
 
   position: relative;
   width: calc(var(--deck-stack-card-width) + var(--deck-stack-offset) + 8px);
@@ -399,14 +400,14 @@
 }
 
 .deckbuilder-deck-stack__ghost--1 {
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   z-index: 3;
 }
 
 .deckbuilder-deck-stack__ghost--2 {
-  top: 6px;
-  left: 6px;
+  top: 5px;
+  left: 5px;
   z-index: 2;
   opacity: 0.86;
 }
@@ -484,8 +485,8 @@
 
 .deckbuilder-deck-stack__quantity {
   position: absolute;
-  right: 0;
-  bottom: 0;
+  right: 2px;
+  bottom: 2px;
   z-index: 8;
   color: #ff3fd4;
   font-size: clamp(1.8rem, 2.4vw, 2.8rem);
@@ -499,21 +500,6 @@
     0 2px 0 #ffffff,
     0 -2px 0 #ffffff,
     0 2px 6px rgb(0 0 0 / 65%);
-}
-
-.deckbuilder-deck-stack__label {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
-  border: 1px solid rgb(240 191 56 / 62%);
-  border-radius: 999px;
-  padding: 4px 7px;
-  color: #171006;
-  background: linear-gradient(180deg, #ffe39b, #c48b28);
-  font-size: 0.68rem;
-  font-weight: 950;
-  text-transform: uppercase;
 }
 
 .deckbuilder-deck-stack--leader .deckbuilder-deck-stack__card {
@@ -677,6 +663,7 @@
   max-width: 100%;
   max-height: min(100%, calc(100dvh - 156px));
   object-fit: contain;
+  object-position: top center;
   border-radius: 14px;
   background: transparent;
 }
