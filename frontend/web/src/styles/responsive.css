@@ -371,7 +371,7 @@
   }
 
   .deckbuilder-deck-stacks {
-    gap: 12px 16px;
+    gap: 10px 12px;
     min-height: 0;
     max-height: none;
     overflow: visible;
@@ -380,7 +380,7 @@
 
   .deckbuilder-deck-stack {
     --deck-stack-card-width: clamp(84px, 28vw, 114px);
-    --deck-stack-offset: 12px;
+    --deck-stack-layer-step: 5px;
   }
 
   .deckbuilder-deck-header-actions {
