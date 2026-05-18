@@ -575,6 +575,8 @@ export function DeckbuilderPage() {
     <section className="deckbuilder-page">
       <div className="deckbuilder-layout">
         <main className="deckbuilder-main">
+          <div className="deckbuilder-main-layout">
+            <div className="deckbuilder-main-column">
           <section className="deckbuilder-topline" aria-label="Deck overview">
             <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
               <div className="deckbuilder-compact-card__header">
@@ -601,9 +603,10 @@ export function DeckbuilderPage() {
                   </Button>
                 </div>
               </div>
-              <label className="field" htmlFor="deckNameCompact">
+              <label className="field deckbuilder-deck-name-field" htmlFor="deckNameCompact">
                 Deck name
                 <input
+                  className="deckbuilder-deck-name-input"
                   id="deckNameCompact"
                   maxLength={40}
                   onChange={(event) => renameDeck(event.target.value)}
@@ -704,9 +707,11 @@ export function DeckbuilderPage() {
                   onSetLeader={addCardToDeck}
                 />
               </div>
-              <CardHoverPreview card={previewCard} />
             </section>
           )}
+            </div>
+            <CardHoverPreview card={previewCard} />
+          </div>
         </main>
       </div>
 
