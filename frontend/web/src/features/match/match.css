@@ -171,8 +171,7 @@
 }
 
 .match-setup-kicker,
-.match-setup-card__header span,
-.match-selected-deck-card span {
+.match-setup-card__header span {
   display: block;
   color: #e3bd68;
   font-size: 0.72rem;
@@ -325,7 +324,6 @@
 }
 
 .match-readiness-list small,
-.match-selected-deck-card small,
 .match-deck-option small {
   color: #9db5bd;
   font-weight: 700;
@@ -415,88 +413,6 @@
   margin: 0;
 }
 
-.match-selected-deck-card {
-  display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgb(148 187 194 / 22%);
-  border-radius: 12px;
-  padding: 10px;
-  background:
-    linear-gradient(135deg, rgb(240 191 56 / 8%), transparent 42%),
-    rgb(7 21 34 / 86%);
-}
-
-.match-selected-deck-card.is-valid {
-  border-color: rgb(31 196 159 / 36%);
-}
-
-.match-selected-deck-card.is-invalid {
-  border-color: rgb(234 111 99 / 38%);
-}
-
-.match-selected-deck-card strong {
-  display: block;
-  color: #ffffff;
-  font-size: 1.08rem;
-  overflow-wrap: anywhere;
-}
-
-.match-leader-card-preview {
-  display: grid;
-  align-content: space-between;
-  min-height: 112px;
-  aspect-ratio: 2.5 / 3.5;
-  border: 1px solid rgb(240 191 56 / 48%);
-  border-radius: 8px;
-  padding: 8px;
-  color: #fff3c7;
-  background:
-    linear-gradient(160deg, rgb(32 70 87 / 82%), rgb(8 21 34 / 92%)),
-    rgb(7 21 34);
-  box-shadow: inset 0 0 24px rgb(0 0 0 / 32%);
-  overflow: hidden;
-}
-
-.match-leader-card-preview span,
-.match-leader-card-preview strong {
-  overflow-wrap: anywhere;
-}
-
-.match-leader-card-preview span {
-  color: #e3bd68;
-  font-size: 0.62rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.match-leader-card-preview strong {
-  font-size: 0.76rem;
-  line-height: 1.15;
-}
-
-.match-selected-deck-card__details {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.match-selected-deck-card__details div {
-  min-width: 0;
-  border: 1px solid rgb(148 187 194 / 16%);
-  border-radius: 9px;
-  padding: 8px;
-  background: rgb(255 255 255 / 4%);
-}
-
-.match-selected-deck-card__details span {
-  color: #8ea9b3;
-  font-size: 0.7rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
 .match-deck-issues {
   display: grid;
   gap: 5px;
@@ -517,41 +433,97 @@
 
 .match-deck-list {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 10px;
 }
 
 .match-deck-option {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  min-height: 64px;
+  align-content: start;
+  justify-items: center;
+  gap: 7px;
+  min-height: 0;
   border: 1px solid rgba(148, 187, 194, 0.22);
   border-radius: 12px;
-  padding: 10px;
-  text-align: left;
+  padding: 8px;
+  text-align: center;
   color: #d9e9ee;
   background: rgba(255, 255, 255, 0.055);
+  cursor: pointer;
 }
 
 .match-deck-option.is-selected {
   border-color: rgba(240, 191, 56, 0.64);
-  box-shadow: 0 0 0 2px rgba(240, 191, 56, 0.14);
+  background:
+    linear-gradient(180deg, rgb(240 191 56 / 12%), transparent 48%),
+    rgb(255 255 255 / 6%);
+  box-shadow:
+    0 0 0 2px rgba(240, 191, 56, 0.14),
+    0 12px 24px rgb(0 0 0 / 22%);
 }
 
 .match-deck-option.is-invalid {
-  border-color: rgba(234, 111, 99, 0.42);
+  opacity: 0.72;
 }
 
-.match-deck-option span {
+.match-deck-option__leader {
   display: grid;
-  gap: 2px;
-  min-width: 0;
+  width: min(100%, 86px);
+  aspect-ratio: 5 / 7;
+  place-items: center;
+  border: 1px solid rgb(240 191 56 / 30%);
+  border-radius: 8px;
+  color: #fff3c7;
+  background: #071522;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 24%);
 }
 
-.match-deck-option strong,
-.match-deck-option small {
+.match-deck-option__leader img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.018);
+}
+
+.match-deck-option__leader-placeholder {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  padding: 7px;
+  background:
+    radial-gradient(circle at 50% 20%, rgb(240 191 56 / 18%), transparent 44%),
+    linear-gradient(160deg, rgb(32 70 87 / 82%), rgb(8 21 34 / 92%)),
+    rgb(7 21 34);
+}
+
+.match-deck-option__leader-placeholder span {
+  color: #e3bd68;
+  font-size: 0.58rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.match-deck-option__leader-placeholder strong {
+  color: #ffffff;
+  font-size: 0.66rem;
+  line-height: 1.12;
+}
+
+.match-deck-option__name,
+.match-deck-option__leader-placeholder strong {
+  display: block;
+  max-width: 100%;
   overflow-wrap: anywhere;
+}
+
+.match-deck-option__name {
+  color: #ffffff;
+  font-size: 0.82rem;
+  line-height: 1.15;
 }
 
 .match-page .scroll-list {

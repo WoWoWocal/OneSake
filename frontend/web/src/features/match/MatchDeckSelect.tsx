@@ -2,6 +2,16 @@ import type { Deck } from '../../types/decks';
 import { Button } from '../../components/ui/Button';
 import { validateDeck } from '../deckbuilder/utils/deckValidation';
 
+type DeckWithLeaderImage = Deck & {
+  leaderCard?: {
+    card_image?: string;
+    cardImage?: string;
+    image?: string;
+  };
+  leaderCardImage?: string;
+  leaderImage?: string;
+};
+
 interface MatchDeckSelectProps {
   decks: Deck[];
   selectedDeckId: string;
@@ -10,11 +20,17 @@ interface MatchDeckSelectProps {
   onOpenDeckbuilder?: () => void;
 }
 
-function deriveSetLabel(deck: Deck | null): string {
-  const cardId = deck?.leaderCardId || deck?.cards.find((card) => card.cardId)?.cardId || '';
-  const match = cardId.match(/^[A-Z]{2}\d{2}/i);
+function getLeaderImage(deck: Deck): string {
+  const enrichedDeck = deck as DeckWithLeaderImage;
 
-  return match ? match[0].toUpperCase() : 'Set -';
+  return (
+    enrichedDeck.leaderImage ||
+    enrichedDeck.leaderCardImage ||
+    enrichedDeck.leaderCard?.card_image ||
+    enrichedDeck.leaderCard?.cardImage ||
+    enrichedDeck.leaderCard?.image ||
+    ''
+  );
 }
 
 export function MatchDeckSelect({
@@ -24,10 +40,6 @@ export function MatchDeckSelect({
   onSelectDeck,
   selectedDeckId,
 }: MatchDeckSelectProps) {
-  const selectedDeck = decks.find((deck) => deck.id === selectedDeckId) ?? null;
-  const selectedValidation = selectedDeck ? validateDeck(selectedDeck) : null;
-  const selectedSetLabel = deriveSetLabel(selectedDeck);
-
   return (
     <section className={embedded ? 'match-deck-select match-deck-select--embedded' : 'panel match-deck-select'}>
       <div className="panel-title-row">
@@ -46,60 +58,39 @@ export function MatchDeckSelect({
           )}
         </div>
       ) : (
-        <>
-          {selectedDeck ? (
-            <div
-              className={`match-selected-deck-card ${
-                selectedValidation?.isValid ? 'is-valid' : 'is-invalid'
-              }`}
-            >
-              <div className="match-leader-card-preview" aria-label="Selected leader card">
-                <span>{selectedDeck.leaderCardId || 'Leader'}</span>
-                <strong>{selectedDeck.leaderName || 'Leader Card'}</strong>
-              </div>
-              <div className="match-selected-deck-card__details">
-                <div>
-                  <span>Deckname</span>
-                  <strong>{selectedDeck.name}</strong>
-                </div>
-                <div>
-                  <span>Set</span>
-                  <strong>{selectedSetLabel}</strong>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="match-deck-select__empty">
-              <strong>No deck selected.</strong>
-            </div>
-          )}
+        <div className="match-deck-list" role="radiogroup" aria-label="Saved decks">
+          {decks.map((deck) => {
+            const validation = validateDeck(deck);
+            const isSelected = deck.id === selectedDeckId;
+            const leaderImage = getLeaderImage(deck);
 
-          <div className="match-deck-list" role="radiogroup" aria-label="Saved decks">
-            {decks.map((deck) => {
-              const validation = validateDeck(deck);
-              const setLabel = deriveSetLabel(deck);
-              const isSelected = deck.id === selectedDeckId;
-
-              return (
-                <button
-                  key={deck.id}
-                  aria-checked={isSelected}
-                  className={`match-deck-option ${isSelected ? 'is-selected' : ''} ${
-                    validation.isValid ? 'is-valid' : 'is-invalid'
-                  }`}
-                  onClick={() => onSelectDeck(deck.id)}
-                  role="radio"
-                  type="button"
-                >
-                  <span>
-                    <strong>{deck.name}</strong>
-                    <small>{setLabel}</small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </>
+            return (
+              <button
+                key={deck.id}
+                aria-checked={isSelected}
+                aria-label={`Select deck ${deck.name}`}
+                className={`match-deck-option ${isSelected ? 'is-selected' : ''} ${
+                  validation.isValid ? 'is-valid' : 'is-invalid'
+                }`}
+                onClick={() => onSelectDeck(deck.id)}
+                role="radio"
+                type="button"
+              >
+                <span className="match-deck-option__leader" aria-hidden="true">
+                  {leaderImage ? (
+                    <img alt="" src={leaderImage} />
+                  ) : (
+                    <span className="match-deck-option__leader-placeholder">
+                      <span>Leader</span>
+                      <strong>{deck.leaderCardId || deck.leaderName || '-'}</strong>
+                    </span>
+                  )}
+                </span>
+                <strong className="match-deck-option__name">{deck.name}</strong>
+              </button>
+            );
+          })}
+        </div>
       )}
     </section>
   );

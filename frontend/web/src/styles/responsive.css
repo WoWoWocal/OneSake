@@ -367,7 +367,20 @@
 
 @media (max-width: 560px) {
   .deckbuilder-page {
-    height: calc(100dvh - 84px);
+    min-height: calc(100dvh - 84px);
+  }
+
+  .match-deck-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+  }
+
+  .match-deck-option {
+    flex: 0 0 108px;
+    scroll-snap-align: start;
   }
 
   .deckbuilder-deck-stacks {
