@@ -584,24 +584,6 @@ export function DeckbuilderPage() {
                   <h2>Deck List</h2>
                   <strong>{totalDeckCards}/50</strong>
                 </div>
-                <div className="deckbuilder-deck-header-actions">
-                  <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
-                    Change leader
-                  </Button>
-                  <Button
-                    disabled={!deck.leaderCardId && deck.cards.length === 0}
-                    onClick={clearDeck}
-                    variant="ghost"
-                  >
-                    Clear deck
-                  </Button>
-                  <Button className="deckbuilder-save-button" onClick={saveDeck}>
-                    Save Deck
-                  </Button>
-                  <Button onClick={() => setDeckOpen(true)} variant="ghost">
-                    Deck Library
-                  </Button>
-                </div>
               </div>
               <label className="field deckbuilder-deck-name-field" htmlFor="deckNameCompact">
                 Deck name
@@ -684,6 +666,34 @@ export function DeckbuilderPage() {
                 selectedColors={filters.selectedColors}
               />
               <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
+              <div className="deckbuilder-toolbar-actions">
+                <Button
+                  className="deckbuilder-toolbar-action"
+                  disabled={!deck.leaderCardId}
+                  onClick={removeLeader}
+                  variant="ghost"
+                >
+                  Change leader
+                </Button>
+                <Button
+                  className="deckbuilder-toolbar-action"
+                  disabled={!deck.leaderCardId && deck.cards.length === 0}
+                  onClick={clearDeck}
+                  variant="ghost"
+                >
+                  Clear deck
+                </Button>
+                <Button className="deckbuilder-toolbar-action deckbuilder-save-button" onClick={saveDeck}>
+                  Save Deck
+                </Button>
+                <Button
+                  className="deckbuilder-toolbar-action deckbuilder-library-button"
+                  onClick={() => setDeckOpen(true)}
+                  variant="ghost"
+                >
+                  Deck Library
+                </Button>
+              </div>
             </div>
           </div>
 

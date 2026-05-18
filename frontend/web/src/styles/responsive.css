@@ -399,11 +399,11 @@
     --deck-stack-layer-step: 5px;
   }
 
-  .deckbuilder-deck-header-actions {
+  .deckbuilder-toolbar-actions {
     justify-content: flex-start;
   }
 
-  .deckbuilder-deck-header-actions .ui-button {
+  .deckbuilder-toolbar-actions .ui-button {
     min-height: 40px;
     padding: 7px 9px;
   }

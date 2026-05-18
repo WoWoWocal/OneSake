@@ -60,9 +60,9 @@
 
 .deckbuilder-toolbar {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   border: 0;
   margin-top: -2px;
   padding: 0;
@@ -85,7 +85,7 @@
 }
 
 .card-search__controls .field {
-  width: clamp(220px, 20vw, 280px);
+  width: clamp(190px, 16vw, 250px);
   margin: 0;
 }
 
@@ -201,17 +201,17 @@
 .deckbuilder-filter-panel {
   display: flex;
   flex: 1 1 auto;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
 .card-size-slider {
   display: grid;
-  flex: 0 0 154px;
-  max-width: 154px;
-  min-width: 148px;
+  flex: 0 0 132px;
+  max-width: 132px;
+  min-width: 120px;
 }
 
 .deckbuilder-toolbar input,
@@ -435,24 +435,25 @@
   flex: 1 1 130px;
 }
 
-.deckbuilder-deck-header-actions {
+.deckbuilder-toolbar-actions {
   display: flex;
   flex: 0 1 auto;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
-  margin-left: 2px;
 }
 
-.deckbuilder-deck-header-actions .ui-button {
+.deckbuilder-toolbar-actions .ui-button,
+.deckbuilder-toolbar-action {
   flex: 0 0 auto;
   width: auto;
   min-height: 34px;
   border-radius: 7px;
-  padding: 6px 9px;
-  font-size: 0.78rem;
+  padding: 6px 8px;
+  font-size: 0.76rem;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .deckbuilder-save-button {
@@ -464,6 +465,17 @@
   box-shadow:
     0 0 0 1px rgb(240 191 56 / 18%),
     0 7px 16px rgb(23 111 101 / 24%);
+}
+
+.deckbuilder-library-button {
+  border-color: rgb(255 84 84 / 58%);
+  color: #fff6f6;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 10%), transparent 74%),
+    #9d1f2f;
+  box-shadow:
+    0 0 0 1px rgb(255 84 84 / 18%),
+    0 7px 16px rgb(157 31 47 / 22%);
 }
 
 .deckbuilder-deck-stacks {

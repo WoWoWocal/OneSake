@@ -91,23 +91,19 @@ function getColorSortIndex(card: CardDto, leaderColors: string[]): number {
 function getCardTypeSortIndex(card: CardDto): number {
   const normalizedType = normalize(card.card_type);
 
-  if (normalizedType.includes('leader')) {
+  if (normalizedType.includes('character')) {
     return 0;
   }
 
-  if (normalizedType.includes('character')) {
+  if (normalizedType.includes('event')) {
     return 1;
   }
 
-  if (normalizedType.includes('event')) {
+  if (normalizedType.includes('stage')) {
     return 2;
   }
 
-  if (normalizedType.includes('stage')) {
-    return 3;
-  }
-
-  return 4;
+  return normalizedType.includes('leader') ? 4 : 3;
 }
 
 function compareCards(
@@ -125,8 +121,8 @@ function compareCards(
 
   return (
     getColorSortIndex(left, leaderColors) - getColorSortIndex(right, leaderColors) ||
-    getCardCost(left) - getCardCost(right) ||
     getCardTypeSortIndex(left) - getCardTypeSortIndex(right) ||
+    getCardCost(left) - getCardCost(right) ||
     left.card_name.localeCompare(right.card_name, undefined, { numeric: true }) ||
     left.card_set_id.localeCompare(right.card_set_id, undefined, { numeric: true })
   );
