@@ -331,14 +331,14 @@
 .deckbuilder-deck-stacks {
   display: flex;
   flex-wrap: wrap;
-  gap: 28px 32px;
+  gap: 24px 30px;
   align-items: start;
   max-height: min(30dvh, 330px);
   min-height: 190px;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-top: 1px solid rgb(148 187 194 / 16%);
-  padding: 28px 36px 12px 0;
+  padding: 22px 24px 12px 0;
 }
 
 .deckbuilder-deck-stacks__empty {
@@ -363,6 +363,7 @@
   background: transparent;
   cursor: pointer;
   isolation: isolate;
+  overflow: visible;
 }
 
 .deckbuilder-deck-stack__ghost,
@@ -386,20 +387,20 @@
 .deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:first-child {
   z-index: 0;
   opacity: 0.98;
-  transform: translate(8px, -7px);
+  transform: translate(5px, -4px);
 }
 
 .deckbuilder-deck-stack--3 .deckbuilder-deck-stack__ghost:nth-child(2),
 .deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:nth-child(2) {
   z-index: 1;
   opacity: 0.92;
-  transform: translate(16px, -14px);
+  transform: translate(10px, -8px);
 }
 
 .deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:nth-child(3) {
   z-index: 2;
   opacity: 0.86;
-  transform: translate(24px, -21px);
+  transform: translate(15px, -12px);
 }
 
 .deckbuilder-deck-stack__card {
@@ -610,7 +611,7 @@
   height: 100%;
   min-height: 0;
   max-height: none;
-  overflow: hidden;
+  overflow: visible;
   border: 0 !important;
   padding: 0;
   background: transparent !important;
@@ -639,24 +640,26 @@
 .deckbuilder-hover-preview__image {
   display: grid;
   place-items: center;
-  width: min(132%, 500px);
+  width: 100%;
+  height: 100%;
   flex: 0 0 auto;
-  aspect-ratio: 5 / 7;
+  aspect-ratio: auto;
   border-radius: 14px;
   color: #ffffff;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
   filter: drop-shadow(0 18px 30px rgb(0 0 0 / 32%));
 }
 
 .deckbuilder-hover-preview__image img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(100%, calc(100dvh - 156px));
+  object-fit: contain;
   border-radius: 14px;
   background: transparent;
-  transform: scale(1.014);
 }
 
 .card-inspect-modal {

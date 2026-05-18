@@ -434,11 +434,9 @@ export function DeckbuilderPage() {
 
       if (existingCard) {
         if (existingCard.quantity >= 4) {
-          showDeckNotice(`${existingCard.name} already has 4 copies.`);
           return currentDeck;
         }
 
-        showDeckNotice(`${existingCard.name} increased to ${existingCard.quantity + 1}.`);
         return {
           ...currentDeck,
           cards: currentDeck.cards.map((deckCard) =>
@@ -449,7 +447,6 @@ export function DeckbuilderPage() {
         };
       }
 
-      showDeckNotice(`${card.card_name} added.`);
       return {
         ...currentDeck,
         cards: [
@@ -470,7 +467,6 @@ export function DeckbuilderPage() {
       }
 
       if (card.quantity >= 4) {
-        showDeckNotice(`${card.name} already has 4 copies.`);
         return currentDeck;
       }
 
