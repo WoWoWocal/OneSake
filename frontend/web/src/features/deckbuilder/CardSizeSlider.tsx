@@ -3,9 +3,9 @@ interface CardSizeSliderProps {
   onChange: (value: number) => void;
 }
 
-const minCardsPerRow = 1;
+const minCardsPerRow = 7;
 const maxCardsPerRow = 10;
-const defaultCardsPerRow = 7;
+const defaultCardsPerRow = 8;
 
 function clampCardsPerRow(value: number): number {
   if (!Number.isFinite(value)) {

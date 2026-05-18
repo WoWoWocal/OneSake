@@ -241,6 +241,10 @@
   .card-search__controls {
     grid-template-columns: minmax(0, 1fr) auto;
   }
+
+  .card-size-slider {
+    max-width: none;
+  }
 }
 
 @media (orientation: portrait) {
@@ -377,6 +381,10 @@
   .saved-deck-select__stats,
   .card-search__controls {
     grid-template-columns: 1fr;
+  }
+
+  .deckbuilder-sort-chip {
+    width: 100%;
   }
 
   .card-inspect-modal {

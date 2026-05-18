@@ -78,7 +78,7 @@ const availableSets = [
   'ST-28',
 ];
 const cardsPerRowStorageKey = 'onesake.deckbuilder.cardsPerRow';
-const defaultCardsPerRow = 7;
+const defaultCardsPerRow = 8;
 const allSetsOption = 'ALL_SETS';
 
 function clampCardsPerRow(value: number): number {
@@ -86,7 +86,7 @@ function clampCardsPerRow(value: number): number {
     return defaultCardsPerRow;
   }
 
-  return Math.min(10, Math.max(1, Math.round(value)));
+  return Math.min(10, Math.max(7, Math.round(value)));
 }
 
 const emptyFilters: CardFilters = {

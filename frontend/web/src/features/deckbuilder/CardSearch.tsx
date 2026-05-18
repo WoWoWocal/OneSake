@@ -32,6 +32,9 @@ export function CardSearch({
         <Button onClick={onOpenFilters} variant="ghost">
           Open filters
         </Button>
+        <button className="deckbuilder-sort-chip" type="button" aria-pressed="true">
+          On: Sort by cost
+        </button>
       </div>
     </section>
   );
