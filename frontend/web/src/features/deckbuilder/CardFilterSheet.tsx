@@ -66,7 +66,7 @@ export function CardFilterSheet({
             aria-label="Search cards"
             id="cardSearch"
             onChange={(event) => onChange({ ...filters, searchText: event.target.value })}
-            placeholder="Name or card ID"
+            placeholder="Search anything"
             value={filters.searchText}
           />
         </div>

@@ -310,7 +310,7 @@
 
 .deckbuilder-card-grid-area {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
   min-height: 0;
   height: 100%;
@@ -324,7 +324,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-grid-min, 168px)), 1fr));
   align-content: start;
-  gap: 8px;
+  gap: 7px;
   width: 100%;
 }
 
@@ -436,7 +436,7 @@
 .deckbuilder-deck-stacks {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px 20px;
+  gap: 14px 18px;
   align-items: start;
   height: auto;
   max-height: none;
@@ -459,8 +459,8 @@
 }
 
 .deckbuilder-deck-stack {
-  --deck-stack-card-width: clamp(86px, 6.4vw, 118px);
-  --deck-stack-offset: 12px;
+  --deck-stack-card-width: clamp(94px, 7vw, 130px);
+  --deck-stack-offset: 13px;
 
   position: relative;
   width: calc(var(--deck-stack-card-width) + var(--deck-stack-offset) + 8px);
@@ -491,14 +491,14 @@
 }
 
 .deckbuilder-deck-stack__ghost--1 {
-  top: 10px;
-  left: 10px;
+  top: 11px;
+  left: 11px;
   z-index: 3;
 }
 
 .deckbuilder-deck-stack__ghost--2 {
-  top: 5px;
-  left: 5px;
+  top: 6px;
+  left: 6px;
   z-index: 2;
   opacity: 0.86;
 }
@@ -579,7 +579,7 @@
   right: 2px;
   bottom: 2px;
   z-index: 8;
-  font-size: clamp(1.55rem, 2vw, 2.25rem);
+  font-size: clamp(1.65rem, 2.15vw, 2.45rem);
   font-weight: 900;
   line-height: 1;
   pointer-events: none;

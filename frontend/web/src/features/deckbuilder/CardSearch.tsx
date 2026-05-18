@@ -24,7 +24,7 @@ export function CardSearch({
             aria-label="Search cards"
             id="deckbuilderSearch"
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Name or card ID"
+            placeholder="Search anything"
             value={searchText}
           />
         </div>
