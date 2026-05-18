@@ -256,8 +256,7 @@
   }
 
   .match-open-board-panel,
-  .match-joined-panel__actions,
-  .match-selected-deck-card dl {
+  .match-joined-panel__actions {
     grid-template-columns: 1fr;
   }
 
