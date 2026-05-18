@@ -239,7 +239,7 @@
   }
 
   .card-search__controls {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
   .card-size-slider {
@@ -386,6 +386,12 @@
 
   .deckbuilder-sort-chip {
     width: 100%;
+  }
+
+  .deckbuilder-filter-open-button,
+  .deckbuilder-sort-chip,
+  .card-size-slider-control {
+    min-height: 44px;
   }
 
   .card-inspect-modal {

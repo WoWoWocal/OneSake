@@ -44,10 +44,10 @@
 .deckbuilder-toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
-  gap: 10px 14px;
+  align-items: center;
+  gap: 6px 10px;
   border: 0;
-  padding: 2px 0 4px;
+  padding: 0;
   background: transparent;
 }
 
@@ -55,27 +55,17 @@
   display: flex;
   flex: 0 1 430px;
   flex-wrap: wrap;
-  align-items: end;
-  gap: 8px 10px;
+  align-items: center;
+  gap: 6px 8px;
   min-width: min(100%, 260px);
-}
-
-.card-search h2 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.card-search p {
-  margin: 2px 0 0;
-  color: #9db5bd;
 }
 
 .card-search__controls {
   display: grid;
   flex: 0 1 430px;
   grid-template-columns: minmax(220px, 320px) auto auto;
-  align-items: end;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
 }
 
 .card-search__controls .field {
@@ -85,8 +75,8 @@
 .set-picker {
   display: grid;
   flex: 0 1 150px;
-  gap: 6px;
-  align-content: end;
+  gap: 4px;
+  align-content: center;
   min-width: 136px;
 }
 
@@ -109,7 +99,7 @@
 
 .color-palette-filter {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .color-palette-filter__header {
@@ -133,16 +123,17 @@
 .color-palette-filter__buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
 .color-filter-button {
-  min-height: 44px;
+  min-height: 38px;
   border: 1px solid rgb(148 187 194 / 28%);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 7px 10px;
   color: #d9e9ee;
   background: rgb(255 255 255 / 5%);
+  font-size: 0.84rem;
   font-weight: 800;
 }
 
@@ -191,28 +182,16 @@
   display: flex;
   flex: 1 1 460px;
   flex-wrap: wrap;
-  align-items: end;
-  gap: 10px 14px;
+  align-items: center;
+  gap: 6px 10px;
   min-width: min(100%, 280px);
 }
 
 .card-size-slider {
   display: grid;
-  flex: 0 1 240px;
-  gap: 8px;
-  max-width: 260px;
-}
-
-.card-size-slider-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.card-size-slider-header span {
-  color: #e3bd68;
-  font-weight: 800;
+  flex: 0 1 180px;
+  max-width: 190px;
+  min-width: 144px;
 }
 
 .deckbuilder-page input,
@@ -227,20 +206,94 @@
 }
 
 .card-size-slider-control {
+  position: relative;
+  z-index: 2;
   width: 100%;
-  min-height: 44px;
+  min-height: 38px;
+  margin: 0;
   accent-color: #176f65;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.card-size-slider__track {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 38px;
+}
+
+.card-size-slider__ticks {
+  position: absolute;
+  right: 8px;
+  left: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.card-size-slider__ticks span {
+  width: 6px;
+  height: 6px;
+  border: 1px solid rgb(240 191 56 / 46%);
+  border-radius: 999px;
+  background: #071522;
+  box-shadow: 0 0 0 2px rgb(7 21 34 / 88%);
+}
+
+.card-size-slider-control::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(31 196 159 / 75%), rgb(240 191 56 / 64%));
+}
+
+.card-size-slider-control::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  appearance: none;
+  border: 2px solid #fff3c7;
+  border-radius: 999px;
+  background: #176f65;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 32%);
+}
+
+.card-size-slider-control::-moz-range-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(31 196 159 / 75%), rgb(240 191 56 / 64%));
+}
+
+.card-size-slider-control::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff3c7;
+  border-radius: 999px;
+  background: #176f65;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 32%);
 }
 
 .deckbuilder-sort-chip {
-  min-height: 44px;
+  min-height: 38px;
   border: 1px solid rgb(31 196 159 / 44%);
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 7px 11px;
   color: #b9f3df;
   background: rgb(31 196 159 / 12%);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 900;
+  white-space: nowrap;
+}
+
+.deckbuilder-filter-open-button {
+  min-height: 38px;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.82rem;
   white-space: nowrap;
 }
 
@@ -278,6 +331,7 @@
 .card-grid-count {
   color: #9db5bd;
   font-weight: 700;
+  line-height: 1.15;
 }
 
 .card-tile {

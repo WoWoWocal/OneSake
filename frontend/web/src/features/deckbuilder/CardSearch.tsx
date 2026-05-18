@@ -13,12 +13,10 @@ export function CardSearch({
   onOpenFilters,
   searchText,
 }: CardSearchProps) {
+  const filterButtonLabel = activeFilterCount > 0 ? `Open filters (${activeFilterCount})` : 'Open filters';
+
   return (
     <section className="card-search">
-      <div>
-        <h2>Filters</h2>
-        {activeFilterCount > 0 && <p>{activeFilterCount} active</p>}
-      </div>
       <div className="card-search__controls">
         <label className="field" htmlFor="deckbuilderSearch">
           Search
@@ -29,8 +27,8 @@ export function CardSearch({
             value={searchText}
           />
         </label>
-        <Button onClick={onOpenFilters} variant="ghost">
-          Open filters
+        <Button className="deckbuilder-filter-open-button" onClick={onOpenFilters} variant="ghost">
+          {filterButtonLabel}
         </Button>
         <button className="deckbuilder-sort-chip" type="button" aria-pressed="true">
           Sort by color & cost
