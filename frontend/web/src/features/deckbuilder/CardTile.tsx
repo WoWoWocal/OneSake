@@ -26,7 +26,7 @@ export function CardTile({
   const disabledLabel = isLeader
     ? `${card.card_name} is already selected as leader`
     : `Maximum copies reached for ${card.card_name}`;
-  const counterLabel = isLeader ? 'Leader' : `${currentQuantity}/${maxQuantity}`;
+  const counterLabel = `${currentQuantity}/${maxQuantity}`;
   const tileTitle = canAdd ? actionLabel : disabledLabel;
 
   const addCard = (): void => {
@@ -59,7 +59,7 @@ export function CardTile({
       title={tileTitle}
     >
       {isLeader && <span className="card-tile__leader-badge">Leader</span>}
-      <span className="card-tile__count-badge">{counterLabel}</span>
+      {!isLeader && <span className="card-tile__count-badge">{counterLabel}</span>}
       <button
         aria-label={canAdd ? actionLabel : `Cannot add ${card.card_name}`}
         className="card-tile__add"

@@ -14,7 +14,7 @@ export function CardSearch({
   searchText,
 }: CardSearchProps) {
   return (
-    <section className="panel card-search">
+    <section className="card-search">
       <div>
         <h2>Filters</h2>
         {activeFilterCount > 0 && <p>{activeFilterCount} active</p>}

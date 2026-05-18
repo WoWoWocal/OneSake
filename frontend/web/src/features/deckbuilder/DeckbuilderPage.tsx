@@ -244,6 +244,10 @@ export function DeckbuilderPage() {
   const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
 
   const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
+  const loadedCardsById = useMemo(
+    () => new Map(cards.map((card) => [card.card_set_id, card])),
+    [cards],
+  );
   const activeLeaderColors = useMemo(() => deck.leaderColors ?? [], [deck.leaderColors]);
   const leaderPreviewCard = useMemo(
     () => sortedCards.find((card) => card.card_set_id === deck.leaderCardId) ?? null,
@@ -521,60 +525,8 @@ export function DeckbuilderPage() {
 
   return (
     <section className="deckbuilder-page">
-      <header className="panel deckbuilder-header">
-        <div>
-          <h1>Deckbuilder</h1>
-        </div>
-        <div className="deckbuilder-header__actions">
-          <button className="deck-toggle" onClick={() => setDeckOpen(true)} type="button">
-            Deck List
-          </button>
-        </div>
-      </header>
-
       <div className="deckbuilder-layout">
         <main className="deckbuilder-main">
-          <div className="deckbuilder-toolbar">
-            <section className="panel set-picker">
-              <label htmlFor="setPicker">Set</label>
-              <select
-                id="setPicker"
-                onChange={(event) => {
-                  setSelectedSetId(event.target.value);
-                  resetFilters();
-                }}
-                value={selectedSetId}
-              >
-                {availableSets.map((setId) => (
-                  <option key={setId} value={setId}>
-                    {setId}
-                  </option>
-                ))}
-              </select>
-            </section>
-
-            <CardSearch
-              activeFilterCount={activeFilterCount}
-              onOpenFilters={() => setFiltersOpen(true)}
-              onSearchChange={(searchText) => setFilters((currentFilters) => ({
-                ...currentFilters,
-                searchText,
-              }))}
-              searchText={filters.searchText}
-            />
-
-            <div className="panel deckbuilder-filter-panel">
-              <ColorPaletteFilter
-                onChange={(selectedColors) => setFilters((currentFilters) => ({
-                  ...currentFilters,
-                  selectedColors,
-                }))}
-                selectedColors={filters.selectedColors}
-              />
-              <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
-            </div>
-          </div>
-
           <section className="deckbuilder-topline" aria-label="Deck overview">
             <section className="panel deckbuilder-compact-card deckbuilder-compact-card--deck">
               <div className="deckbuilder-compact-card__header">
@@ -657,9 +609,93 @@ export function DeckbuilderPage() {
                   Clear deck
                 </Button>
                 <Button onClick={saveDeck}>Save Deck</Button>
+                <Button onClick={() => setDeckOpen(true)} variant="ghost">
+                  Deck Library
+                </Button>
+              </div>
+
+              <div className="deckbuilder-deck-stacks" aria-label="Cards in current deck">
+                {deck.cards.length === 0 ? (
+                  <div className="deckbuilder-deck-stacks__empty">No cards added yet.</div>
+                ) : (
+                  deck.cards.map((deckCard) => {
+                    const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
+
+                    return (
+                      <button
+                        aria-label={`Remove one ${deckCard.name} from deck`}
+                        className={`deckbuilder-deck-stack deckbuilder-deck-stack--${Math.min(
+                          deckCard.quantity,
+                          4,
+                        )}`}
+                        key={deckCard.cardId}
+                        onClick={() => decreaseDeckCard(deckCard.cardId)}
+                        title={`Remove one ${deckCard.name}`}
+                        type="button"
+                      >
+                        <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
+                        <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
+                        <span className="deckbuilder-deck-stack__card">
+                          {cardImage ? (
+                            <img alt={`${deckCard.name} card`} loading="lazy" src={cardImage} />
+                          ) : (
+                            <span className="deckbuilder-deck-stack__placeholder">
+                              <strong>{deckCard.name}</strong>
+                              <small>{deckCard.cardId}</small>
+                            </span>
+                          )}
+                        </span>
+                        <strong className="deckbuilder-deck-stack__quantity">
+                          {deckCard.quantity}
+                        </strong>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </section>
           </section>
+
+          <div className="deckbuilder-toolbar" aria-label="Deckbuilder filters">
+            <section className="set-picker">
+              <label htmlFor="setPicker">Set</label>
+              <select
+                id="setPicker"
+                onChange={(event) => {
+                  setSelectedSetId(event.target.value);
+                  resetFilters();
+                }}
+                value={selectedSetId}
+              >
+                {availableSets.map((setId) => (
+                  <option key={setId} value={setId}>
+                    {setId}
+                  </option>
+                ))}
+              </select>
+            </section>
+
+            <CardSearch
+              activeFilterCount={activeFilterCount}
+              onOpenFilters={() => setFiltersOpen(true)}
+              onSearchChange={(searchText) => setFilters((currentFilters) => ({
+                ...currentFilters,
+                searchText,
+              }))}
+              searchText={filters.searchText}
+            />
+
+            <div className="deckbuilder-filter-panel">
+              <ColorPaletteFilter
+                onChange={(selectedColors) => setFilters((currentFilters) => ({
+                  ...currentFilters,
+                  selectedColors,
+                }))}
+                selectedColors={filters.selectedColors}
+              />
+              <CardSizeSlider cardsPerRow={cardsPerRow} onChange={setCardsPerRow} />
+            </div>
+          </div>
 
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
           {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}

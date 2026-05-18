@@ -210,12 +210,10 @@
 }
 
 @media (max-width: 1180px) {
-  .deckbuilder-toolbar,
   .deckbuilder-topline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .deckbuilder-filter-panel,
   .deckbuilder-compact-card--deck {
     grid-column: 1 / -1;
   }
@@ -341,22 +339,6 @@
     min-height: 46px;
     padding: 7px 4px;
     font-size: 0.82rem;
-  }
-
-  .deckbuilder-header {
-    grid-template-columns: 1fr;
-  }
-
-  .deckbuilder-header__actions {
-    justify-content: stretch;
-  }
-
-  .deckbuilder-header__actions > * {
-    flex: 1 1 150px;
-  }
-
-  .deck-toggle {
-    width: 100%;
   }
 
   .tools-deck-context__stats,
