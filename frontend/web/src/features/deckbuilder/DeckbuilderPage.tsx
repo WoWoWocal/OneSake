@@ -79,6 +79,7 @@ const availableSets = [
 ];
 const cardsPerRowStorageKey = 'onesake.deckbuilder.cardsPerRow';
 const defaultCardsPerRow = 7;
+const allSetsOption = 'ALL_SETS';
 
 function clampCardsPerRow(value: number): number {
   if (!Number.isFinite(value)) {
@@ -104,17 +105,6 @@ function uniqueValues(cards: CardDto[], readValue: (card: CardDto) => string): s
 
 function optionalCardText(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
-}
-
-function getColorClassName(color: string): string {
-  return color.trim().toLowerCase();
-}
-
-function normalizeLeaderColors(colors: string[]): string[] {
-  return colors
-    .flatMap((color) => color.split(/[/,]/))
-    .map((color) => color.trim())
-    .filter(Boolean);
 }
 
 function loadCardsPerRow(): number {
@@ -229,10 +219,23 @@ function hydrateDeckWithCards(deckToHydrate: Deck, loadedCards: CardDto[]): Deck
   return changed ? { ...deckToHydrate, leaderName, leaderColors, cards: hydratedCards } : deckToHydrate;
 }
 
+function dedupeCards(cardsToDedupe: CardDto[]): CardDto[] {
+  const cardsById = new Map<string, CardDto>();
+
+  cardsToDedupe.forEach((card) => {
+    if (!cardsById.has(card.card_set_id)) {
+      cardsById.set(card.card_set_id, card);
+    }
+  });
+
+  return [...cardsById.values()];
+}
+
 export function DeckbuilderPage() {
   const [selectedSetId, setSelectedSetId] = useState(availableSets[0]);
   const [filters, setFilters] = useState<CardFilters>(emptyFilters);
-  const [cards, setCards] = useState<CardDto[]>([]);
+  const [setCards, setSetCards] = useState<CardDto[]>([]);
+  const [allSetCards, setAllSetCards] = useState<CardDto[]>([]);
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
   const [previewCard, setPreviewCard] = useState<CardDto | null>(null);
@@ -243,19 +246,17 @@ export function DeckbuilderPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
 
-  const sortedCards = useMemo(() => [...cards].sort(compareCardsForDeckbuilder), [cards]);
+  const hasActiveLeader = Boolean(deck.leaderCardId);
+  const cardPool = hasActiveLeader && allSetCards.length > 0 ? allSetCards : setCards;
+  const sortedCards = useMemo(() => [...cardPool].sort(compareCardsForDeckbuilder), [cardPool]);
   const loadedCardsById = useMemo(
-    () => new Map(cards.map((card) => [card.card_set_id, card])),
-    [cards],
+    () => new Map([...setCards, ...allSetCards].map((card) => [card.card_set_id, card])),
+    [allSetCards, setCards],
   );
   const activeLeaderColors = useMemo(() => deck.leaderColors ?? [], [deck.leaderColors]);
   const leaderPreviewCard = useMemo(
-    () => sortedCards.find((card) => card.card_set_id === deck.leaderCardId) ?? null,
-    [deck.leaderCardId, sortedCards],
-  );
-  const leaderColorDots = useMemo(
-    () => normalizeLeaderColors(activeLeaderColors),
-    [activeLeaderColors],
+    () => loadedCardsById.get(deck.leaderCardId) ?? null,
+    [deck.leaderCardId, loadedCardsById],
   );
   const totalDeckCards = getTotalCards(deck.cards);
   const isDeckSaved = savedDecks.some(
@@ -285,16 +286,17 @@ export function DeckbuilderPage() {
   }, [cardsPerRow]);
 
   useEffect(() => {
-    if (cards.length === 0) {
+    const cardsForHydration = dedupeCards([...setCards, ...allSetCards]);
+    if (cardsForHydration.length === 0) {
       return;
     }
 
-    setDeck((currentDeck) => hydrateDeckWithCards(currentDeck, cards));
+    setDeck((currentDeck) => hydrateDeckWithCards(currentDeck, cardsForHydration));
 
     const storedDecks = loadStoredDecks();
     let changed = false;
     const hydratedDecks = storedDecks.map((storedDeck) => {
-      const hydratedDeck = hydrateDeckWithCards(storedDeck, cards);
+      const hydratedDeck = hydrateDeckWithCards(storedDeck, cardsForHydration);
       if (hydratedDeck !== storedDeck) {
         changed = true;
       }
@@ -306,7 +308,7 @@ export function DeckbuilderPage() {
       saveStoredDecks(hydratedDecks);
       setSavedDecks(hydratedDecks);
     }
-  }, [cards]);
+  }, [allSetCards, setCards]);
 
   useEffect(() => {
     if (!deckNotice) {
@@ -327,13 +329,13 @@ export function DeckbuilderPage() {
       try {
         const loadedCards = await getCardsBySetId(selectedSetId);
         if (!ignoreResult) {
-          setCards(loadedCards);
+          setSetCards(loadedCards);
         }
       } catch (loadError) {
         if (!ignoreResult) {
           const message =
             loadError instanceof Error ? loadError.message : 'Cards could not be loaded.';
-          setCards([]);
+          setSetCards([]);
           setError(message);
         }
       } finally {
@@ -349,6 +351,44 @@ export function DeckbuilderPage() {
       ignoreResult = true;
     };
   }, [selectedSetId]);
+
+  useEffect(() => {
+    if (!hasActiveLeader || allSetCards.length > 0) {
+      return undefined;
+    }
+
+    let ignoreResult = false;
+
+    const loadAllSetCards = async (): Promise<void> => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const loadedSetCards = await Promise.all(
+          availableSets.map((setId) => getCardsBySetId(setId)),
+        );
+        if (!ignoreResult) {
+          setAllSetCards(dedupeCards(loadedSetCards.flat()));
+        }
+      } catch (loadError) {
+        if (!ignoreResult) {
+          const message =
+            loadError instanceof Error ? loadError.message : 'Playable cards could not be loaded.';
+          setError(message);
+        }
+      } finally {
+        if (!ignoreResult) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadAllSetCards();
+
+    return () => {
+      ignoreResult = true;
+    };
+  }, [allSetCards.length, hasActiveLeader]);
 
   const showDeckNotice = (message: string): void => {
     setDeckNotice(message);
@@ -542,61 +582,6 @@ export function DeckbuilderPage() {
                   value={deck.name}
                 />
               </label>
-              <dl className="deckbuilder-compact-stats">
-                <div className="deckbuilder-compact-stat deckbuilder-compact-stat--leader">
-                  <dt>Leader</dt>
-                  <dd>
-                    {deck.leaderCardId ? (
-                      <div className="deckbuilder-leader-preview">
-                        {leaderPreviewCard?.card_image ? (
-                          <img
-                            alt={`${leaderPreviewCard.card_name} leader card`}
-                            src={leaderPreviewCard.card_image}
-                          />
-                        ) : (
-                          <div className="deckbuilder-leader-preview__placeholder">
-                            <span>Leader</span>
-                            <strong>{deck.leaderName || deck.leaderCardId}</strong>
-                            <small>{deck.leaderCardId}</small>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="deckbuilder-leader-preview deckbuilder-leader-preview--empty" />
-                    )}
-                  </dd>
-                </div>
-                <div className="deckbuilder-compact-stat deckbuilder-compact-stat--colors">
-                  <dt>Colors</dt>
-                  <dd>
-                    {leaderColorDots.length > 0 ? (
-                      <span className="deckbuilder-color-dots" aria-label="Leader colors">
-                        {leaderColorDots.map((color, index) => (
-                          <span
-                            aria-label={`${color} leader color`}
-                            className={`deckbuilder-color-dot deckbuilder-color-dot--${getColorClassName(color)}`}
-                            key={`${color}-${index}`}
-                            role="img"
-                            title={color}
-                          />
-                        ))}
-                      </span>
-                    ) : (
-                      <span className="deckbuilder-color-dots__empty" aria-label="No leader colors">
-                        -
-                      </span>
-                    )}
-                  </dd>
-                </div>
-                <div className="deckbuilder-compact-stat">
-                  <dt>Unique</dt>
-                  <dd>{deck.cards.length}</dd>
-                </div>
-                <div className="deckbuilder-compact-stat">
-                  <dt>Status</dt>
-                  <dd>{isDeckSaved ? 'Saved' : 'Unsaved'}</dd>
-                </div>
-              </dl>
               <div className="deckbuilder-compact-actions">
                 <Button disabled={!deck.leaderCardId} onClick={removeLeader} variant="ghost">
                   Change leader
@@ -615,58 +600,82 @@ export function DeckbuilderPage() {
               </div>
 
               <div className="deckbuilder-deck-stacks" aria-label="Cards in current deck">
-                {deck.cards.length === 0 ? (
-                  <div className="deckbuilder-deck-stacks__empty">No cards added yet.</div>
-                ) : (
-                  deck.cards.map((deckCard) => {
-                    const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
-
-                    return (
-                      <button
-                        aria-label={`Remove one ${deckCard.name} from deck`}
-                        className={`deckbuilder-deck-stack deckbuilder-deck-stack--${Math.min(
-                          deckCard.quantity,
-                          4,
-                        )}`}
-                        key={deckCard.cardId}
-                        onClick={() => decreaseDeckCard(deckCard.cardId)}
-                        title={`Remove one ${deckCard.name}`}
-                        type="button"
-                      >
-                        <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
-                        <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
-                        <span className="deckbuilder-deck-stack__card">
-                          {cardImage ? (
-                            <img alt={`${deckCard.name} card`} loading="lazy" src={cardImage} />
-                          ) : (
-                            <span className="deckbuilder-deck-stack__placeholder">
-                              <strong>{deckCard.name}</strong>
-                              <small>{deckCard.cardId}</small>
-                            </span>
-                          )}
+                {deck.leaderCardId ? (
+                  <div className="deckbuilder-deck-stack deckbuilder-deck-stack--leader">
+                    <span className="deckbuilder-deck-stack__label">Leader</span>
+                    <span className="deckbuilder-deck-stack__card">
+                      {leaderPreviewCard?.card_image ? (
+                        <img
+                          alt={`${leaderPreviewCard.card_name} leader card`}
+                          loading="lazy"
+                          src={leaderPreviewCard.card_image}
+                        />
+                      ) : (
+                        <span className="deckbuilder-deck-stack__placeholder">
+                          <strong>{deck.leaderName || deck.leaderCardId}</strong>
+                          <small>{deck.leaderCardId}</small>
                         </span>
-                        <strong className="deckbuilder-deck-stack__quantity">
-                          {deckCard.quantity}
-                        </strong>
-                      </button>
-                    );
-                  })
+                      )}
+                    </span>
+                    <strong className="deckbuilder-deck-stack__quantity">1</strong>
+                  </div>
+                ) : (
+                  <div className="deckbuilder-deck-stack deckbuilder-deck-stack--empty-leader">
+                    <span className="deckbuilder-deck-stack__placeholder">
+                      <strong>Leader</strong>
+                    </span>
+                  </div>
                 )}
+                {deck.cards.map((deckCard) => {
+                  const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
+
+                  return (
+                    <button
+                      aria-label={`Remove one copy of ${deckCard.name}`}
+                      className={`deckbuilder-deck-stack deckbuilder-deck-stack--${Math.min(
+                        deckCard.quantity,
+                        4,
+                      )}`}
+                      key={deckCard.cardId}
+                      onClick={() => decreaseDeckCard(deckCard.cardId)}
+                      title={`Remove one ${deckCard.name}`}
+                      type="button"
+                    >
+                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
+                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true" />
+                      <span className="deckbuilder-deck-stack__card">
+                        {cardImage ? (
+                          <img alt={`${deckCard.name} card`} loading="lazy" src={cardImage} />
+                        ) : (
+                          <span className="deckbuilder-deck-stack__placeholder">
+                            <strong>{deckCard.name}</strong>
+                            <small>{deckCard.cardId}</small>
+                          </span>
+                        )}
+                      </span>
+                      <strong className="deckbuilder-deck-stack__quantity">
+                        {deckCard.quantity}
+                      </strong>
+                    </button>
+                  );
+                })}
               </div>
             </section>
           </section>
 
           <div className="deckbuilder-toolbar" aria-label="Deckbuilder filters">
             <section className="set-picker">
-              <label htmlFor="setPicker">Set</label>
+              <label htmlFor="setPicker">{hasActiveLeader ? 'Card pool' : 'Leader set'}</label>
               <select
+                disabled={hasActiveLeader}
                 id="setPicker"
                 onChange={(event) => {
                   setSelectedSetId(event.target.value);
                   resetFilters();
                 }}
-                value={selectedSetId}
+                value={hasActiveLeader ? allSetsOption : selectedSetId}
               >
+                {hasActiveLeader && <option value={allSetsOption}>All sets</option>}
                 {availableSets.map((setId) => (
                   <option key={setId} value={setId}>
                     {setId}
@@ -698,7 +707,7 @@ export function DeckbuilderPage() {
           </div>
 
           {deckNotice && <div className="panel status-panel">{deckNotice}</div>}
-          {loading && <div className="panel status-panel">Loading cards from {selectedSetId}...</div>}
+          {loading && <div className="panel status-panel">Loading cards...</div>}
           {error && <div className="panel status-panel status-panel--error">{error}</div>}
           {!loading && !error && (
             <section className="deckbuilder-card-browser">

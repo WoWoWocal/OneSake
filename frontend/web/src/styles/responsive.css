@@ -359,7 +359,6 @@
 
   .saved-deck-select__toolbar,
   .saved-deck-select__stats,
-  .deckbuilder-compact-stats,
   .card-search__controls {
     grid-template-columns: 1fr;
   }
