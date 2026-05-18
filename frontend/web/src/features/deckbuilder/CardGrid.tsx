@@ -74,7 +74,8 @@ function buildCardSearchText(card: CardDto): string {
 }
 
 function getCardCost(card: CardDto): number {
-  return typeof card.card_cost === 'number' ? card.card_cost : Number.POSITIVE_INFINITY;
+  const numericCost = Number(card.card_cost);
+  return Number.isFinite(numericCost) ? numericCost : Number.POSITIVE_INFINITY;
 }
 
 function getColorSortIndex(card: CardDto, leaderColors: string[]): number {
@@ -87,19 +88,47 @@ function getColorSortIndex(card: CardDto, leaderColors: string[]): number {
   return matchingIndex === -1 ? Number.POSITIVE_INFINITY : matchingIndex;
 }
 
-function compareCards(left: CardDto, right: CardDto, leaderColors: string[], hasActiveLeader: boolean): number {
+function getCardTypeSortIndex(card: CardDto): number {
+  const normalizedType = normalize(card.card_type);
+
+  if (normalizedType.includes('leader')) {
+    return 0;
+  }
+
+  if (normalizedType.includes('character')) {
+    return 1;
+  }
+
+  if (normalizedType.includes('event')) {
+    return 2;
+  }
+
+  if (normalizedType.includes('stage')) {
+    return 3;
+  }
+
+  return 4;
+}
+
+function compareCards(
+  left: CardDto,
+  right: CardDto,
+  leaderColors: string[],
+  hasActiveLeader: boolean,
+): number {
   if (!hasActiveLeader) {
     return (
-      left.card_set_id.localeCompare(right.card_set_id, undefined, { numeric: true }) ||
-      left.card_name.localeCompare(right.card_name, undefined, { numeric: true })
+      left.card_name.localeCompare(right.card_name, undefined, { numeric: true }) ||
+      left.card_set_id.localeCompare(right.card_set_id, undefined, { numeric: true })
     );
   }
 
   return (
     getColorSortIndex(left, leaderColors) - getColorSortIndex(right, leaderColors) ||
     getCardCost(left) - getCardCost(right) ||
-    left.card_set_id.localeCompare(right.card_set_id, undefined, { numeric: true }) ||
-    left.card_name.localeCompare(right.card_name, undefined, { numeric: true })
+    getCardTypeSortIndex(left) - getCardTypeSortIndex(right) ||
+    left.card_name.localeCompare(right.card_name, undefined, { numeric: true }) ||
+    left.card_set_id.localeCompare(right.card_set_id, undefined, { numeric: true })
   );
 }
 

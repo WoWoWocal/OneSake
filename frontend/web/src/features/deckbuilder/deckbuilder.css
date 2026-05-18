@@ -344,14 +344,14 @@
 .deckbuilder-deck-stacks {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px 30px;
+  gap: 26px 32px;
   align-items: start;
   max-height: min(30dvh, 330px);
-  min-height: 190px;
+  min-height: 210px;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-top: 1px solid rgb(148 187 194 / 16%);
-  padding: 22px 24px 12px 0;
+  padding: 18px 12px 12px 0;
 }
 
 .deckbuilder-deck-stacks__empty {
@@ -367,9 +367,12 @@
 }
 
 .deckbuilder-deck-stack {
+  --deck-stack-card-width: clamp(136px, 9.8vw, 188px);
+  --deck-stack-offset: 18px;
+
   position: relative;
-  width: clamp(136px, 9.8vw, 188px);
-  aspect-ratio: 5 / 7;
+  width: calc(var(--deck-stack-card-width) + var(--deck-stack-offset) + 8px);
+  aspect-ratio: 214 / 289;
   border: 0;
   padding: 0;
   color: #ffffff;
@@ -382,7 +385,8 @@
 .deckbuilder-deck-stack__ghost,
 .deckbuilder-deck-stack__card {
   position: absolute;
-  inset: 0;
+  width: var(--deck-stack-card-width);
+  aspect-ratio: 5 / 7;
   border: 1px solid rgb(240 191 56 / 28%);
   border-radius: 8px;
   background: #071522;
@@ -390,34 +394,34 @@
 }
 
 .deckbuilder-deck-stack__ghost {
-  z-index: 0;
-  opacity: 0;
+  opacity: 0.9;
   overflow: hidden;
 }
 
-.deckbuilder-deck-stack--2 .deckbuilder-deck-stack__ghost:first-child,
-.deckbuilder-deck-stack--3 .deckbuilder-deck-stack__ghost:first-child,
-.deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:first-child {
-  z-index: 0;
-  opacity: 0.98;
-  transform: translate(5px, -4px);
+.deckbuilder-deck-stack__ghost--1 {
+  top: 12px;
+  left: 12px;
+  z-index: 3;
 }
 
-.deckbuilder-deck-stack--3 .deckbuilder-deck-stack__ghost:nth-child(2),
-.deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:nth-child(2) {
-  z-index: 1;
-  opacity: 0.92;
-  transform: translate(10px, -8px);
-}
-
-.deckbuilder-deck-stack--4 .deckbuilder-deck-stack__ghost:nth-child(3) {
+.deckbuilder-deck-stack__ghost--2 {
+  top: 6px;
+  left: 6px;
   z-index: 2;
   opacity: 0.86;
-  transform: translate(15px, -12px);
+}
+
+.deckbuilder-deck-stack__ghost--3 {
+  top: 0;
+  left: 0;
+  z-index: 1;
+  opacity: 0.82;
 }
 
 .deckbuilder-deck-stack__card {
-  z-index: 3;
+  top: var(--deck-stack-offset);
+  left: var(--deck-stack-offset);
+  z-index: 4;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -431,7 +435,7 @@
 .deckbuilder-deck-stack:hover .deckbuilder-deck-stack__card,
 .deckbuilder-deck-stack:focus-visible .deckbuilder-deck-stack__card {
   border-color: rgb(240 191 56 / 70%);
-  transform: translateY(-2px);
+  transform: translate(0, -2px);
   box-shadow: 0 14px 24px rgb(0 0 0 / 32%);
 }
 
@@ -480,20 +484,21 @@
 
 .deckbuilder-deck-stack__quantity {
   position: absolute;
-  right: -16px;
-  bottom: -4px;
-  z-index: 4;
-  color: #ff19b9;
-  font-size: clamp(2.15rem, 3vw, 3.45rem);
-  font-weight: 950;
+  right: 0;
+  bottom: 0;
+  z-index: 8;
+  color: #ff3fd4;
+  font-size: clamp(1.8rem, 2.4vw, 2.8rem);
+  font-weight: 900;
   line-height: 1;
-  -webkit-text-stroke: 2px #fff7ff;
+  pointer-events: none;
+  -webkit-text-stroke: 2px #ffffff;
   text-shadow:
-    2px 0 0 #fff7ff,
-    -2px 0 0 #fff7ff,
-    0 2px 0 #fff7ff,
-    0 -2px 0 #fff7ff,
-    0 6px 10px rgb(0 0 0 / 48%);
+    2px 0 0 #ffffff,
+    -2px 0 0 #ffffff,
+    0 2px 0 #ffffff,
+    0 -2px 0 #ffffff,
+    0 2px 6px rgb(0 0 0 / 65%);
 }
 
 .deckbuilder-deck-stack__label {

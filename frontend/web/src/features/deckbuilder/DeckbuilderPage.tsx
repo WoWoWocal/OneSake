@@ -13,6 +13,7 @@ import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
 import { DeckDrawer } from './DeckDrawer';
 import { DeckLibrary } from './DeckLibrary';
+import { DeckStackCard } from './DeckStackCard';
 import { DeckSummary } from './DeckSummary';
 import {
   createNewDeck,
@@ -608,69 +609,28 @@ export function DeckbuilderPage() {
 
               <div className="deckbuilder-deck-stacks" aria-label="Cards in current deck">
                 {deck.leaderCardId ? (
-                  <div className="deckbuilder-deck-stack deckbuilder-deck-stack--leader">
-                    <span className="deckbuilder-deck-stack__label">Leader</span>
-                    <span className="deckbuilder-deck-stack__card">
-                      {leaderPreviewCard?.card_image ? (
-                        <img
-                          alt={`${leaderPreviewCard.card_name} leader card`}
-                          loading="lazy"
-                          src={leaderPreviewCard.card_image}
-                        />
-                      ) : (
-                        <span className="deckbuilder-deck-stack__placeholder">
-                          <strong>{deck.leaderName || deck.leaderCardId}</strong>
-                          <small>{deck.leaderCardId}</small>
-                        </span>
-                      )}
-                    </span>
-                    <strong className="deckbuilder-deck-stack__quantity">1</strong>
-                  </div>
+                  <DeckStackCard
+                    cardId={deck.leaderCardId}
+                    image={leaderPreviewCard?.card_image}
+                    isLeader
+                    name={deck.leaderName || deck.leaderCardId}
+                    quantity={1}
+                  />
                 ) : (
-                  <div className="deckbuilder-deck-stack deckbuilder-deck-stack--empty-leader">
-                    <span className="deckbuilder-deck-stack__placeholder">
-                      <strong>Leader</strong>
-                    </span>
-                  </div>
+                  <DeckStackCard cardId="" isEmpty name="Leader" />
                 )}
                 {deck.cards.map((deckCard) => {
                   const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
 
                   return (
-                    <button
-                      aria-label={`Remove one copy of ${deckCard.name}`}
-                      className={`deckbuilder-deck-stack deckbuilder-deck-stack--${Math.min(
-                        deckCard.quantity,
-                        4,
-                      )}`}
+                    <DeckStackCard
+                      cardId={deckCard.cardId}
+                      image={cardImage}
                       key={deckCard.cardId}
-                      onClick={() => decreaseDeckCard(deckCard.cardId)}
-                      title={`Remove one ${deckCard.name}`}
-                      type="button"
-                    >
-                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true">
-                        {cardImage && <img alt="" loading="lazy" src={cardImage} />}
-                      </span>
-                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true">
-                        {cardImage && <img alt="" loading="lazy" src={cardImage} />}
-                      </span>
-                      <span className="deckbuilder-deck-stack__ghost" aria-hidden="true">
-                        {cardImage && <img alt="" loading="lazy" src={cardImage} />}
-                      </span>
-                      <span className="deckbuilder-deck-stack__card">
-                        {cardImage ? (
-                          <img alt={`${deckCard.name} card`} loading="lazy" src={cardImage} />
-                        ) : (
-                          <span className="deckbuilder-deck-stack__placeholder">
-                            <strong>{deckCard.name}</strong>
-                            <small>{deckCard.cardId}</small>
-                          </span>
-                        )}
-                      </span>
-                      <strong className="deckbuilder-deck-stack__quantity">
-                        {deckCard.quantity}
-                      </strong>
-                    </button>
+                      name={deckCard.name}
+                      onRemove={() => decreaseDeckCard(deckCard.cardId)}
+                      quantity={deckCard.quantity}
+                    />
                   );
                 })}
               </div>

@@ -346,7 +346,7 @@
   }
 
   .deckbuilder-deck-stack {
-    width: clamp(112px, 34vw, 142px);
+    --deck-stack-card-width: clamp(112px, 34vw, 142px);
   }
 
   .bottom-nav {

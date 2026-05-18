@@ -33,7 +33,7 @@ export function CardSearch({
           Open filters
         </Button>
         <button className="deckbuilder-sort-chip" type="button" aria-pressed="true">
-          On: Sort by cost
+          Sort by color & cost
         </button>
       </div>
     </section>
