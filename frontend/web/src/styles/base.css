@@ -11,6 +11,7 @@
   --color-text-muted: #9db5bd;
   --color-border-soft: rgb(229 176 73 / 24%);
   --radius-panel: 8px;
+  --card-corner-radius: 5px;
   --shadow-panel: 0 18px 42px rgb(3 11 20 / 16%);
 
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;

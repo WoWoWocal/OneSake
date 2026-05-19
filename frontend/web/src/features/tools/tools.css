@@ -327,7 +327,7 @@
   gap: 7px;
   min-height: 212px;
   border: 1px solid rgb(240 191 56 / 48%);
-  border-radius: 10px;
+  border-radius: var(--card-corner-radius);
   padding: 7px;
   color: #fff4cf;
   scroll-snap-align: start;
@@ -344,7 +344,7 @@
   place-items: center;
   min-height: 92px;
   border: 1px solid rgb(255 231 161 / 14%);
-  border-radius: 7px;
+  border-radius: var(--card-corner-radius);
   color: rgb(255 243 199 / 82%);
   background:
     linear-gradient(135deg, rgb(240 191 56 / 18%), transparent 42%),

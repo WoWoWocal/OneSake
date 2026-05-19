@@ -124,7 +124,7 @@
   aspect-ratio: 5 / 7;
   overflow: hidden;
   border: 1px solid rgb(240 191 56 / 56%);
-  border-radius: 8px;
+  border-radius: var(--card-corner-radius);
   padding: 5px;
   color: #fff4cf;
   text-align: left;
@@ -147,7 +147,7 @@ button.match-card-view {
   inset: 4px;
   pointer-events: none;
   border: 1px solid rgb(255 231 161 / 14%);
-  border-radius: 6px;
+  border-radius: var(--card-corner-radius);
 }
 
 .match-card-view__art {
@@ -155,7 +155,7 @@ button.match-card-view {
   min-height: 0;
   place-items: center;
   border: 1px solid rgb(255 231 161 / 14%);
-  border-radius: 5px;
+  border-radius: var(--card-corner-radius);
   color: rgb(255 243 199 / 82%);
   background:
     linear-gradient(135deg, rgb(240 191 56 / 18%), transparent 42%),
@@ -202,7 +202,7 @@ button.match-card-view {
 
 .match-card-view--slot {
   height: 100%;
-  border-radius: 6px;
+  border-radius: var(--card-corner-radius);
   padding: 3px;
 }
 
@@ -219,7 +219,7 @@ button.match-card-view {
   width: min(58vw, 300px);
   max-width: 100%;
   justify-self: center;
-  border-radius: 12px;
+  border-radius: var(--card-corner-radius);
   padding: 10px;
   box-shadow:
     inset 0 0 28px rgb(0 0 0 / 42%),
@@ -275,7 +275,7 @@ button.match-card-view {
   inset: 12% 20% 14% 18%;
   z-index: -1;
   border: 1px solid rgb(255 231 161 / 34%);
-  border-radius: 5px;
+  border-radius: var(--card-corner-radius);
   background:
     linear-gradient(160deg, rgb(30 57 72 / 90%), rgb(5 12 20 / 96%));
   box-shadow:
