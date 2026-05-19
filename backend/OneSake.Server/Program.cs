@@ -28,6 +28,7 @@ builder.Services.AddControllers(); // Support Adden fuer Controllers
 
 builder.Services.AddHttpClient<CardService>();
 builder.Services.AddScoped<CardImportService>();
+builder.Services.AddScoped<CardQueryService>();
 
 // Enables Swagger (API documentation UI)
 builder.Services.AddEndpointsApiExplorer();

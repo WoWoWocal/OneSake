@@ -12,41 +12,63 @@ public class CardsController : ControllerBase
 {
     private readonly CardService _cardService;
     private readonly CardImportService _cardImportService;
+    private readonly CardQueryService _cardQueryService;
 
     // inject services
-    public CardsController(CardService cardService, CardImportService cardImportService)
+    public CardsController(
+        CardService cardService,
+        CardImportService cardImportService,
+        CardQueryService cardQueryService)
     {
         _cardService = cardService;
         _cardImportService = cardImportService;
+        _cardQueryService = cardQueryService;
     }
 
     // GET /cards/OP01-001
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCardsById(string id)
     {
-        var cards = await _cardService.GetCardsByIdAsync(id);
+        var cardsFromDatabase = await _cardQueryService.GetCardsByIdAsync(id);
+
+        if (cardsFromDatabase.Count > 0)
+        {
+            return Ok(cardsFromDatabase);
+        }
+
+        var cardsFromApi = await _cardService.GetCardsByIdAsync(id);
 
         // Falls nichts gefunden wurde return 404
-        if (cards == null || cards.Count == 0) return NotFound();
+        if (cardsFromApi == null || cardsFromApi.Count == 0) return NotFound();
 
-        return Ok(cards);
+        return Ok(cardsFromApi);
     }
 
-    // GET /cards/set/OP01
+    // GET /cards/set/OP-01
     [HttpGet("set/{set_id}")]
     public async Task<IActionResult> GetSetById(string set_id)
     {
-        var set = await _cardService.GetSetByIdAsync(set_id);
+        var setFromDatabase = await _cardQueryService.GetSetByIdAsync(set_id);
 
-        Console.WriteLine($"Fetching Set {set_id}");
-        Console.WriteLine($"Count: {set.Count}");
+        if (setFromDatabase.Count > 0)
+        {
+            Console.WriteLine($"Fetching Set {set_id} from database");
+            Console.WriteLine($"Count: {setFromDatabase.Count}");
 
-        if (set == null || set.Count == 0) return NotFound();
+            return Ok(setFromDatabase);
+        }
 
-        return Ok(set);
+        var setFromApi = await _cardService.GetSetByIdAsync(set_id);
+
+        Console.WriteLine($"Fetching Set {set_id} from external API");
+        Console.WriteLine($"Count: {setFromApi.Count}");
+
+        if (setFromApi == null || setFromApi.Count == 0) return NotFound();
+
+        return Ok(setFromApi);
     }
 
-    // POST /cards/import/OP01
+    // POST /cards/import/OP-01
     [HttpPost("import/{setId}")]
     public async Task<IActionResult> ImportSet(string setId)
     {
