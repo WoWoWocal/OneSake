@@ -1,13 +1,11 @@
-import type { CSSProperties, MouseEvent } from 'react';
+import type { CSSProperties } from 'react';
 
 interface DeckStackCardProps {
-  canAdd?: boolean;
   cardId: string;
   image?: string;
   isEmpty?: boolean;
   isLeader?: boolean;
   name: string;
-  onAdd?: () => void;
   onRemove?: () => void;
   quantity?: number;
 }
@@ -40,13 +38,11 @@ function getLayerStyle(zIndex: number): CSSProperties {
 }
 
 export function DeckStackCard({
-  canAdd = false,
   cardId,
   image,
   isEmpty = false,
   isLeader = false,
   name,
-  onAdd,
   onRemove,
   quantity = 1,
 }: DeckStackCardProps) {
@@ -92,18 +88,6 @@ export function DeckStackCard({
     </span>
   );
 
-  const handleContextMenu = (event: MouseEvent<HTMLButtonElement>): void => {
-    if (!onAdd) {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (canAdd) {
-      onAdd();
-    }
-  };
-
   if (isLeader || isEmpty) {
     return (
       <div
@@ -117,11 +101,10 @@ export function DeckStackCard({
 
   return (
     <button
-      aria-label={`${name}: left click to remove, right click to add one copy`}
+      aria-label={`Remove one copy of ${name}`}
       className={className}
-      onContextMenu={handleContextMenu}
       onClick={onRemove}
-      title="Left click to remove, right click to add one copy"
+      title={`Remove one ${name}`}
       type="button"
     >
       {content}

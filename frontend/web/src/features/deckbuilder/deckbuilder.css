@@ -39,7 +39,7 @@
 
 .deckbuilder-main-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) clamp(360px, 27vw, 560px);
   align-items: stretch;
   flex: 1;
   gap: 12px;
@@ -315,13 +315,9 @@
 }
 
 .deckbuilder-card-browser {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(360px, 27vw, 560px);
-  align-items: stretch;
-  gap: 12px;
+  display: flex;
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
   overflow: hidden;
 }
 
@@ -764,13 +760,13 @@
 .deckbuilder-hover-preview {
   position: relative;
   align-self: stretch;
-  display: block;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
   height: 100%;
   min-height: 0;
-  max-height: none;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  max-height: 100%;
+  overflow: visible;
   border: 0 !important;
   padding: 0;
   background: transparent !important;
@@ -778,9 +774,8 @@
 }
 
 .deckbuilder-hover-preview--empty {
-  display: grid;
   min-height: 0;
-  place-items: center;
+  align-items: center;
 }
 
 .deckbuilder-hover-preview__placeholder {
@@ -798,10 +793,13 @@
 }
 
 .deckbuilder-hover-preview__image {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   width: 100%;
-  height: auto;
+  height: 100%;
   min-height: 0;
+  flex: 1 1 auto;
   border-radius: var(--card-corner-radius);
   color: #ffffff;
   background: transparent;
@@ -812,9 +810,9 @@
 .deckbuilder-hover-preview__image img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   max-width: 100%;
-  max-height: none;
+  max-height: 100%;
   object-fit: contain;
   object-position: top center;
   border-radius: var(--card-corner-radius);

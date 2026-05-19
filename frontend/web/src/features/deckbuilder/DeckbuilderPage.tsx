@@ -480,15 +480,6 @@ export function DeckbuilderPage() {
     });
   };
 
-  const addDeckStackCopy = (cardId: string): void => {
-    const card = loadedCardsById.get(cardId);
-    if (!card) {
-      return;
-    }
-
-    addCardToDeck(card);
-  };
-
   const decreaseDeckCard = (cardId: string): void => {
     updateDeck((currentDeck) => ({
       ...currentDeck,
@@ -619,16 +610,13 @@ export function DeckbuilderPage() {
                 )}
                 {deck.cards.map((deckCard) => {
                   const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
-                  const canAddCopy = deckCard.quantity < 4 && loadedCardsById.has(deckCard.cardId);
 
                   return (
                     <DeckStackCard
                       cardId={deckCard.cardId}
-                      canAdd={canAddCopy}
                       image={cardImage}
                       key={deckCard.cardId}
                       name={deckCard.name}
-                      onAdd={() => addDeckStackCopy(deckCard.cardId)}
                       onRemove={() => decreaseDeckCard(deckCard.cardId)}
                       quantity={deckCard.quantity}
                     />
@@ -729,10 +717,10 @@ export function DeckbuilderPage() {
                   onSetLeader={addCardToDeck}
                 />
               </div>
-              <CardHoverPreview card={previewCard} />
             </section>
           )}
             </div>
+            <CardHoverPreview card={previewCard} />
           </div>
         </main>
       </div>
