@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { getCardsById } from '../../api/cardsApi';
 import type { Deck } from '../../types/decks';
@@ -19,6 +20,8 @@ interface MatchDeckSelectProps {
   decks: Deck[];
   selectedDeckId: string;
   embedded?: boolean;
+  headerAction?: ReactNode;
+  title?: string;
   onSelectDeck: (deckId: string) => void;
   onOpenDeckbuilder?: () => void;
 }
@@ -39,9 +42,11 @@ function getLeaderImage(deck: Deck): string {
 export function MatchDeckSelect({
   decks,
   embedded = false,
+  headerAction,
   onOpenDeckbuilder,
   onSelectDeck,
   selectedDeckId,
+  title = 'Deck',
 }: MatchDeckSelectProps) {
   const [leaderImagesById, setLeaderImagesById] = useState<Record<string, string>>({});
   const leaderCardIds = useMemo(
@@ -85,8 +90,9 @@ export function MatchDeckSelect({
     <section className={embedded ? 'match-deck-select match-deck-select--embedded' : 'panel match-deck-select'}>
       <div className="panel-title-row">
         <div>
-          <h2>Deck</h2>
+          <h2>{title}</h2>
         </div>
+        {headerAction}
       </div>
 
       {decks.length === 0 ? (

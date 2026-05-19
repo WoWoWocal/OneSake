@@ -93,21 +93,23 @@ export function LobbyPanel({
             <span>Room</span>
             {joinedRoomCode ? <strong className="match-room-code-chip">{joinedRoomCode}</strong> : null}
           </div>
-          <div className="field">
-            <label htmlFor="roomCode">Room Code</label>
-            <input
-              className="match-room-code-input"
-              id="roomCode"
-              maxLength={12}
-              onChange={(event) => onRoomCodeChange(event.target.value)}
-              placeholder="SAKE42"
-              value={roomCodeInput}
-            />
-          </div>
-          <div className="match-room-actions">
+          <div className="match-room-code-row">
+            <div className="field">
+              <label htmlFor="roomCode">Room Code</label>
+              <input
+                className="match-room-code-input"
+                id="roomCode"
+                maxLength={12}
+                onChange={(event) => onRoomCodeChange(event.target.value)}
+                placeholder="SAKE42"
+                value={roomCodeInput}
+              />
+            </div>
             <Button onClick={onGenerateRoomCode} variant="secondary">
               Generate Room Code
             </Button>
+          </div>
+          <div className="match-room-actions">
             {joinedRoomCode && (
               <Button onClick={onCopyRoomCode} variant="ghost">
                 {copyStatus === 'copied'

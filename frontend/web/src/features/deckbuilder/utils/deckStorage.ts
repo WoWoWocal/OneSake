@@ -2,6 +2,8 @@ import type { Deck, DeckCard } from '../../../types/decks';
 
 const currentDeckStorageKey = 'onesake.deckbuilder.currentDeck';
 const deckLibraryStorageKey = 'onesake.deckbuilder.decks';
+const recentDeckIdsStorageKey = 'onesake.recentDeckIds';
+const maxRecentDeckIds = 5;
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -156,6 +158,44 @@ export function loadStoredDecks(): Deck[] {
   } catch {
     return [];
   }
+}
+
+export function loadRecentDeckIds(): string[] {
+  try {
+    const storedDeckIds = window.localStorage.getItem(recentDeckIdsStorageKey);
+    if (!storedDeckIds) {
+      return [];
+    }
+
+    const parsedDeckIds = JSON.parse(storedDeckIds);
+    if (!Array.isArray(parsedDeckIds)) {
+      return [];
+    }
+
+    return parsedDeckIds.filter((deckId): deckId is string => typeof deckId === 'string' && Boolean(deckId.trim()));
+  } catch {
+    return [];
+  }
+}
+
+export function saveRecentDeckId(deckId: string): string[] {
+  const safeDeckId = deckId.trim();
+  if (!safeDeckId) {
+    return loadRecentDeckIds();
+  }
+
+  const nextDeckIds = [
+    safeDeckId,
+    ...loadRecentDeckIds().filter((recentDeckId) => recentDeckId !== safeDeckId),
+  ].slice(0, maxRecentDeckIds);
+
+  try {
+    window.localStorage.setItem(recentDeckIdsStorageKey, JSON.stringify(nextDeckIds));
+  } catch {
+    // Recent deck tracking is optional and must not block match setup.
+  }
+
+  return nextDeckIds;
 }
 
 export function saveStoredDecks(decks: Deck[]): void {

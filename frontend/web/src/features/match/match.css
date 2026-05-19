@@ -246,6 +246,20 @@
   text-transform: uppercase;
 }
 
+.match-room-code-row {
+  display: grid;
+  gap: 8px;
+}
+
+.match-room-code-row .field {
+  margin-bottom: 0;
+}
+
+.match-room-code-row .ui-button {
+  width: 100%;
+  min-height: 54px;
+}
+
 .match-display-name-row {
   display: grid;
   gap: 8px;
@@ -397,11 +411,23 @@
 }
 
 .match-deck-select .panel-title-row {
-  align-items: start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
 }
 
 .match-deck-select .panel-title-row h2 {
   margin: 0;
+  color: #ffffff;
+  font-size: 0.96rem;
+  line-height: 1.12;
+}
+
+.match-deck-select .panel-title-row .ui-button {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 0.72rem;
 }
 
 .match-deck-select__empty {
@@ -443,23 +469,20 @@
   justify-items: center;
   gap: 7px;
   min-height: 0;
-  border: 1px solid rgba(148, 187, 194, 0.22);
-  border-radius: 12px;
+  border: 0;
+  border-radius: 8px;
   padding: 8px;
   text-align: center;
   color: #d9e9ee;
-  background: rgba(255, 255, 255, 0.055);
+  background: transparent;
   cursor: pointer;
 }
 
 .match-deck-option.is-selected {
-  border-color: rgba(240, 191, 56, 0.64);
   background:
-    linear-gradient(180deg, rgb(240 191 56 / 12%), transparent 48%),
-    rgb(255 255 255 / 6%);
-  box-shadow:
-    0 0 0 2px rgba(240, 191, 56, 0.14),
-    0 12px 24px rgb(0 0 0 / 22%);
+    linear-gradient(180deg, rgb(240 191 56 / 10%), transparent 52%),
+    rgb(255 255 255 / 5%);
+  box-shadow: 0 10px 22px rgb(0 0 0 / 20%);
 }
 
 .match-deck-option.is-invalid {
@@ -471,7 +494,7 @@
   width: min(100%, 86px);
   aspect-ratio: 5 / 7;
   place-items: center;
-  border: 1px solid rgb(240 191 56 / 30%);
+  border: 0;
   border-radius: var(--card-corner-radius);
   color: #fff3c7;
   background: #071522;
@@ -525,6 +548,10 @@
   color: #ffffff;
   font-size: 0.82rem;
   line-height: 1.15;
+}
+
+.match-deck-library-modal .match-deck-list {
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
 }
 
 .match-page .scroll-list {

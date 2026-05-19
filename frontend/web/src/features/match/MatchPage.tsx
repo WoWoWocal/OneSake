@@ -10,7 +10,8 @@ import {
   LogEventDto,
 } from '../../types/realtime';
 import { Button } from '../../components/ui/Button';
-import { loadStoredDecks } from '../deckbuilder/utils/deckStorage';
+import { Modal } from '../../components/ui/Modal';
+import { loadRecentDeckIds, loadStoredDecks, saveRecentDeckId } from '../deckbuilder/utils/deckStorage';
 import { validateDeck } from '../deckbuilder/utils/deckValidation';
 import { ChatPanel } from './ChatPanel';
 import { ChoiceSheet } from './ChoiceSheet';
@@ -118,8 +119,10 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   const [pending, setPending] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [savedDecks] = useState(() => loadStoredDecks());
+  const [recentDeckIds, setRecentDeckIds] = useState(() => loadRecentDeckIds());
   const [selectedDeckId, setSelectedDeckId] = useState('');
   const [isBoardMode, setIsBoardMode] = useState(false);
+  const [isDeckLibraryOpen, setIsDeckLibraryOpen] = useState(false);
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('');
   const [displayNamePlaceholder] = useState(() => generatePirateName());
 
@@ -151,10 +154,17 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
   }, [signalRClient]);
 
   useEffect(() => {
-    if (!selectedDeckId && savedDecks[0]) {
-      setSelectedDeckId(savedDecks[0].id);
+    if (!selectedDeckId) {
+      const recentDeckId = recentDeckIds.find((deckId) =>
+        savedDecks.some((deck) => deck.id === deckId),
+      );
+      const initialDeckId = recentDeckId ?? savedDecks[0]?.id;
+
+      if (initialDeckId) {
+        setSelectedDeckId(initialDeckId);
+      }
     }
-  }, [savedDecks, selectedDeckId]);
+  }, [recentDeckIds, savedDecks, selectedDeckId]);
 
   useEffect(() => {
     onImmersiveModeChange?.(isBoardMode);
@@ -178,6 +188,14 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     () => savedDecks.find((deck) => deck.id === selectedDeckId) ?? null,
     [savedDecks, selectedDeckId],
   );
+  const recentDecks = useMemo(
+    () =>
+      recentDeckIds
+        .map((deckId) => savedDecks.find((deck) => deck.id === deckId) ?? null)
+        .filter((deck): deck is (typeof savedDecks)[number] => Boolean(deck)),
+    [recentDeckIds, savedDecks],
+  );
+  const lobbyDecks = recentDecks.length > 0 ? recentDecks : savedDecks;
   const selectedDeckValidation = useMemo(
     () => (selectedDeck ? validateDeck(selectedDeck) : null),
     [selectedDeck],
@@ -317,6 +335,7 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           normalizedRoomCode,
           toPlayerDeckSubmission(selectedDeck),
         );
+        setRecentDeckIds(saveRecentDeckId(selectedDeck.id));
       }
 
       setIsBoardMode(true);
@@ -381,12 +400,20 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
     setError('');
     try {
       await signalRClient.startMatch(joinedRoomCode);
+      if (selectedDeck && selectedDeckValidation?.isValid) {
+        setRecentDeckIds(saveRecentDeckId(selectedDeck.id));
+      }
     } catch (startError) {
       const message = startError instanceof Error ? startError.message : 'StartMatch fehlgeschlagen.';
       setError(message);
     } finally {
       setPending(false);
     }
+  };
+
+  const selectDeckFromLibrary = (deckId: string): void => {
+    setSelectedDeckId(deckId);
+    setIsDeckLibraryOpen(false);
   };
 
   const submitChoice = async (option: string, selectedCardInstanceId?: string): Promise<void> => {
@@ -495,11 +522,17 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
           copyStatus={copyStatus}
           deckSlot={(
             <MatchDeckSelect
-              decks={savedDecks}
+              decks={lobbyDecks}
               embedded
+              headerAction={(
+                <Button onClick={() => setIsDeckLibraryOpen(true)} variant="secondary">
+                  DECK LIBRARY
+                </Button>
+              )}
               onOpenDeckbuilder={onOpenDeckbuilder}
               onSelectDeck={setSelectedDeckId}
               selectedDeckId={selectedDeckId}
+              title="MOST RECENT DECKS"
             />
           )}
           deckNotice={deckNotice}
@@ -595,6 +628,22 @@ export function MatchPage({ onImmersiveModeChange, onOpenDeckbuilder }: MatchPag
         }
         pending={pending}
       />
+
+      <Modal
+        className="match-deck-library-modal"
+        onClose={() => setIsDeckLibraryOpen(false)}
+        open={isDeckLibraryOpen}
+        title="DECK LIBRARY"
+      >
+        <MatchDeckSelect
+          decks={savedDecks}
+          embedded
+          onOpenDeckbuilder={onOpenDeckbuilder}
+          onSelectDeck={selectDeckFromLibrary}
+          selectedDeckId={selectedDeckId}
+          title="All Decks"
+        />
+      </Modal>
     </section>
   );
 }
