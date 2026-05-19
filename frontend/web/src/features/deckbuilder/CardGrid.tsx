@@ -142,8 +142,10 @@ export function CardGrid({
   selectedSetId,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
+  const cardMinWidth = getCardMinWidth(safeCardsPerRow);
   const gridStyle = {
-    '--card-grid-min': `${getCardMinWidth(safeCardsPerRow)}px`,
+    '--card-grid-min': `${cardMinWidth}px`,
+    '--deck-playable-card-height': `${Math.round(cardMinWidth * 1.4)}px`,
   } as CSSProperties;
   const deckQuantities = new Map(deckCards.map((deckCard) => [deckCard.cardId, deckCard.quantity]));
   const normalizedSearch = normalize(filters.searchText);

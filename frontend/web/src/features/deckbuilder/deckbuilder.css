@@ -5,9 +5,8 @@
   flex-direction: column;
   width: 100%;
   max-width: none;
-  height: calc(100dvh - 116px);
-  min-height: 0;
-  overflow: hidden;
+  min-height: calc(100dvh - 116px);
+  overflow: visible;
   color: #d9e9ee;
 }
 
@@ -40,7 +39,7 @@
 .deckbuilder-main-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(360px, 27vw, 560px);
-  align-items: stretch;
+  align-items: start;
   flex: 1;
   gap: 12px;
   min-height: 0;
@@ -316,21 +315,34 @@
 
 .deckbuilder-card-browser {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .deckbuilder-card-grid-area {
+  --deck-playable-card-gap: 7px;
+  --deck-playable-visible-rows: 4;
+  --deck-playable-card-height: 235px;
+
   display: grid;
-  gap: 7px;
+  gap: var(--deck-playable-card-gap);
   min-width: 0;
   min-height: 0;
   width: 100%;
-  height: 100%;
+  height: calc(
+    var(--deck-playable-card-height) +
+    var(--deck-playable-card-height) +
+    var(--deck-playable-card-height) +
+    var(--deck-playable-card-height) +
+    var(--deck-playable-card-gap) +
+    var(--deck-playable-card-gap) +
+    var(--deck-playable-card-gap) +
+    1.2rem
+  );
   max-height: none;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
   padding-right: 4px;
   padding-bottom: max(18px, env(safe-area-inset-bottom));
 }
@@ -339,7 +351,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-grid-min, 168px)), 1fr));
   align-content: start;
-  gap: 7px;
+  gap: var(--deck-playable-card-gap, 7px);
   width: 100%;
 }
 
@@ -758,14 +770,15 @@
 }
 
 .deckbuilder-hover-preview {
-  position: relative;
-  align-self: stretch;
+  position: sticky;
+  top: clamp(8px, 1vw, 16px);
+  align-self: start;
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
-  height: 100%;
+  height: auto;
   min-height: 0;
-  max-height: 100%;
+  max-height: calc(100dvh - 116px);
   overflow: visible;
   border: 0 !important;
   padding: 0;
@@ -774,7 +787,7 @@
 }
 
 .deckbuilder-hover-preview--empty {
-  min-height: 0;
+  min-height: min(520px, calc(100dvh - 116px));
   align-items: center;
 }
 
@@ -797,7 +810,7 @@
   align-items: flex-start;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 0;
   flex: 1 1 auto;
   border-radius: var(--card-corner-radius);
@@ -810,9 +823,9 @@
 .deckbuilder-hover-preview__image img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   max-width: 100%;
-  max-height: 100%;
+  max-height: calc(100dvh - 116px);
   object-fit: contain;
   object-position: top center;
   border-radius: var(--card-corner-radius);

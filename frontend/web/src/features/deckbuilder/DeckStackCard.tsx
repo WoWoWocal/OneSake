@@ -6,6 +6,7 @@ interface DeckStackCardProps {
   isEmpty?: boolean;
   isLeader?: boolean;
   name: string;
+  onPreview?: () => void;
   onRemove?: () => void;
   quantity?: number;
 }
@@ -43,6 +44,7 @@ export function DeckStackCard({
   isEmpty = false,
   isLeader = false,
   name,
+  onPreview,
   onRemove,
   quantity = 1,
 }: DeckStackCardProps) {
@@ -93,6 +95,9 @@ export function DeckStackCard({
       <div
         aria-label={isLeader ? `Selected leader ${name}` : 'No leader selected'}
         className={className}
+        onFocus={onPreview}
+        onMouseEnter={onPreview}
+        tabIndex={onPreview && !isEmpty ? 0 : undefined}
       >
         {content}
       </div>
@@ -104,6 +109,8 @@ export function DeckStackCard({
       aria-label={`Remove one copy of ${name}`}
       className={className}
       onClick={onRemove}
+      onFocus={onPreview}
+      onMouseEnter={onPreview}
       title={`Remove one ${name}`}
       type="button"
     >

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 
 import { getCardsBySetId } from '../../api/cardsApi';
 import { Drawer } from '../../components/ui/Drawer';
@@ -126,6 +127,10 @@ function saveCardsPerRow(cardsPerRow: number): void {
   }
 }
 
+function getPlayableCardMinWidth(cardsPerRow: number): number {
+  return Math.min(210, Math.max(116, Math.round(1180 / clampCardsPerRow(cardsPerRow))));
+}
+
 function createDeckCard(card: CardDto, quantity: number): DeckCard {
   return {
     cardId: card.card_set_id,
@@ -139,6 +144,30 @@ function createDeckCard(card: CardDto, quantity: number): DeckCard {
     attribute: optionalCardText(card.attribute),
     subTypes: optionalCardText(card.sub_types),
     rarity: optionalCardText(card.rarity),
+  };
+}
+
+function createPreviewCardFromDeckCard(deckCard: DeckCard, cardImage = ''): CardDto {
+  return {
+    inventory_price: null,
+    market_price: null,
+    card_name: deckCard.name,
+    set_name: '',
+    card_text: '',
+    set_id: deckCard.cardId.split('-').slice(0, 2).join('-'),
+    rarity: deckCard.rarity ?? '',
+    card_set_id: deckCard.cardId,
+    card_color: deckCard.color ?? '',
+    card_type: deckCard.type ?? '',
+    life: null,
+    card_cost: deckCard.cost ?? null,
+    card_power: deckCard.power ?? null,
+    sub_types: deckCard.subTypes ?? '',
+    counter_amount: deckCard.counter ?? null,
+    attribute: deckCard.attribute ?? '',
+    date_scraped: '',
+    card_image_id: '',
+    card_image: cardImage,
   };
 }
 
@@ -247,6 +276,10 @@ export function DeckbuilderPage() {
   const [deckOpen, setDeckOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [cardsPerRow, setCardsPerRow] = useState(loadCardsPerRow);
+  const playableCardMinWidth = getPlayableCardMinWidth(cardsPerRow);
+  const cardGridAreaStyle = {
+    '--deck-playable-card-height': `${Math.round(playableCardMinWidth * 1.4)}px`,
+  } as CSSProperties;
 
   const hasActiveLeader = Boolean(deck.leaderCardId);
   const shouldUseAllSetCards = selectedSetId === allSetsOption || hasActiveLeader;
@@ -261,6 +294,21 @@ export function DeckbuilderPage() {
     () => loadedCardsById.get(deck.leaderCardId) ?? null,
     [deck.leaderCardId, loadedCardsById],
   );
+  const fallbackLeaderPreviewCard = useMemo(() => {
+    if (!deck.leaderCardId) {
+      return null;
+    }
+
+    return createPreviewCardFromDeckCard(
+      {
+        cardId: deck.leaderCardId,
+        name: deck.leaderName || deck.leaderCardId,
+        quantity: 1,
+        color: deck.leaderColors?.join('/'),
+        type: 'Leader',
+      },
+    );
+  }, [deck.leaderCardId, deck.leaderColors, deck.leaderName]);
   const totalDeckCards = getTotalCards(deck.cards);
   const isDeckSaved = savedDecks.some(
     (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
@@ -603,13 +651,16 @@ export function DeckbuilderPage() {
                     image={leaderPreviewCard?.card_image}
                     isLeader
                     name={deck.leaderName || deck.leaderCardId}
+                    onPreview={() => setPreviewCard(leaderPreviewCard ?? fallbackLeaderPreviewCard)}
                     quantity={1}
                   />
                 ) : (
                   <DeckStackCard cardId="" isEmpty name="Leader" />
                 )}
                 {deck.cards.map((deckCard) => {
-                  const cardImage = loadedCardsById.get(deckCard.cardId)?.card_image;
+                  const loadedCard = loadedCardsById.get(deckCard.cardId);
+                  const cardImage = loadedCard?.card_image;
+                  const previewDeckCard = loadedCard ?? createPreviewCardFromDeckCard(deckCard, cardImage);
 
                   return (
                     <DeckStackCard
@@ -617,6 +668,7 @@ export function DeckbuilderPage() {
                       image={cardImage}
                       key={deckCard.cardId}
                       name={deckCard.name}
+                      onPreview={() => setPreviewCard(previewDeckCard)}
                       onRemove={() => decreaseDeckCard(deckCard.cardId)}
                       quantity={deckCard.quantity}
                     />
@@ -702,7 +754,7 @@ export function DeckbuilderPage() {
           {error && <div className="panel status-panel status-panel--error">{error}</div>}
           {!loading && !error && (
             <section className="deckbuilder-card-browser">
-              <div className="deckbuilder-card-grid-area">
+              <div className="deckbuilder-card-grid-area" style={cardGridAreaStyle}>
                 <CardGrid
                   cards={sortedCards}
                   cardsPerRow={cardsPerRow}
