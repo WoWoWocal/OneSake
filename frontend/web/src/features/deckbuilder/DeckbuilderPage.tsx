@@ -12,10 +12,8 @@ import { CardHoverPreview } from './CardHoverPreview';
 import { CardSearch } from './CardSearch';
 import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
-import { DeckDrawer } from './DeckDrawer';
 import { DeckLibrary } from './DeckLibrary';
 import { DeckStackCard } from './DeckStackCard';
-import { DeckSummary } from './DeckSummary';
 import {
   createNewDeck,
   deleteStoredDeck,
@@ -310,9 +308,6 @@ export function DeckbuilderPage() {
     );
   }, [deck.leaderCardId, deck.leaderColors, deck.leaderName]);
   const totalDeckCards = getTotalCards(deck.cards);
-  const isDeckSaved = savedDecks.some(
-    (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
-  );
   const activeFilterCount =
     (filters.searchText ? 1 : 0) +
     (filters.archetype ? 1 : 0) +
@@ -508,26 +503,6 @@ export function DeckbuilderPage() {
     });
   };
 
-  const increaseDeckCard = (cardId: string): void => {
-    updateDeck((currentDeck) => {
-      const card = currentDeck.cards.find((deckCard) => deckCard.cardId === cardId);
-      if (!card) {
-        return currentDeck;
-      }
-
-      if (card.quantity >= 4) {
-        return currentDeck;
-      }
-
-      return {
-        ...currentDeck,
-        cards: currentDeck.cards.map((deckCard) =>
-          deckCard.cardId === cardId ? { ...deckCard, quantity: deckCard.quantity + 1 } : deckCard,
-        ),
-      };
-    });
-  };
-
   const decreaseDeckCard = (cardId: string): void => {
     updateDeck((currentDeck) => ({
       ...currentDeck,
@@ -536,13 +511,6 @@ export function DeckbuilderPage() {
           deckCard.cardId === cardId ? { ...deckCard, quantity: deckCard.quantity - 1 } : deckCard,
         )
         .filter((deckCard) => deckCard.quantity > 0),
-    }));
-  };
-
-  const removeDeckCard = (cardId: string): void => {
-    updateDeck((currentDeck) => ({
-      ...currentDeck,
-      cards: currentDeck.cards.filter((deckCard) => deckCard.cardId !== cardId),
     }));
   };
 
@@ -579,6 +547,7 @@ export function DeckbuilderPage() {
   const createDeck = (): void => {
     const newDeck = createNewDeck();
     setDeck(newDeck);
+    setDeckOpen(false);
     showDeckNotice('New deck started.');
   };
 
@@ -592,6 +561,7 @@ export function DeckbuilderPage() {
 
   const loadDeck = (deckToLoad: Deck): void => {
     setDeck(deckToLoad);
+    setDeckOpen(false);
     showDeckNotice(`${deckToLoad.name} loaded.`);
   };
 
@@ -777,27 +747,15 @@ export function DeckbuilderPage() {
         </main>
       </div>
 
-      <Drawer onClose={() => setDeckOpen(false)} open={deckOpen} title="Deck">
+      <Drawer onClose={() => setDeckOpen(false)} open={deckOpen} title="Deck Library">
         <DeckLibrary
           activeDeckId={deck.id}
           decks={savedDecks}
+          leaderCardsById={loadedCardsById}
           onCreateDeck={createDeck}
           onDeleteDeck={deleteDeck}
           onDuplicateDeck={duplicateDeck}
           onLoadDeck={loadDeck}
-        />
-        <DeckSummary
-          deck={deck}
-          isSaved={isDeckSaved}
-          onClearDeck={clearDeck}
-          onDeckNameChange={renameDeck}
-          onRemoveLeader={removeLeader}
-        />
-        <DeckDrawer
-          deck={deck}
-          onDecreaseCard={decreaseDeckCard}
-          onIncreaseCard={increaseDeckCard}
-          onRemoveCard={removeDeckCard}
         />
       </Drawer>
 
