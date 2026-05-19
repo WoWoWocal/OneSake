@@ -205,6 +205,10 @@
 
 @media (min-width: 1600px) {
   .deckbuilder-main-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deckbuilder-card-browser {
     grid-template-columns: minmax(0, 1fr) clamp(440px, 25vw, 620px);
   }
 }
@@ -229,6 +233,7 @@
   }
 
   .deckbuilder-card-browser {
+    grid-template-columns: minmax(0, 1fr);
     min-height: 0;
   }
 
