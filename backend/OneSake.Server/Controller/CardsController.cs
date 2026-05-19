@@ -58,14 +58,22 @@ public class CardsController : ControllerBase
             return Ok(setFromDatabase);
         }
 
-        var setFromApi = await _cardService.GetSetByIdAsync(set_id);
+        Console.WriteLine($"Set {set_id} not found in database. Importing from external API...");
 
-        Console.WriteLine($"Fetching Set {set_id} from external API");
-        Console.WriteLine($"Count: {setFromApi.Count}");
+        var importResult = await _cardImportService.ImportSetAsync(set_id);
 
-        if (setFromApi == null || setFromApi.Count == 0) return NotFound();
+        if (importResult.TotalFromApi == 0)
+        {
+            return NotFound($"No cards found for set {set_id}.");
+        }
 
-        return Ok(setFromApi);
+        var importedSetFromDatabase = await _cardQueryService.GetSetByIdAsync(set_id);
+
+        Console.WriteLine($"Imported Set {set_id} into database");
+        Console.WriteLine($"Imported: {importResult.Imported}, Skipped: {importResult.Skipped}");
+        Console.WriteLine($"Count from database: {importedSetFromDatabase.Count}");
+
+        return Ok(importedSetFromDatabase);
     }
 
     // POST /cards/import/OP-01
