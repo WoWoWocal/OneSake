@@ -25,6 +25,15 @@ public class CardsController : ControllerBase
         _cardQueryService = cardQueryService;
     }
 
+        // GET /cards/sets
+    [HttpGet("sets")]
+    public async Task<IActionResult> GetAvailableSets()
+    {
+        var sets = await _cardQueryService.GetAvailableSetsAsync();
+
+        return Ok(sets);
+    }
+
     // GET /cards/OP01-001
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCardsById(string id)

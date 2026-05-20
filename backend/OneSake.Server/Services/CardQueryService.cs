@@ -63,4 +63,30 @@ public class CardQueryService
             ImageURL = card.ImageUrl
         };
     }
+
+        public async Task<List<CardSetSummaryDto>> GetAvailableSetsAsync()
+    {
+        return await _dbContext.Cards
+            .AsNoTracking()
+            .GroupBy(card => new
+            {
+                card.SetId,
+                card.SetName
+            })
+            .Select(group => new CardSetSummaryDto
+            {
+                SetId = group.Key.SetId,
+                SetName = group.Key.SetName,
+                CardCount = group.Count()
+            })
+            .OrderBy(set => set.SetId)
+            .ToListAsync();
+    }
+}
+
+public class CardSetSummaryDto
+{
+    public string SetId { get; set; } = "";
+    public string SetName { get; set; } = "";
+    public int CardCount { get; set; }
 }
