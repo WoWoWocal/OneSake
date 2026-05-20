@@ -268,6 +268,7 @@ export function DeckbuilderPage() {
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
   const [previewCard, setPreviewCard] = useState<CardDto | null>(null);
+  const [previewedCardId, setPreviewedCardId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deckNotice, setDeckNotice] = useState('');
@@ -448,6 +449,15 @@ export function DeckbuilderPage() {
     setDeckNotice(message);
   };
 
+  const previewCardForDeckbuilder = (card: CardDto | null): void => {
+    setPreviewCard(card);
+    setPreviewedCardId(card?.card_set_id ?? '');
+  };
+
+  const clearPreviewedCard = (cardId: string): void => {
+    setPreviewedCardId((currentCardId) => (currentCardId === cardId ? '' : currentCardId));
+  };
+
   const updateDeck = (update: (currentDeck: Deck) => Deck): void => {
     setDeck((currentDeck) => touchDeck(update(currentDeck)));
   };
@@ -621,7 +631,9 @@ export function DeckbuilderPage() {
                     image={leaderPreviewCard?.card_image}
                     isLeader
                     name={deck.leaderName || deck.leaderCardId}
-                    onPreview={() => setPreviewCard(leaderPreviewCard ?? fallbackLeaderPreviewCard)}
+                    isPreviewed={previewedCardId === deck.leaderCardId}
+                    onPreview={() => previewCardForDeckbuilder(leaderPreviewCard ?? fallbackLeaderPreviewCard)}
+                    onPreviewEnd={() => clearPreviewedCard(deck.leaderCardId)}
                     quantity={1}
                   />
                 ) : (
@@ -636,9 +648,11 @@ export function DeckbuilderPage() {
                     <DeckStackCard
                       cardId={deckCard.cardId}
                       image={cardImage}
+                      isPreviewed={previewedCardId === deckCard.cardId}
                       key={deckCard.cardId}
                       name={deckCard.name}
-                      onPreview={() => setPreviewCard(previewDeckCard)}
+                      onPreview={() => previewCardForDeckbuilder(previewDeckCard)}
+                      onPreviewEnd={() => clearPreviewedCard(deckCard.cardId)}
                       onRemove={() => decreaseDeckCard(deckCard.cardId)}
                       quantity={deckCard.quantity}
                     />
@@ -735,8 +749,10 @@ export function DeckbuilderPage() {
                   selectedSetId={selectedSetId}
                   allSetsOption={allSetsOption}
                   onAddCard={addCardToDeck}
-                  onPreviewCard={setPreviewCard}
+                  onPreviewCard={previewCardForDeckbuilder}
+                  onPreviewEnd={clearPreviewedCard}
                   onSetLeader={addCardToDeck}
+                  previewedCardId={previewedCardId}
                 />
               </div>
             </section>
