@@ -248,14 +248,28 @@ public sealed class MatchRoom
                             CreateMainActionPrompt(player);
                             break;
                         case "ATTACK":
-                            
-                            _attackAction.Execute(player, opponent, _phase, _activePlayerId, submission.SelectedCardInstanceId);
+                             var gameOver = _attackAction.Execute(player, opponent, _phase, _activePlayerId, submission.SelectedCardInstanceId);
 
                             CreateLogEvent(
-                                "ATTACK",
-                                $"{player.DisplayName} attacked {opponent.DisplayName}");
-                            CreateMainActionPrompt(player);
-                            break;
+                                    "ATTACK",
+                                    $"{player.DisplayName} attacked {opponent.DisplayName}");
+                            CreateLogEvent(
+                                "LIFE_LOST",
+                                $"{opponent.DisplayName} lost 1 life");
+                            if (gameOver)
+                            {
+                                _phase = MatchPhase.GameOver;
+
+                                CreateLogEvent(
+                                "GAME_OVER",
+                                $"{player.DisplayName} wins!");
+                                break;
+                            }
+                            else
+                            {
+                                CreateMainActionPrompt(player);
+                                break;
+                            }
                         case "END_TURN":
 
                             var previousActivePlayerId = player.PlayerId;

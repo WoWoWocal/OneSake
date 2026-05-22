@@ -11,7 +11,7 @@ namespace OneSake.Game.Actions
     public sealed class AttackAction
     {
 
-        public void Execute(PlayerState attacker, PlayerState opponent, MatchPhase phase, string activePlayerId, string? selectedCardInstanceId)
+        public bool Execute(PlayerState attacker, PlayerState opponent, MatchPhase phase, string activePlayerId, string? selectedCardInstanceId)
         {
             ValidatePhase(phase);
 
@@ -20,13 +20,8 @@ namespace OneSake.Game.Actions
             
             opponent.LifeCount = Math.Max(0, opponent.LifeCount - 1);
 
-            if (opponent.LifeCount <= 0)
-            {
-                phase = MatchPhase.GameOver;
-                return;
-            }
+            return opponent.LifeCount <= 0;
 
-            
         }
 
 
