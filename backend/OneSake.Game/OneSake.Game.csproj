@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Engine\" />
+    <Folder Include="Rules\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OneSake.Domain\OneSake.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
