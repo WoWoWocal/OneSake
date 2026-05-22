@@ -4,16 +4,20 @@ import { isLeaderCard } from './utils/deckValidation';
 interface CardTileProps {
   card: CardDto;
   quantity: number;
+  isPreviewed?: boolean;
   isSelectedLeader: boolean;
   onAddCard: (card: CardDto) => void;
+  onPreviewEnd: (cardId: string) => void;
   onSetLeader: (card: CardDto) => void;
   onPreviewCard: (card: CardDto) => void;
 }
 
 export function CardTile({
   card,
+  isPreviewed = false,
   isSelectedLeader,
   onAddCard,
+  onPreviewEnd,
   onPreviewCard,
   onSetLeader,
   quantity,
@@ -50,12 +54,14 @@ export function CardTile({
         'panel',
         'card-tile',
         isLeader ? 'card-tile--leader' : '',
+        isPreviewed ? 'card-tile--previewed' : '',
         isSelectedLeader ? 'card-tile--selected-leader' : '',
         !canAdd ? 'card-tile--maxed' : '',
       ]
         .filter(Boolean)
         .join(' ')}
       onMouseEnter={() => onPreviewCard(card)}
+      onMouseLeave={() => onPreviewEnd(card.card_set_id)}
       title={tileTitle}
     >
       {!isLeader && <span className="card-tile__count-badge">{counterLabel}</span>}
@@ -64,6 +70,7 @@ export function CardTile({
         className="card-tile__add"
         disabled={!canAdd}
         onClick={addCard}
+        onBlur={() => onPreviewEnd(card.card_set_id)}
         onFocus={() => onPreviewCard(card)}
         type="button"
       >

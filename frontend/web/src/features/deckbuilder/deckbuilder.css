@@ -107,6 +107,135 @@
   width: 100%;
 }
 
+.deckbuilder-page .ui-overlay,
+.deckbuilder-page .ui-sheet-backdrop {
+  background:
+    radial-gradient(circle at 72% 12%, rgb(240 191 56 / 14%), transparent 24rem),
+    rgb(3 9 15 / 72%);
+  backdrop-filter: blur(3px);
+}
+
+.deckbuilder-page .ui-drawer,
+.deckbuilder-page .ui-bottom-sheet {
+  border: 1px solid rgb(229 176 73 / 24%);
+  color: #d9e9ee;
+  background:
+    linear-gradient(180deg, rgb(255 221 137 / 6%), transparent 34%),
+    #071522;
+  box-shadow:
+    0 0 34px rgb(240 191 56 / 10%),
+    0 22px 58px rgb(0 0 0 / 48%);
+}
+
+.deckbuilder-page .ui-drawer {
+  width: min(96vw, 780px);
+}
+
+.deckbuilder-page .ui-bottom-sheet {
+  max-height: min(82dvh, 720px);
+}
+
+.deckbuilder-page .ui-dialog-header,
+.deckbuilder-page .ui-dialog-footer {
+  border-color: rgb(229 176 73 / 18%);
+  background: rgb(5 17 29 / 52%);
+}
+
+.deckbuilder-page .ui-dialog-header h2 {
+  color: #ffffff;
+}
+
+.deckbuilder-page .ui-dialog-body {
+  overflow-y: auto;
+}
+
+.deckbuilder-page .ui-dialog-body {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 187 194 / 34%) transparent;
+}
+
+.deckbuilder-card-grid-area {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.deckbuilder-card-grid-area:hover,
+.deckbuilder-card-grid-area:focus-within {
+  scrollbar-color: rgb(148 187 194 / 30%) transparent;
+}
+
+.deckbuilder-page .ui-dialog-body::-webkit-scrollbar,
+.deck-library__list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.deckbuilder-page .ui-dialog-body::-webkit-scrollbar-thumb,
+.deck-library__list::-webkit-scrollbar-thumb {
+  border: 2px solid #071522;
+  border-radius: 999px;
+  background: rgb(148 187 194 / 34%);
+}
+
+.deckbuilder-card-grid-area::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.deckbuilder-card-grid-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.deckbuilder-card-grid-area::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.deckbuilder-card-grid-area:hover::-webkit-scrollbar-thumb,
+.deckbuilder-card-grid-area:focus-within::-webkit-scrollbar-thumb {
+  background: rgb(148 187 194 / 30%);
+  background-clip: padding-box;
+}
+
+.deckbuilder-page .ui-bottom-sheet input,
+.deckbuilder-page .ui-bottom-sheet select {
+  border-color: rgb(148 187 194 / 34%);
+  color: #eef8f9;
+  background: #06111d;
+}
+
+.deckbuilder-page .ui-bottom-sheet input::placeholder {
+  color: #78929a;
+}
+
+.deckbuilder-page .ui-bottom-sheet label,
+.deckbuilder-page .ui-bottom-sheet .color-palette-filter__header span {
+  color: #a9c0c8;
+}
+
+.deckbuilder-page .ui-bottom-sheet .ui-button--ghost,
+.deckbuilder-page .ui-drawer .ui-button--ghost {
+  border-color: rgb(148 187 194 / 30%);
+  color: #d9e9ee;
+  background: rgb(255 255 255 / 6%);
+}
+
+.deckbuilder-page .ui-bottom-sheet .ui-button:not(.ui-button--ghost) {
+  border-color: rgb(31 196 159 / 54%);
+  color: #ffffff;
+  background:
+    linear-gradient(180deg, rgb(35 230 208 / 18%), transparent 70%),
+    #176f65;
+}
+
+.deckbuilder-page .ui-bottom-sheet input:focus,
+.deckbuilder-page .ui-bottom-sheet select:focus,
+.deckbuilder-page .ui-button:focus-visible {
+  outline: 2px solid rgb(240 191 56 / 76%);
+  outline-offset: 2px;
+}
+
 .color-palette-filter {
   display: grid;
   gap: 6px;
@@ -342,8 +471,9 @@
   );
   max-height: none;
   overflow-y: auto;
+  overflow-x: clip;
   overscroll-behavior: auto;
-  padding-right: 4px;
+  padding-right: 8px;
   padding-bottom: max(18px, env(safe-area-inset-bottom));
 }
 
@@ -372,7 +502,11 @@
   color: inherit;
   text-align: left;
   background: transparent !important;
-  overflow: hidden;
+  overflow: visible;
+  isolation: isolate;
+  transition:
+    filter 150ms ease,
+    transform 150ms ease;
 }
 
 .deckbuilder-topline {
@@ -589,16 +723,41 @@
 }
 
 .deckbuilder-deck-stack:hover .deckbuilder-deck-stack__layer--front,
-.deckbuilder-deck-stack:focus-visible .deckbuilder-deck-stack__layer--front {
+.deckbuilder-deck-stack:focus-visible .deckbuilder-deck-stack__layer--front,
+.deckbuilder-deck-stack--previewed .deckbuilder-deck-stack__layer--front {
   --deck-stack-hover-lift: -2px;
 
-  border-color: rgb(240 191 56 / 70%);
-  box-shadow: 0 14px 24px rgb(0 0 0 / 32%);
+  border-color: rgb(255 255 255 / 34%);
+  filter: brightness(1.12) saturate(1.05);
+  box-shadow:
+    0 0 0 2px rgb(255 255 255 / 18%),
+    0 14px 26px rgb(0 0 0 / 34%),
+    0 0 24px rgb(255 255 255 / 10%);
 }
 
 .deckbuilder-deck-stack:focus-visible {
-  outline: 3px solid #f2c94c;
+  outline: 2px solid rgb(255 255 255 / 72%);
   outline-offset: 6px;
+}
+
+.deckbuilder-deck-stack__layer--front::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 20%), rgb(255 255 255 / 4%) 42%, transparent 72%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.deckbuilder-deck-stack:hover .deckbuilder-deck-stack__layer--front::after,
+.deckbuilder-deck-stack:focus-visible .deckbuilder-deck-stack__layer--front::after,
+.deckbuilder-deck-stack--previewed .deckbuilder-deck-stack__layer--front::after {
+  opacity: 1;
 }
 
 .deckbuilder-deck-stack__layer img {
@@ -720,8 +879,7 @@
 }
 
 .card-tile:hover {
-  border-color: rgb(240 191 56 / 42%);
-  box-shadow: 0 4px 12px rgb(240 191 56 / 12%);
+  filter: brightness(1.02);
 }
 
 .card-tile__add {
@@ -740,12 +898,13 @@
 }
 
 .card-tile__add:focus-visible {
-  outline: 3px solid #f2c94c;
-  outline-offset: 2px;
+  outline: 2px solid rgb(255 255 255 / 72%);
+  outline-offset: 4px;
 }
 
 .card-tile-image,
 .card-tile__image {
+  position: relative;
   display: grid;
   width: 100%;
   aspect-ratio: 5 / 7;
@@ -756,6 +915,10 @@
   text-align: center;
   font-weight: 700;
   overflow: hidden;
+  transition:
+    filter 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
 .card-tile-image img,
@@ -767,6 +930,38 @@
   border-radius: var(--card-corner-radius);
   background: transparent;
   transform: scale(1.018);
+}
+
+.card-tile-image::after,
+.card-tile__image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 20%), rgb(255 255 255 / 5%) 44%, transparent 72%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.card-tile:hover .card-tile-image,
+.card-tile:focus-within .card-tile-image,
+.card-tile--previewed .card-tile-image {
+  filter: brightness(1.12) saturate(1.05);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 2px rgb(255 255 255 / 18%),
+    0 14px 26px rgb(0 0 0 / 34%),
+    0 0 24px rgb(255 255 255 / 10%);
+}
+
+.card-tile:hover .card-tile-image::after,
+.card-tile:focus-within .card-tile-image::after,
+.card-tile--previewed .card-tile-image::after {
+  opacity: 1;
 }
 
 .deckbuilder-hover-preview {
@@ -947,59 +1142,256 @@
 .deck-library {
   display: grid;
   gap: 12px;
+  border: 0 !important;
+  padding: 0;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .deck-library__header {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
 .deck-library__header h2 {
   margin: 0;
+  color: #ffffff;
 }
 
-.deck-library__actions,
 .deck-library__deck-actions {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.deck-library__actions {
+  display: flex;
 }
 
 .deck-library__list {
   display: grid;
   gap: 10px;
+  max-height: calc(100dvh - 154px);
   margin: 0;
   padding: 0;
   list-style: none;
+  overflow-y: auto;
 }
 
 .deck-library__list li {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 10px;
   border: 1px solid rgb(148 187 194 / 18%);
   border-radius: 8px;
   padding: 10px;
-  background: rgb(255 255 255 / 5%);
+  background:
+    linear-gradient(135deg, rgb(255 221 137 / 5%), transparent 44%),
+    rgb(255 255 255 / 5%);
 }
 
 .deck-library__list li.is-active {
   border-color: rgb(240 191 56 / 54%);
-  box-shadow: inset 3px 0 0 #f0bf38;
+  background:
+    linear-gradient(135deg, rgb(240 191 56 / 11%), transparent 48%),
+    rgb(255 255 255 / 6%);
+  box-shadow:
+    inset 3px 0 0 #f0bf38,
+    0 12px 24px rgb(0 0 0 / 20%);
 }
 
 .deck-library__deck {
   display: grid;
-  gap: 2px;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.deck-library__deck:hover .deck-library__leader,
+.deck-library__deck:focus-visible .deck-library__leader {
+  box-shadow:
+    0 0 0 2px rgb(240 191 56 / 24%),
+    0 14px 26px rgb(0 0 0 / 30%);
+}
+
+.deck-library__deck:focus-visible {
+  outline: 2px solid rgb(240 191 56 / 72%);
+  outline-offset: 4px;
+}
+
+.deck-library__leader {
+  display: grid;
+  width: 92px;
+  aspect-ratio: 5 / 7;
+  place-items: center;
+  border-radius: var(--card-corner-radius);
+  background: #06111d;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgb(0 0 0 / 28%);
+}
+
+.deck-library__leader img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.018);
+}
+
+.deck-library__leader-placeholder {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  color: #fff3c7;
+  background:
+    radial-gradient(circle at 50% 20%, rgb(240 191 56 / 18%), transparent 42%),
+    #071522;
+  text-align: center;
+}
+
+.deck-library__leader-placeholder span {
+  color: #e3bd68;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.deck-library__leader-placeholder strong {
+  color: #ffffff;
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.deck-library__content,
+.deck-library__title-row,
+.deck-library__meta-grid,
+.deck-library__type-row {
   min-width: 0;
 }
 
+.deck-library__content {
+  display: grid;
+  gap: 7px;
+}
+
+.deck-library__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.deck-library__title-row > strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.deck-library__title-row > span,
+.deck-library__type-row span {
+  display: inline-grid;
+  min-height: 24px;
+  place-items: center;
+  border: 1px solid rgb(148 187 194 / 22%);
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: #b8cdd3;
+  background: rgb(255 255 255 / 6%);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.deck-library__title-row > span.is-valid {
+  border-color: rgb(31 196 159 / 42%);
+  color: #b9f3df;
+  background: rgb(31 196 159 / 10%);
+}
+
+.deck-library__title-row > span.is-incomplete {
+  border-color: rgb(240 191 56 / 38%);
+  color: #ffe7a1;
+  background: rgb(240 191 56 / 10%);
+}
+
+.deck-library__leader-name {
+  color: #b9cbd1;
+  font-size: 0.86rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.deck-library__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.deck-library__meta-grid > span {
+  display: grid;
+  gap: 2px;
+  border: 1px solid rgb(148 187 194 / 14%);
+  border-radius: 7px;
+  padding: 6px;
+  background: rgb(5 17 29 / 48%);
+}
+
+.deck-library__meta-grid small {
+  color: #8ea9b3;
+  font-size: 0.64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.deck-library__meta-grid strong {
+  color: #ffffff;
+  font-size: 0.76rem;
+}
+
+.deck-library__type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.deck-library__empty,
 .deck-library__deck strong,
 .deck-library__deck span {
   overflow-wrap: anywhere;
 }
 
-.deck-library__deck span {
+.deck-library__empty {
+  margin: 0;
   color: #9db5bd;
-  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.deck-library__deck-actions {
+  min-width: 112px;
+}
+
+.deck-library__deck-actions .ui-button {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 0.76rem;
+}
+
+.deck-library__deck-actions .ui-button--danger {
+  border-color: rgb(234 111 99 / 58%);
+  color: #fff6f6;
+  background: #9d1f2f;
 }
 
 .deck-actions {

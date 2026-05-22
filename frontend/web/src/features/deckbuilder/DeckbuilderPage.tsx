@@ -12,10 +12,8 @@ import { CardHoverPreview } from './CardHoverPreview';
 import { CardSearch } from './CardSearch';
 import { CardSizeSlider } from './CardSizeSlider';
 import { ColorPaletteFilter } from './ColorPaletteFilter';
-import { DeckDrawer } from './DeckDrawer';
 import { DeckLibrary } from './DeckLibrary';
 import { DeckStackCard } from './DeckStackCard';
-import { DeckSummary } from './DeckSummary';
 import {
   createNewDeck,
   deleteStoredDeck,
@@ -270,6 +268,7 @@ export function DeckbuilderPage() {
   const [deck, setDeck] = useState<Deck>(() => loadStoredDeck());
   const [savedDecks, setSavedDecks] = useState<Deck[]>(() => loadStoredDecks());
   const [previewCard, setPreviewCard] = useState<CardDto | null>(null);
+  const [previewedCardId, setPreviewedCardId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deckNotice, setDeckNotice] = useState('');
@@ -310,9 +309,6 @@ export function DeckbuilderPage() {
     );
   }, [deck.leaderCardId, deck.leaderColors, deck.leaderName]);
   const totalDeckCards = getTotalCards(deck.cards);
-  const isDeckSaved = savedDecks.some(
-    (savedDeck) => savedDeck.id === deck.id && savedDeck.updatedAt === deck.updatedAt,
-  );
   const activeFilterCount =
     (filters.searchText ? 1 : 0) +
     (filters.archetype ? 1 : 0) +
@@ -453,6 +449,15 @@ export function DeckbuilderPage() {
     setDeckNotice(message);
   };
 
+  const previewCardForDeckbuilder = (card: CardDto | null): void => {
+    setPreviewCard(card);
+    setPreviewedCardId(card?.card_set_id ?? '');
+  };
+
+  const clearPreviewedCard = (cardId: string): void => {
+    setPreviewedCardId((currentCardId) => (currentCardId === cardId ? '' : currentCardId));
+  };
+
   const updateDeck = (update: (currentDeck: Deck) => Deck): void => {
     setDeck((currentDeck) => touchDeck(update(currentDeck)));
   };
@@ -508,26 +513,6 @@ export function DeckbuilderPage() {
     });
   };
 
-  const increaseDeckCard = (cardId: string): void => {
-    updateDeck((currentDeck) => {
-      const card = currentDeck.cards.find((deckCard) => deckCard.cardId === cardId);
-      if (!card) {
-        return currentDeck;
-      }
-
-      if (card.quantity >= 4) {
-        return currentDeck;
-      }
-
-      return {
-        ...currentDeck,
-        cards: currentDeck.cards.map((deckCard) =>
-          deckCard.cardId === cardId ? { ...deckCard, quantity: deckCard.quantity + 1 } : deckCard,
-        ),
-      };
-    });
-  };
-
   const decreaseDeckCard = (cardId: string): void => {
     updateDeck((currentDeck) => ({
       ...currentDeck,
@@ -536,13 +521,6 @@ export function DeckbuilderPage() {
           deckCard.cardId === cardId ? { ...deckCard, quantity: deckCard.quantity - 1 } : deckCard,
         )
         .filter((deckCard) => deckCard.quantity > 0),
-    }));
-  };
-
-  const removeDeckCard = (cardId: string): void => {
-    updateDeck((currentDeck) => ({
-      ...currentDeck,
-      cards: currentDeck.cards.filter((deckCard) => deckCard.cardId !== cardId),
     }));
   };
 
@@ -579,6 +557,7 @@ export function DeckbuilderPage() {
   const createDeck = (): void => {
     const newDeck = createNewDeck();
     setDeck(newDeck);
+    setDeckOpen(false);
     showDeckNotice('New deck started.');
   };
 
@@ -592,6 +571,7 @@ export function DeckbuilderPage() {
 
   const loadDeck = (deckToLoad: Deck): void => {
     setDeck(deckToLoad);
+    setDeckOpen(false);
     showDeckNotice(`${deckToLoad.name} loaded.`);
   };
 
@@ -651,7 +631,9 @@ export function DeckbuilderPage() {
                     image={leaderPreviewCard?.card_image}
                     isLeader
                     name={deck.leaderName || deck.leaderCardId}
-                    onPreview={() => setPreviewCard(leaderPreviewCard ?? fallbackLeaderPreviewCard)}
+                    isPreviewed={previewedCardId === deck.leaderCardId}
+                    onPreview={() => previewCardForDeckbuilder(leaderPreviewCard ?? fallbackLeaderPreviewCard)}
+                    onPreviewEnd={() => clearPreviewedCard(deck.leaderCardId)}
                     quantity={1}
                   />
                 ) : (
@@ -666,9 +648,11 @@ export function DeckbuilderPage() {
                     <DeckStackCard
                       cardId={deckCard.cardId}
                       image={cardImage}
+                      isPreviewed={previewedCardId === deckCard.cardId}
                       key={deckCard.cardId}
                       name={deckCard.name}
-                      onPreview={() => setPreviewCard(previewDeckCard)}
+                      onPreview={() => previewCardForDeckbuilder(previewDeckCard)}
+                      onPreviewEnd={() => clearPreviewedCard(deckCard.cardId)}
                       onRemove={() => decreaseDeckCard(deckCard.cardId)}
                       quantity={deckCard.quantity}
                     />
@@ -765,8 +749,10 @@ export function DeckbuilderPage() {
                   selectedSetId={selectedSetId}
                   allSetsOption={allSetsOption}
                   onAddCard={addCardToDeck}
-                  onPreviewCard={setPreviewCard}
+                  onPreviewCard={previewCardForDeckbuilder}
+                  onPreviewEnd={clearPreviewedCard}
                   onSetLeader={addCardToDeck}
+                  previewedCardId={previewedCardId}
                 />
               </div>
             </section>
@@ -777,27 +763,15 @@ export function DeckbuilderPage() {
         </main>
       </div>
 
-      <Drawer onClose={() => setDeckOpen(false)} open={deckOpen} title="Deck">
+      <Drawer onClose={() => setDeckOpen(false)} open={deckOpen} title="Deck Library">
         <DeckLibrary
           activeDeckId={deck.id}
           decks={savedDecks}
+          leaderCardsById={loadedCardsById}
           onCreateDeck={createDeck}
           onDeleteDeck={deleteDeck}
           onDuplicateDeck={duplicateDeck}
           onLoadDeck={loadDeck}
-        />
-        <DeckSummary
-          deck={deck}
-          isSaved={isDeckSaved}
-          onClearDeck={clearDeck}
-          onDeckNameChange={renameDeck}
-          onRemoveLeader={removeLeader}
-        />
-        <DeckDrawer
-          deck={deck}
-          onDecreaseCard={decreaseDeckCard}
-          onIncreaseCard={increaseDeckCard}
-          onRemoveCard={removeDeckCard}
         />
       </Drawer>
 

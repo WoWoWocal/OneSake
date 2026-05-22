@@ -21,8 +21,10 @@ interface CardGridProps {
   selectedSetId: string;
   allSetsOption: string;
   onAddCard: (card: CardDto) => void;
+  onPreviewEnd: (cardId: string) => void;
   onSetLeader: (card: CardDto) => void;
   onPreviewCard: (card: CardDto) => void;
+  previewedCardId?: string;
 }
 
 function normalize(value: string): string {
@@ -137,8 +139,10 @@ export function CardGrid({
   leaderCardId,
   leaderColors,
   onAddCard,
+  onPreviewEnd,
   onPreviewCard,
   onSetLeader,
+  previewedCardId,
   selectedSetId,
 }: CardGridProps) {
   const safeCardsPerRow = clampCardsPerRow(cardsPerRow);
@@ -194,8 +198,10 @@ export function CardGrid({
           <CardTile
             key={`${card.card_set_id}-${card.card_image_id}`}
             card={card}
+            isPreviewed={previewedCardId === card.card_set_id}
             isSelectedLeader={leaderCardId === card.card_set_id}
             onAddCard={onAddCard}
+            onPreviewEnd={onPreviewEnd}
             onPreviewCard={onPreviewCard}
             onSetLeader={onSetLeader}
             quantity={deckQuantities.get(card.card_set_id) ?? 0}

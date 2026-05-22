@@ -5,8 +5,10 @@ interface DeckStackCardProps {
   image?: string;
   isEmpty?: boolean;
   isLeader?: boolean;
+  isPreviewed?: boolean;
   name: string;
   onPreview?: () => void;
+  onPreviewEnd?: () => void;
   onRemove?: () => void;
   quantity?: number;
 }
@@ -43,8 +45,10 @@ export function DeckStackCard({
   image,
   isEmpty = false,
   isLeader = false,
+  isPreviewed = false,
   name,
   onPreview,
+  onPreviewEnd,
   onRemove,
   quantity = 1,
 }: DeckStackCardProps) {
@@ -55,6 +59,7 @@ export function DeckStackCard({
     'deckbuilder-deck-stack',
     isLeader ? 'deckbuilder-deck-stack--leader' : '',
     isEmpty ? 'deckbuilder-deck-stack--empty-leader' : '',
+    isPreviewed ? 'deckbuilder-deck-stack--previewed' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -95,7 +100,9 @@ export function DeckStackCard({
       <div
         aria-label={isLeader ? `Selected leader ${name}` : 'No leader selected'}
         className={className}
+        onBlur={onPreviewEnd}
         onFocus={onPreview}
+        onMouseLeave={onPreviewEnd}
         onMouseEnter={onPreview}
         tabIndex={onPreview && !isEmpty ? 0 : undefined}
       >
@@ -108,8 +115,10 @@ export function DeckStackCard({
     <button
       aria-label={`Remove one copy of ${name}`}
       className={className}
+      onBlur={onPreviewEnd}
       onClick={onRemove}
       onFocus={onPreview}
+      onMouseLeave={onPreviewEnd}
       onMouseEnter={onPreview}
       title={`Remove one ${name}`}
       type="button"
